@@ -16,3 +16,6 @@ import EthCor
 #print axioms EthCor.HamITM.decode_seedCode
 #print axioms EthCor.HamITM.hcI_tm
 #print axioms EthCor.HamITM.ham_randomized
+#print axioms EthCor.Conn.conn_parity
+#print axioms EthCor.ConnTM.conn_parity_tm
+#print axioms EthCor.ConnTM.cvc_parity_tm

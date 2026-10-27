@@ -182,3 +182,18 @@ Step (3) is done (2026-10-27): `lean/EthCor/HamIsoTM.lean`, so N1 = A5b is compl
   iso_decide with δ/(D+1) and boundS_le with θ = 1/4; N ≤ A·n with A = 9Dk + 9k + 9D + 9, and
   A ≤ (lg n)^{1/4} for n ≥ 2^{A⁴}.
 Amplification (repeating with fresh seeds) is not formalized.
+
+### N2 progress (2026-10-27)
+Done: `lean/EthCor/ConnFormula.lean` and `ConnTM.lean`. The formula is `connF n E ψ` on 3n variables
+(x_v, s_v, s̄_v): ψ, plus s̄ = ¬s, plus s_v → x_v, plus s_u = s_v on the edges inside X (width 4).
+- `cntS_connF`: cntS(3n, n+ℓ) = Σ_{X ⊨ ψ, |X| = ℓ} sig(X), where sig(X) = 2^{cc(G[X])}.
+- `sig_parity`: sig(X) is even, and sig(X)/2 is odd ⟺ G[X] is connected. This is `parity_root` (the
+  flip argument with root r ∈ X) together with `card_sides_two`.
+- `conn_parity`: cntS/2 ≡ numConnF (mod 2) for ℓ ≥ 1.
+- Machines: SIZED (r+4) with target n+ℓ, then postC keeps bit 1. `conn_parity_tm` (input code G ++
+  unary ℓ ++ SatFree.enc φ, width ≤ r, ≤ (n+2)^D clauses) runs in C·2^{δn}, and so does
+  `cvc_parity_tm` (input code G ++ unary ℓ, φ = the edges). Any density, since there are 3n
+  variables.
+Next for N2: decision versions via isolation on the n vertex bits (each Tseitin chain bit gets a
+complement bit, so the count of true variables stays fixed). That gives randomized Steiner tree /
+connected vertex cover in 2^{δn}.

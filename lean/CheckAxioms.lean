@@ -19,3 +19,6 @@ import EthCor
 #print axioms EthCor.Conn.conn_parity
 #print axioms EthCor.ConnTM.conn_parity_tm
 #print axioms EthCor.ConnTM.cvc_parity_tm
+#print axioms EthCor.ConnI.ci_parity
+#print axioms EthCor.ConnI.ci_decide
+#print axioms EthCor.ConnITM.conn_randomized

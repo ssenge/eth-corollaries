@@ -234,17 +234,20 @@ theorem ext_natAdd {n : ℕ} (y : Fin (n + n) → Bool) {v : ℕ} (hv : v < n) :
     ext y (n + v) = y (Fin.natAdd n ⟨v, hv⟩) := by
   simp only [CountKSat.ext, dif_pos (show n + v < n + n by omega)]; rfl
 
-/-- Step A: the complementary bits are determined. -/
+/-- Step A: the complementary bits are determined. P is any property of the vertex bits. -/
 theorem cnt_stepA {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 < p.2 ∧ p.2 < n) {ψ : Fml}
-    (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) :
-    cntS (n + n + n) (n + ℓ) (connF n E ψ) =
-      (univ.filter fun y : Fin (n + n) → Bool => ((∀ C ∈ ψ, ∃ l ∈ C, ext y l.1 = l.2) ∧
+    (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) (P : (Fin n → Bool) → Prop) [DecidablePred P] :
+    (univ.filter fun w : Fin (n + n + n) → Bool => ((∀ C ∈ connF n E ψ, ∃ l ∈ C, ext w l.1 = l.2) ∧
+        P (fun j => ext w j.val)) ∧ (univ.filter fun i => w i = true).card = n + ℓ).card =
+      (univ.filter fun y : Fin (n + n) → Bool => (((∀ C ∈ ψ, ∃ l ∈ C, ext y l.1 = l.2) ∧
         (∀ v < n, ext y v = false → ext y (n + v) = false) ∧
         ∀ p ∈ E, ext y p.1 = true → ext y p.2 = true → ext y (n + p.1) = ext y (n + p.2)) ∧
+        P (fun j => ext y j.val)) ∧
         (univ.filter fun v : Fin n => y (Fin.castAdd n v) = true).card = ℓ).card := by
-  unfold cntS
   refine card_append _ _ (fun y v => !y (Fin.natAdd n v)) fun y g => ?_
   have hlt : ∀ a < n + n, ext (Fin.append y g) a = ext y a := fun a ha => ext_append_lt y g ha
+  have hP : (fun j : Fin n => ext (Fin.append y g) j.val) = fun j => ext y j.val :=
+    funext fun j => hlt _ (by omega)
   have hE' : ∀ p ∈ E, (ext (Fin.append y g) p.1 = true → ext (Fin.append y g) p.2 = true →
       ext (Fin.append y g) (n + p.1) = ext (Fin.append y g) (n + p.2)) ↔
       (ext y p.1 = true → ext y p.2 = true → ext y (n + p.1) = ext y (n + p.2)) := fun p hp => by
@@ -275,25 +278,26 @@ theorem cnt_stepA {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 <
     omega
   rw [connF, List.forall_mem_append, List.forall_mem_append,
     sat_congr (f' := ext y) (fun C hC l hl => hlt _ (by have := hψ C hC l hl; omega)),
-    sat_edgeCC, sat_sideF, hside, hg, forall₂_congr hE']
+    sat_edgeCC, sat_sideF, hside, hg, forall₂_congr hE', hP]
   constructor
-  · rintro ⟨⟨⟨hA, hG, hS⟩, hC⟩, hcnt⟩
+  · rintro ⟨⟨⟨⟨hA, hG, hS⟩, hC⟩, hQ⟩, hcnt⟩
     subst hG
-    exact ⟨⟨⟨hA, hS, hC⟩, by rw [hcount] at hcnt; omega⟩, rfl⟩
-  · rintro ⟨⟨⟨hA, hS, hC⟩, hcnt⟩, rfl⟩
-    exact ⟨⟨⟨hA, rfl, hS⟩, hC⟩, by rw [hcount]; omega⟩
+    exact ⟨⟨⟨⟨hA, hS, hC⟩, hQ⟩, by rw [hcount] at hcnt; omega⟩, rfl⟩
+  · rintro ⟨⟨⟨⟨hA, hS, hC⟩, hQ⟩, hcnt⟩, rfl⟩
+    exact ⟨⟨⟨⟨hA, rfl, hS⟩, hC⟩, hQ⟩, by rw [hcount]; omega⟩
 
 /-- Step B: the pairs (x, s). -/
 theorem cnt_stepB {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 < p.2 ∧ p.2 < n) {ψ : Fml}
-    (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) :
-    (univ.filter fun y : Fin (n + n) → Bool => ((∀ C ∈ ψ, ∃ l ∈ C, ext y l.1 = l.2) ∧
+    (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) (P : (Fin n → Bool) → Prop) [DecidablePred P] :
+    (univ.filter fun y : Fin (n + n) → Bool => (((∀ C ∈ ψ, ∃ l ∈ C, ext y l.1 = l.2) ∧
         (∀ v < n, ext y v = false → ext y (n + v) = false) ∧
         ∀ p ∈ E, ext y p.1 = true → ext y p.2 = true → ext y (n + p.1) = ext y (n + p.2)) ∧
+        P (fun j => ext y j.val)) ∧
         (univ.filter fun v : Fin n => y (Fin.castAdd n v) = true).card = ℓ).card =
-      ∑ x : Fin n → Bool, if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
+      ∑ x : Fin n → Bool, if ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ
         then sig n E x else 0 := by
   rw [Finset.card_equiv (Fin.appendEquiv n n).symm (t := univ.filter fun p : (Fin n → Bool) × (Fin n → Bool) =>
-      ((∀ C ∈ ψ, ∃ l ∈ C, ext p.1 l.1 = l.2) ∧ (univ.filter fun v => p.1 v = true).card = ℓ) ∧
+      (((∀ C ∈ ψ, ∃ l ∈ C, ext p.1 l.1 = l.2) ∧ P p.1) ∧ (univ.filter fun v => p.1 v = true).card = ℓ) ∧
       ((∀ v, p.1 v = false → p.2 v = false) ∧
         ∀ q ∈ E, ext p.1 q.1 = true → ext p.1 q.2 = true → ext p.2 q.1 = ext p.2 q.2))]
   · rw [Finset.card_filter, Fintype.sum_prod_type]
@@ -313,7 +317,9 @@ theorem cnt_stepB {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 <
     have hb : (Fin.appendEquiv n n) p = Fin.append p.1 p.2 := funext fun a => Fin.appendEquiv_apply _ _ _ _
     rw [hb]
     have hlt : ∀ a < n, ext (Fin.append p.1 p.2) a = ext p.1 a := fun a ha => ext_append_lt _ _ ha
-    rw [sat_congr (f' := ext p.1) (fun C hC l hl => hlt _ (hψ C hC l hl))]
+    have hP : (fun j : Fin n => ext (Fin.append p.1 p.2) j.val) = p.1 :=
+      funext fun j => by rw [hlt _ j.2, ext_fin]
+    rw [sat_congr (f' := ext p.1) (fun C hC l hl => hlt _ (hψ C hC l hl)), hP]
     have hside : (∀ v < n, ext (Fin.append p.1 p.2) v = false → ext (Fin.append p.1 p.2) (n + v) = false) ↔
         ∀ v, p.1 v = false → p.2 v = false := by
       constructor
@@ -337,12 +343,44 @@ theorem cnt_stepB {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 <
     rw [hside, hedge, hcnt]
     tauto
 
-theorem cntS_connF {n ℓ : ℕ} {E : List (ℕ × ℕ)} (hE : ∀ p ∈ E, p.1 < p.2 ∧ p.2 < n) {ψ : Fml}
-    (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) :
-    cntS (n + n + n) (n + ℓ) (connF n E ψ) =
-      ∑ x : Fin n → Bool, if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
-        then sig n E x else 0 := by
-  rw [cnt_stepA hE hψ, cnt_stepB hE hψ]
+open Classical in
+/-- **Cut & Count for connected vertex sets, with a property P of the vertex set**: half the number
+of satisfying assignments of `connF` with n + ℓ true variables and P on the vertex bits has the
+parity of the number of sets X of size ℓ ≥ 1 with X ⊨ ψ, P X and G[X] connected. -/
+theorem conn_parity_P {n : ℕ} (G : SimpleGraph (Fin n)) {ψ : Fml} (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) {ℓ : ℕ}
+    (hℓ : 1 ≤ ℓ) (P : (Fin n → Bool) → Prop) [DecidablePred P] :
+    (univ.filter fun w : Fin (n + n + n) → Bool => ((∀ C ∈ connF n (edges n (matrix G)) ψ, ∃ l ∈ C, ext w l.1 = l.2) ∧
+        P (fun j => ext w j.val)) ∧ (univ.filter fun i => w i = true).card = n + ℓ).card / 2 % 2 =
+      (univ.filter fun x : Fin n → Bool => ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧
+        (univ.filter fun v => x v = true).card = ℓ ∧ (G.induce {v | x v = true}).Connected).card % 2 := by
+  rw [cnt_stepA (edges_bound n (matrix G)) hψ P, cnt_stepB (edges_bound n (matrix G)) hψ P]
+  have key : ∀ x : Fin n → Bool,
+      (if ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ
+        then sig n (edges n (matrix G)) x else 0) =
+        2 * (if ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ
+          then sig n (edges n (matrix G)) x / 2 else 0) ∧
+      (if ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ
+          then sig n (edges n (matrix G)) x / 2 else 0) % 2 =
+        if ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ ∧
+          (G.induce {v | x v = true}).Connected then 1 else 0 := by
+    intro x
+    by_cases hQ : ((∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ P x) ∧ (univ.filter fun v => x v = true).card = ℓ
+    · have hx : ∃ r, x r = true := by
+        by_contra h
+        push Not at h
+        have : (univ.filter fun v => x v = true) = ∅ := filter_eq_empty_iff.2 fun v _ => by simp [h v]
+        rw [this, card_empty] at hQ
+        omega
+      obtain ⟨h1, h2⟩ := sig_parity G x hx
+      rw [if_pos hQ, if_pos hQ, h2]
+      refine ⟨h1, ?_⟩
+      by_cases hc : (G.induce {v | x v = true}).Connected
+      · rw [if_pos hc, if_pos ⟨hQ.1, hQ.2, hc⟩]
+      · rw [if_neg hc, if_neg fun h => hc h.2.2]
+    · rw [if_neg hQ, if_neg hQ, if_neg fun h => hQ ⟨h.1, h.2.1⟩]
+      simp
+  rw [Finset.sum_congr rfl fun x _ => (key x).1, ← Finset.mul_sum, Nat.mul_div_cancel_left _ two_pos,
+    Finset.sum_nat_mod, Finset.sum_congr rfl fun x _ => (key x).2, ← Finset.card_filter]
 
 open Classical in
 /-- The number of vertex sets of size ℓ that satisfy ψ and induce a connected subgraph. -/
@@ -357,33 +395,9 @@ connected. -/
 theorem conn_parity {n : ℕ} (G : SimpleGraph (Fin n)) {ψ : Fml} (hψ : ∀ C ∈ ψ, ∀ l ∈ C, l.1 < n) {ℓ : ℕ}
     (hℓ : 1 ≤ ℓ) :
     cntS (n + n + n) (n + ℓ) (connF n (edges n (matrix G)) ψ) / 2 % 2 = numConnF G ψ ℓ % 2 := by
-  rw [cntS_connF (edges_bound n (matrix G)) hψ]
-  have key : ∀ x : Fin n → Bool,
-      (if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
-        then sig n (edges n (matrix G)) x else 0) =
-        2 * (if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
-          then sig n (edges n (matrix G)) x / 2 else 0) ∧
-      (if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
-          then sig n (edges n (matrix G)) x / 2 else 0) % 2 =
-        if (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ ∧
-          (G.induce {v | x v = true}).Connected then 1 else 0 := by
-    intro x
-    by_cases hP : (∀ C ∈ ψ, ∃ l ∈ C, ext x l.1 = l.2) ∧ (univ.filter fun v => x v = true).card = ℓ
-    · have hx : ∃ r, x r = true := by
-        by_contra h
-        push Not at h
-        have : (univ.filter fun v => x v = true) = ∅ := filter_eq_empty_iff.2 fun v _ => by simp [h v]
-        rw [this, card_empty] at hP
-        omega
-      obtain ⟨h1, h2⟩ := sig_parity G x hx
-      rw [if_pos hP, if_pos hP, h2]
-      refine ⟨h1, ?_⟩
-      by_cases hc : (G.induce {v | x v = true}).Connected
-      · rw [if_pos hc, if_pos ⟨hP.1, hP.2, hc⟩]
-      · rw [if_neg hc, if_neg fun h => hc h.2.2]
-    · rw [if_neg hP, if_neg hP, if_neg fun h => hP ⟨h.1, h.2.1⟩]
-      simp
-  rw [Finset.sum_congr rfl fun x _ => (key x).1, ← Finset.mul_sum, Nat.mul_div_cancel_left _ two_pos,
-    Finset.sum_nat_mod, Finset.sum_congr rfl fun x _ => (key x).2, ← Finset.card_filter, numConnF]
+  have h := conn_parity_P G hψ hℓ fun _ => True
+  simp only [and_true] at h
+  unfold cntS numConnF
+  exact h
 
 end EthCor.Conn

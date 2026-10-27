@@ -50,6 +50,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
 | A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
+| N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. | ours |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
@@ -67,9 +68,11 @@ Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgrap
 degree 2. The "ours" entries are our derivations; we have not finished a literature check.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
-edges, and the fraction is taken over all of them, so it is the probability for a uniformly random
-seed. A seed has O(m·k·log m) bits. Its code `seedCode ω` is W = m + k + (3m + 3) + 1 in unary,
-followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. Repeating the run with
+edges. In N2′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
+is taken over all seeds, so it is the probability for a uniformly random seed. A seed has
+O(M·k·log M) bits, for M = m or n. Its code `seedCode ω` is W = M + k + (3M + 3) + 1 in unary,
+followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. In N2′ the input
+carries the seed's length in unary in front of it (`seedL`). Repeating the run with
 2^{2δn} independent seeds gives error at most e^{−2^{δn}}. This amplification step is standard and is
 not part of the Lean statement.
 
@@ -112,11 +115,19 @@ not part of the Lean statement.
   side bit s_v and its complement s̄_v. The clauses are those of φ, then s̄_v = ¬s_v, s_v = 0 outside
   X, and s_u = s_v on every edge inside X (width ≤ max(r, 4)). Each complementary pair has exactly
   one true bit, so the satisfying assignments with n + ℓ true variables are the pairs (X, s) with
-  \|X\| = ℓ, X ⊨ φ and s constant on the edges of G[X] (`cntS_connF`). There are 2^{cc(G[X])} of
+  \|X\| = ℓ, X ⊨ φ and s constant on the edges of G[X] (`cnt_stepA`, `cnt_stepB`). There are 2^{cc(G[X])} of
   them, so half their number is odd exactly when G[X] is connected (`sig_parity`, the flip argument
   of A5a with a root in X). Anthropic's `SIZED` counter for "exactly s true variables" counts the
   3n-variable formula, and the machine keeps bit 1 of the count (`conn_parity`). The number of edges
   does not matter: it changes the number of clauses, not the number of variables.
+- **N2′, the decision versions.** Add the isolation checks of A5b on the n vertex bits: a variable z
+  set to false, the Tseitin chains of the checks, and a complement bit for every chain bit
+  (`compF`). Each chain bit and its complement hold exactly one true bit, so the target becomes
+  n + ℓ + (3n+3)·k. The chain bits are determined (`stepC`, `stepD`, `stepE`). Half the count then
+  has the parity of the number of connected solutions that pass the checks (`ci_parity`, through
+  `conn_parity_P` with the checks as the property P). The isolation lemma on the set of connected
+  solutions, a subset of {0,1}^n, gives `ci_decide`. The formula has 3n + 1 + 2(3n+3)k = O(n)
+  variables for fixed k, so `SIZED` runs in C·2^{εn}.
 - **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
   distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
   Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
@@ -173,10 +184,9 @@ lake env lean CheckAxioms.lean
   m·k = o(n·√lg n/lglg n).
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
-- **N2** is done for vertex sets (see the table). Next: the decision versions, randomized as in
-  A5b. The isolation checks act on the n vertex bits; each auxiliary chain bit gets a complement
-  bit, so that the target number of true variables stays fixed. This would give Steiner tree and
-  connected vertex cover with one-sided error in 2^{δn}.
+- **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
+  a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
+  the domination clauses have width Δ + 1. Next on the plan: S3, N3 (Potts/Tutte), then A3.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.
@@ -202,6 +212,7 @@ lean/
     HamIso                                checks as clauses, one-sided-error parity (A5b)
     HamIsoTM                              seed code, the machine, ham_randomized (A5b)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
+    ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```
 
 ## Use of AI

@@ -186,7 +186,7 @@ Amplification (repeating with fresh seeds) is not formalized.
 ### N2 progress (2026-10-27)
 Done: `lean/EthCor/ConnFormula.lean` and `ConnTM.lean`. The formula is `connF n E ψ` on 3n variables
 (x_v, s_v, s̄_v): ψ, plus s̄ = ¬s, plus s_v → x_v, plus s_u = s_v on the edges inside X (width 4).
-- `cntS_connF`: cntS(3n, n+ℓ) = Σ_{X ⊨ ψ, |X| = ℓ} sig(X), where sig(X) = 2^{cc(G[X])}.
+- `cnt_stepA`, `cnt_stepB` (with any vertex property P): cntS(3n, n+ℓ) = Σ_{X ⊨ ψ, P X, |X| = ℓ} sig(X), where sig(X) = 2^{cc(G[X])}.
 - `sig_parity`: sig(X) is even, and sig(X)/2 is odd ⟺ G[X] is connected. This is `parity_root` (the
   flip argument with root r ∈ X) together with `card_sides_two`.
 - `conn_parity`: cntS/2 ≡ numConnF (mod 2) for ℓ ≥ 1.
@@ -197,3 +197,16 @@ Done: `lean/EthCor/ConnFormula.lean` and `ConnTM.lean`. The formula is `connF n 
 Next for N2: decision versions via isolation on the n vertex bits (each Tseitin chain bit gets a
 complement bit, so the count of true variables stays fixed). That gives randomized Steiner tree /
 connected vertex cover in 2^{δn}.
+
+N2′ is done (2026-10-27): `lean/EthCor/ConnIso.lean` and `ConnIsoTM.lean`.
+- The formula is `ciF` = connF ++ [z = 3n false] ++ isoF(z, 3n+1, k, …) ++ compF(3n+1, mm·k), where
+  compF makes bit 3n+1+A+i the complement of chain bit 3n+1+i. It has 3n+1+2·mm·k variables and
+  target n+ℓ+mm·k.
+- Steps: `stepC` (complements), `stepD` (chains, via `sat_isoF_iff` with N₀ = 3n+1), `stepE` (z),
+  then `conn_parity_P` with P = H ω. This gives `ci_parity`, and with Iso.isolation on the connected
+  solutions also `ci_decide`.
+- The input is `codeCI G ℓ ω φ` = code G ++ unary ℓ ++ unary |seedCode ω| ++ seedCode ω ++ enc φ.
+  readFree ignores trailing bits, but the seed must come before φ, hence the length prefix.
+- `conn_randomized`: ∀ r D δ ε, ∃ k t n₀ M C. The machine runs within C·2^{εn}; the bit is 0 for
+  every seed when no solution exists, and |Seed| ≤ 2^{δn}·#{ω : out ω} when one does. SIZED(r+4)
+  with δ' = ε/(2(12k+4)) works because N ≤ (12k+4)n.

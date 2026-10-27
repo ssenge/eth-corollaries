@@ -18,3 +18,5 @@ import EthCor.HamIso
 import EthCor.HamIsoTM
 import EthCor.ConnFormula
 import EthCor.ConnTM
+import EthCor.ConnIso
+import EthCor.ConnIsoTM

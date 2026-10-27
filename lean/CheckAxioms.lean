@@ -13,3 +13,6 @@ import EthCor
 #print axioms EthCor.Iso.isolation
 #print axioms EthCor.HamI.iso_parity
 #print axioms EthCor.HamI.iso_decide
+#print axioms EthCor.HamITM.decode_seedCode
+#print axioms EthCor.HamITM.hcI_tm
+#print axioms EthCor.HamITM.ham_randomized

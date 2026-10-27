@@ -167,3 +167,18 @@ fixed k. Main results: `HamI.iso_parity` (#SAT(hcI) ≡ |hcSet G ∩ H ω| mod 2
 seedBits = unary W, then every number of (k, m₁, rows, fixes) as a W-bit block 1^v 0^{W−v}. The
 graph reader only looks at the first n² matrix bits. The machine reads k, so one machine works for
 all δ. Its bound is 2^{o(n)} for m ≤ D·n.
+
+Step (3) is done (2026-10-27): `lean/EthCor/HamIsoTM.lean`, so N1 = A5b is complete.
+- `seedCode ω` = unary W followed by `seedNums ω` in W-bit blocks, with W = M + k + mm + 1. The
+  numbers are: the header k, m₁, mm, M; for each check, (j_l, c_l) for l < k, then the right-hand
+  side; for each coordinate, "is fixed" as 0/1, then the bit.
+- `decode_seedCode` reads k, m₁, mm, M, `rowsOf ω` and `fixesOf ω` back. `edges_append`: the edge
+  list ignores whatever follows the matrix.
+- `hcI_tm`: one machine, for every n ≥ 4, k ≥ 1, mm ≥ 1 and seed. It outputs the parity of
+  #SAT(hcI) within c·2^{9c·N·r(N)}, where N = NI. The input stays within 1000·(N+2)³ because
+  W ≤ 3(N+2).
+- `ham_randomized`: ∀ D δ ε, ∃ k t n₀. For m ≤ D·n, out(ω) runs within 2^{εn} steps, is 0 for every
+  seed when G has no Hamiltonian cycle, and |Seed| ≤ 2^{δn}·#{ω : out ω} when G has one. It uses
+  iso_decide with δ/(D+1) and boundS_le with θ = 1/4; N ≤ A·n with A = 9Dk + 9k + 9D + 9, and
+  A ≤ (lg n)^{1/4} for n ≥ 2^{A⁴}.
+Amplification (repeating with fresh seeds) is not formalized.

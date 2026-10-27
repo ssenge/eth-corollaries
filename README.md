@@ -49,6 +49,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given t and a CNF with clauses of ≤ r literals and ≤ D·n clauses, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
 | A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
+| A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. | ours |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -63,6 +64,13 @@ Valiant–Vazirani hashing does not.
 `cnf_counts` and `cnf_grow` assume that no clause repeats a literal. In A2, k ≥ 2. The number of
 Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgraphs H ≤ G with every
 degree 2. The "ours" entries are our derivations; we have not finished a literature check.
+
+In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
+edges, and the fraction is taken over all of them, so it is the probability for a uniformly random
+seed. A seed has O(m·k·log m) bits. Its code `seedCode ω` is W = m + k + (3m + 3) + 1 in unary,
+followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. Repeating the run with
+2^{2δn} independent seeds gives error at most e^{−2^{δn}}. This amplification step is standard and is
+not part of the Lean statement.
 
 ### Proof ideas
 
@@ -108,6 +116,17 @@ degree 2. The "ours" entries are our derivations; we have not finished a literat
   other, fix the coordinates where the two furthest of them differ; then one point is left (`stepII`).
   The count `iso_count` is exact. `iso_real` takes r = ⌊M/a⌋ + 1 and k = a·b and bounds the ball by
   a^{r−1}·e^{M/a}. `isolation` then picks t, b and a, in this order, against δ.
+- **A5b, Hamiltonian cycle with one-sided error.** Isolate among the Hamiltonian cycles, then count
+  mod 2. Each check of a seed becomes a chain of k auxiliary variables
+  a_l = a_{l−1} ⊕ (c_l ∧ x_{j_l}), written as clauses of width ≤ 3; each fixing becomes a unit
+  clause (`HamI.sat_isoF_iff`). The edge bits determine the auxiliary variables. Added to the formula
+  of A5a′, the checks give a formula on N = 5m + n + 2 + (3m+3)·k variables with
+  #SAT ≡ #{Hamiltonian cycles that pass the checks} (mod 2) (`iso_parity`). If G has no Hamiltonian
+  cycle, the parity is 0 for every seed. If G has one, the isolation lemma leaves exactly one
+  Hamiltonian cycle for at least a 2^{−δm} fraction of the seeds, so the parity is 1 there
+  (`iso_decide`). The machine reads k, the number of checks used, the checks and the fixings from
+  the input (`decode_seedCode`), so one machine serves every δ. Its bound c·2^{9c·N·lglg N/√lg N}
+  is 2^{o(n)} because N = O(n) for m ≤ D·n.
 
 ## Checking the proofs
 
@@ -132,21 +151,16 @@ lake env lean CheckAxioms.lean
 - The 2^{o(n)} algorithm is itself a Lean theorem in the dependency. These results are therefore not
   conditional on an unproved hypothesis. They are as sound as Anthropic's formalization.
 - Lean cannot tell whether a formal statement means what it should. Read the theorem statements and
-  the definitions they use by hand. Ours: `numHamCycles`, `spectrum`, the input codes. Anthropic's:
+  the definitions they use by hand. Ours: `numHamCycles`, `spectrum`, `Seed`, the input codes
+  (including `seedCode`). Anthropic's:
   the TM2 machine model and their statement files. Nobody has reviewed Anthropic's statements by
   hand yet.
 
 ## Status and next steps
 
-- **A5b, deciding Hamiltonian cycle on graphs with O(n) edges, randomized, one-sided error:** in
-  progress. Step 1, the isolation lemma for arbitrary sets, is proved (`EthCor.Iso.isolation`, see
-  above). Step 2 is proved too (`EthCor.HamI.iso_parity`, `iso_decide`). Each check of a seed
-  becomes a chain of k auxiliary variables a_l = a_{l−1} ⊕ (c_l ∧ x_{j_l}), with clauses of width
-  ≤ 3. Each fixing becomes a unit clause. The auxiliary variables are determined by the edge bits,
-  so the formula, on 5m + n + 2 + (3m+3)k variables, has #SAT ≡ #{Hamiltonian cycles passing the
-  checks} (mod 2). Hence: with no Hamiltonian cycle, the parity is 0 for every seed. With one, it
-  is 1 for at least a 2^{−δm} fraction of the seeds. Step 3, the machine on input `code G` and a
-  seed, is next.
+- **A5b** is done (see the table). Open: a deterministic version, and graphs with more than O(n)
+  edges. The formula has N ≈ 3m·k variables, so the bound stays 2^{o(n)} only while
+  m·k = o(n·√lg n/lglg n).
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
 - **Parity of other connected structures:** next. The Cut & Count argument of A5a/A5a′ should
@@ -172,8 +186,9 @@ lean/
     Spectrum                              A4
     HamFormula, HamTM                     A5a
     HamCounter, HamSparseTM               A5a′
-    Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b, step 1)
-    HamIso                                checks as clauses, one-sided-error parity (A5b, step 2)
+    Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b)
+    HamIso                                checks as clauses, one-sided-error parity (A5b)
+    HamIsoTM                              seed code, the machine, ham_randomized (A5b)
 ```
 
 ## Use of AI

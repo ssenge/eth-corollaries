@@ -1,0 +1,16 @@
+name = "ethcor"
+defaultTargets = ["EthCor"]
+
+[leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+
+# Anthropic's ETH development, pinned; we prove our corollaries from `MainResults.mainTheorem`.
+[[require]]
+name = "eth"
+git = "https://github.com/anthropics/formal-math"
+rev = "16a5ce41304fcdaea4e0be7c132e1c361dc26da5"
+subDir = "eth"
+
+[[lean_lib]]
+name = "EthCor"

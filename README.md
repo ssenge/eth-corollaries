@@ -140,10 +140,13 @@ lake env lean CheckAxioms.lean
 
 - **A5b, deciding Hamiltonian cycle on graphs with O(n) edges, randomized, one-sided error:** in
   progress. Step 1, the isolation lemma for arbitrary sets, is proved (`EthCor.Iso.isolation`, see
-  above). Step 2 adds the checks of a seed as clauses to the Cut & Count formula of A5a′, so that
-  #SAT ≡ #{Hamiltonian cycles passing the checks} (mod 2). Step 3 is the machine, with input
-  `code G` and a seed. If G has no Hamiltonian cycle, it outputs 0 for every seed. If G has one, it
-  outputs 1 for a 2^{−δn} fraction of the seeds.
+  above). Step 2 is proved too (`EthCor.HamI.iso_parity`, `iso_decide`). Each check of a seed
+  becomes a chain of k auxiliary variables a_l = a_{l−1} ⊕ (c_l ∧ x_{j_l}), with clauses of width
+  ≤ 3. Each fixing becomes a unit clause. The auxiliary variables are determined by the edge bits,
+  so the formula, on 5m + n + 2 + (3m+3)k variables, has #SAT ≡ #{Hamiltonian cycles passing the
+  checks} (mod 2). Hence: with no Hamiltonian cycle, the parity is 0 for every seed. With one, it
+  is 1 for at least a 2^{−δm} fraction of the seeds. Step 3, the machine on input `code G` and a
+  seed, is next.
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
 - **Parity of other connected structures:** next. The Cut & Count argument of A5a/A5a′ should
@@ -170,6 +173,7 @@ lean/
     HamFormula, HamTM                     A5a
     HamCounter, HamSparseTM               A5a′
     Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b, step 1)
+    HamIso                                checks as clauses, one-sided-error parity (A5b, step 2)
 ```
 
 ## Use of AI

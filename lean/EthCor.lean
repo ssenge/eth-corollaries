@@ -14,3 +14,4 @@ import EthCor.HamCounter
 import EthCor.HamSparseTM
 import EthCor.Isolation
 import EthCor.IsoBound
+import EthCor.HamIso

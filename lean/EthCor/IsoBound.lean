@@ -210,7 +210,7 @@ theorem F_le (M a b t : ℕ) (η δ : ℝ) (hη : η = δ * log 2 / 5) (ht : 1 �
 /-- **Isolation lemma for arbitrary sets.** For every δ > 0 there are k and t such that, for all large M
 and every nonempty S ⊆ {0,1}^M, at least a fraction 2^{−δM} of the seeds ω (3M+3 parity checks on k
 coordinates each, a number of checks to use, and fixings with rate 1/t) leave exactly one point of S. -/
-theorem isolation (δ : ℝ) (hδ : 0 < δ) : ∃ k t : ℕ, 1 ≤ t ∧ ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
+theorem isolation (δ : ℝ) (hδ : 0 < δ) : ∃ k t : ℕ, 1 ≤ k ∧ 1 ≤ t ∧ ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
     ∀ S : Finset (Fin M → Bool), S.Nonempty →
       (Fintype.card (Seed M k t (3 * M + 3)) : ℝ) ≤
         2 ^ (δ * M) * (univ.filter fun ω : Seed M k t (3 * M + 3) => (S.filter (H ω)).card = 1).card := by
@@ -251,7 +251,7 @@ theorem isolation (δ : ℝ) (hδ : 0 < δ) : ∃ k t : ℕ, 1 ≤ t ∧ ∃ M�
   obtain ⟨B₀, hB₀⟩ := Filter.eventually_atTop.1 (isLittleO_log_id_atTop.bound hη0)
   obtain ⟨c, hc⟩ : ∃ c : ℕ, c = ⌈max B₀ ((log 56 + 2 * log ((2 * t : ℕ) : ℝ)) / η)⌉₊ := ⟨_, rfl⟩
   have hcle : max B₀ ((log 56 + 2 * log ((2 * t : ℕ) : ℝ)) / η) ≤ (c : ℝ) := hc ▸ Nat.le_ceil _
-  refine ⟨a * b, t, ht1, c + 1, fun M hM S hS => ?_⟩
+  refine ⟨a * b, t, Nat.mul_pos ha1 hb1, ht1, c + 1, fun M hM S hS => ?_⟩
   have hM1 : 1 ≤ M := by omega
   have hMr : (c : ℝ) + 1 ≤ M := by exact_mod_cast hM
   have hlog : log (8 * (3 * M + 4)) + 2 * log ((2 * t : ℕ) : ℝ) ≤ 2 * η * M := by

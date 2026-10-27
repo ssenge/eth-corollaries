@@ -159,3 +159,11 @@ Step (1) is done: `lean/EthCor/Isolation.lean` (pure counting) and `lean/EthCor/
 Standard axioms only. Next is step (2): XOR rows as CNF clauses. A row's support is
 {j : Σ_{l : J l = j} C l odd}, of size ≤ k, so the row is 2^{|T|−1} clauses of width |T| on the edge
 variables. The fixings become unit clauses. Then Cut & Count gives #SAT ≡ |HC ∩ H ω| (mod 2).
+
+Step (2) is done (2026-10-27): `lean/EthCor/HamIso.lean`. I used Tseitin chains instead of
+2^{k−1} clauses per check: width stays 3 and the variable count is 5m+n+2+(3m+3)k, linear for
+fixed k. Main results: `HamI.iso_parity` (#SAT(hcI) ≡ |hcSet G ∩ H ω| mod 2) and `HamI.iso_decide`
+(the one-sided-error statement, for every δ). Step (3) plan: input `code G ++ seedBits`, where
+seedBits = unary W, then every number of (k, m₁, rows, fixes) as a W-bit block 1^v 0^{W−v}. The
+graph reader only looks at the first n² matrix bits. The machine reads k, so one machine works for
+all δ. Its bound is 2^{o(n)} for m ≤ D·n.

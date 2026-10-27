@@ -11,3 +11,5 @@ import EthCor
 #print axioms EthCor.HamSTM.hc_parity_bounded
 #print axioms EthCor.Iso.iso_count
 #print axioms EthCor.Iso.isolation
+#print axioms EthCor.HamI.iso_parity
+#print axioms EthCor.HamI.iso_decide

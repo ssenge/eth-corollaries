@@ -48,6 +48,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/4}/(lg lg n)²} clauses** of any width within 2^{δn} steps, for every δ > 0. This density exceeds n·2^{(lg n)^{1/4−ε}} for every ε > 0. | ours |
 | A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given t and a CNF with clauses of ≤ r literals and ≤ D·n clauses, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
+| A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
 
 `cnf_counts` and `cnf_grow` assume that no clause repeats a literal. In A2, k ≥ 2. The number of
 Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgraphs H ≤ G with every
@@ -81,6 +82,13 @@ degree 2. The "ours" entries are our derivations; we have not finished a literat
   is odd exactly when the 2-factor is connected (`parity_sides`: flip the sides on a component that
   avoids vertex 0). So #SAT ≡ #HC (mod 2) (`hc_parity`). The machine keeps the low bit of Anthropic's
   count. The formula has width Δ + 3 and N = m + n ≤ (Δ+1)n variables, so the bound is 2^{o(n)}.
+- **A5a′, any degree.** At a vertex of degree d, "at most two chosen edges" takes C(d, 3) clauses
+  and "at least two" a clause of width d. A sequential counter replaces both. Each pair (edge, end)
+  gets two bits, "one edge at this end chosen so far" and "two chosen so far". Clauses of width ≤ 3
+  fix these bits from the edge bits (`auxOK_iff`) and forbid a third edge. The formula has
+  N = 5m + n + 2 variables, width 3, and as many satisfying assignments as before (`cntN_hcS`).
+  Anthropic's bound c·2^{9c·N·lglg N/√lg N} is then 2^{o(n)} whenever m = o(n·√lg n/lglg n).
+  We prove the case m ≤ n·(lg n)^{1/2−θ}.
 
 ## Checking the proofs
 
@@ -116,10 +124,8 @@ lake env lean CheckAxioms.lean
   sparse-hash isolation lemma of [7].
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
-- **Parity of Hamiltonian cycles beyond bounded degree:** next. Graphs with O(n) edges but unbounded
-  degree need sequential counters in place of the (Δ+3)-wide degree clauses. The same Cut & Count
-  argument should give the parity of other connected structures, such as Steiner trees and
-  connected vertex covers of a given size.
+- **Parity of other connected structures:** next. The Cut & Count argument of A5a/A5a′ should
+  carry over to Steiner trees and connected vertex covers of a given size.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.
@@ -140,6 +146,7 @@ lean/
     GrowTree, GrowArith, GrowTM           A1′
     Spectrum                              A4
     HamFormula, HamTM                     A5a
+    HamCounter, HamSparseTM               A5a′
 ```
 
 ## Use of AI

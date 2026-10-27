@@ -101,6 +101,16 @@ Check with `cd lean && lake build && lake env lean CheckAxioms.lean`.
   the side maps number 2^{cc−1}, odd iff connected (`parity_sides`, flip s on a component missing 0); edge choices ↔ H ≤ G
   (`card_hc`); so #SAT ≡ #HC mod 2 (`hc_parity`). Low bit of Anthropic's compact-code count, width Δ + 3 (`hc_parity_tm`,
   bound c·2^{c(Δ+3)²·N·r(N)}, N = m + n ≤ (Δ+1)n, `boundH_le`).
+- **A5a′ (⊕HC, sparse, any degree), done.** `EthCor.HamSTM.hc_parity_sparse` (EthCor/HamCounter.lean, HamSparseTM.lean):
+  ONE TM; for every θ, ε > 0 there is n₀ such that for every G on n ≥ n₀ vertices with |E(G)| ≤ n·(lg n)^{1/2−θ} it
+  outputs [#HC(G) odd] within ⌊2^{εn}⌋ steps. Corollary `hc_parity_bounded`: one TM for all Δ (A5a had one per Δ).
+  Proof: `hcS` replaces atMost2/atLeast2 by a sequential counter. Bits m+n+4e+2b (+1) = "≥1 (≥2) of the edges at end b of
+  e, up to e, chosen"; the start counter is the pair z = 5m+n, z+1 forced false. Steps: c = p ∨ x, c+1 = (p+1) ∨ (x ∧ p),
+  ¬(p+1 ∧ x), final c_d+1 (`stepC`, `cntC`, `sat_cntC` by induction on the list). The bits are determined (`auxOK_iff` on
+  the sorted incidence list, `aux_iff`), so cntN(5m+n+2, hcS) = cntN(m+n, hcF) (`cntN_hcS`, via Fin.appendEquiv and
+  card_nbij'). Width 3 → `hcS_tm` with bound c·2^{9c·N·r(N)}, N = 5m+n+2; `boundS_le` (rate_le_rpow with a = θ/2) gives
+  2^{εn} for N ≤ 8n·(lg n)^{1/2−θ}. `length_edges_le_card`: the edge list injects into G.edgeFinset (Sym2).
+  Limit of the method: m = o(n·√lg n/lglg n).
 - A5b (deciding HC) status: blocked for "fast". Cut & Count needs isolation. MVV weights (≤ 2m per edge) blow the variables up
   to ~m², and the cntS "exactly t true" trick only carries O(n) total weight. Dense Valiant–Vazirani XORs need ~n·m auxiliary
   variables. The workable route is randomized: CIKP08 sparse-hash isolation (k-sparse XORs, no new variables, success

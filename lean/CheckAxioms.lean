@@ -6,3 +6,6 @@ import EthCor
 #print axioms EthCor.Spectrum.maxsat_spectrum
 #print axioms EthCor.HamTM.hc_parity_tm
 #print axioms EthCor.HamTM.hc_parity_subexp
+#print axioms EthCor.HamSTM.hcS_tm
+#print axioms EthCor.HamSTM.hc_parity_sparse
+#print axioms EthCor.HamSTM.hc_parity_bounded

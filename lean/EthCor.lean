@@ -10,3 +10,5 @@ import EthCor.GrowTM
 import EthCor.Spectrum
 import EthCor.HamFormula
 import EthCor.HamTM
+import EthCor.HamCounter
+import EthCor.HamSparseTM

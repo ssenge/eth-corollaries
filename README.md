@@ -52,6 +52,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
+| N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases are the chromatic polynomial at q, at (1−q, 0), and the flow polynomial at q, at (0, 1−q). | direct corollary; formalized |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -101,6 +102,17 @@ not part of the Lean statement.
   with exactly n + t true variables correspond to assignments with exactly t satisfied clauses
   (`cntS_specF`, explicit bijection). They are counted by Anthropic's `SIZED` counter. This covers
   the Max-Cut spectrum and the density of states of the ±1 Ising model on O(n)-edge graphs.
+- **N3, Potts and Tutte.** The variables are x_{vq+c} (vertex v has color c) and y_i (edge i is
+  monochromatic), nq + m in all. The clauses say: at least one color per vertex (width q), at most
+  one (width 2), and for every edge (a, b) and color c, x_{aq+c} ∧ x_{bq+c} → y_i and
+  y_i ∧ x_{aq+c} → x_{bq+c} (width 3). The satisfying assignments are the colorings, with
+  n + (number of monochromatic edges) true variables (`cnt_pottsF`), so `SIZED` counts N_j. For the
+  identities, expand Π_e (1 + v·[e monochromatic]) over the subsets A ⊆ E. The colorings constant on
+  the components of (V, A) are q^{k(A)} many (`card_const`), which gives the Fortuin–Kasteleyn
+  identity (`potts_fk`). With v = y − 1 and q = (x−1)(y−1), the term q^{k(A)}·(y−1)^{|A|} is
+  (x−1)^{k(E)}·(y−1)^n times the term of A in the Tutte polynomial (`tutte_hyperbola`). Under #ETH,
+  [10] proves lower bounds of the form 2^{Ω(n/polylog n)} for these evaluations on sparse simple
+  graphs; here they take 2^{δn} for every δ > 0.
 - **A5a, parity of Hamiltonian cycles (Cut & Count [6]).** The CNF has one bit per edge and one side
   bit per vertex. It says: every vertex is on exactly two chosen edges, the two ends of a chosen edge
   share a side, and s₀ is false. A chosen 2-factor with c cycles has 2^{c−1} side maps. That number
@@ -176,7 +188,8 @@ lake env lean CheckAxioms.lean
   conditional on an unproved hypothesis. They are as sound as Anthropic's formalization.
 - Lean cannot tell whether a formal statement means what it should. Read the theorem statements and
   the definitions they use by hand. Ours: `numHamCycles` (proved equal to Mathlib's count, see
-  above), `spectrum`, `Seed`, the input codes
+  above), `spectrum`, `pottsSpec`, `mono`, `comps`, `tutte` (the rank-generating form; Mathlib has no
+  Tutte polynomial to compare with), `Seed`, the input codes
   (including `seedCode`). Anthropic's:
   the TM2 machine model and their statement files. Nobody has reviewed Anthropic's statements by
   hand yet.
@@ -192,7 +205,10 @@ lake env lean CheckAxioms.lean
   a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
   the domination clauses have width Δ + 1.
 - **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
-  `IsHamiltonianCycle` (see the notes under the table). Next on the plan: N3 (Potts/Tutte), then A3.
+  `IsHamiltonianCycle` (see the notes under the table).
+- **N3** is done (see the table). Here q is a constant: the formula has width q + 3, and `SIZED`
+  takes a fixed width. Open: the Tutte polynomial off the hyperbolas (x−1)(y−1) ∈ ℕ. Next on the
+  plan: A3.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.
@@ -218,6 +234,8 @@ lean/
     HamIso                                checks as clauses, one-sided-error parity (A5b)
     HamIsoTM                              seed code, the machine, ham_randomized (A5b)
     HamMathlib                            numHamCycles vs Mathlib's IsHamiltonian (S3)
+    Potts                                 Fortuin–Kasteleyn, Tutte polynomial on hyperbolas (N3)
+    PottsTM                               the Potts formula and machine, potts_spectrum (N3)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```
@@ -244,6 +262,10 @@ and check proofs, to write the Lean formalisation, and to draft the text.
    isolation lemma for k-CNFs. J. Comput. System Sci. 74(3):386–393, 2008.
 8. Anthropic. formal-math: Lean formalizations, subdirectory `eth`.
    https://github.com/anthropics/formal-math.
+9. C. M. Fortuin and P. W. Kasteleyn. On the random-cluster model I. Introduction and relation to
+   other models. Physica 57(4):536–564, 1972.
+10. H. Dell, T. Husfeldt, D. Marx, N. Taslaman, and M. Wahlén. Exponential time complexity of the
+    permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
 
 ## Citation
 

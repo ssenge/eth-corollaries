@@ -220,3 +220,15 @@ S3 is done (2026-10-27): `lean/EthCor/HamMathlib.lean`.
   `card_bij` with H ↦ H.edgeFinset (injective by `edgeFinset_inj`).
 - `ham_randomized_mathlib`: A5b with ¬G.IsHamiltonian / G.IsHamiltonian in place of the count
   (n₀ + 2 so that n ≠ 1).
+
+N3 is done (2026-10-27): `lean/EthCor/Potts.lean` and `PottsTM.lean`.
+- Definitions: `mono G σ` (monochromatic edges), `pottsSpec G q j`, `comps A` (components of
+  (Fin n, A)), `fk`, `tutte` (rank-generating form with integer exponents, in a field).
+- `card_const`: colorings constant on the components of A = q^{k(A)} (via ConnectedComponent.lift).
+  `potts_fk`: Σ_j N_j (1+v)^j = Σ_{A ⊆ E} q^{k(A)} v^{|A|} in any commutative ring (prod_add).
+  `tutte_hyperbola`: (x−1)^{k(E)} (y−1)^n T(G;x,y) = Σ_j N_j y^j when (x−1)(y−1) = q, x, y ≠ 1.
+- Formula `pottsF n q E` on nq + m variables, width q + 3; `cnt_pottsF`: cntS(nq+m, n+j) = colorings
+  with j monochromatic list edges; `mE_eq` matches list edges with G.edgeFinset (also gives
+  |E(G)| ≤ length of the edge list, `card_le_length`).
+- `potts_spectrum q D hq hδ`: input code G ++ unary j, output bits of N_j, C·2^{δn}, |E| ≤ D·n.
+  `tutte_tm` packages it with `tutte_hyperbola`. q must be constant (SIZED has fixed width).

@@ -25,3 +25,9 @@ import EthCor
 #print axioms EthCor.Ham.numHamCycles_pos_iff
 #print axioms EthCor.Ham.numHamCycles_eq
 #print axioms EthCor.HamITM.ham_randomized_mathlib
+#print axioms EthCor.Potts.card_const
+#print axioms EthCor.Potts.potts_fk
+#print axioms EthCor.Potts.tutte_hyperbola
+#print axioms EthCor.PottsTM.cnt_pottsF
+#print axioms EthCor.PottsTM.potts_spectrum
+#print axioms EthCor.PottsTM.tutte_tm

@@ -21,3 +21,5 @@ import EthCor.ConnTM
 import EthCor.ConnIso
 import EthCor.ConnIsoTM
 import EthCor.HamMathlib
+import EthCor.Potts
+import EthCor.PottsTM

@@ -50,6 +50,16 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
 | A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
 
+**Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
+δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
+2^{−δM} fraction of the seeds ω leaves exactly one point of S. A seed consists of 3M + 3 parity checks
+on k coordinates each, a number m of them to use, and for every coordinate a value in {0,…,t−1} and a
+bit; the coordinate is fixed to the bit when the value is 0. This is the isolation lemma of [7].
+[7] states it for solution sets of k-CNFs, but its proof uses only that S is nonempty, and that is
+what we formalize. Sparse checks matter here: a check on k coordinates is 2^{k−1} clauses of width k
+on the same variables. So isolating among the solutions of a CNF keeps the number of variables, which
+Valiant–Vazirani hashing does not.
+
 `cnf_counts` and `cnf_grow` assume that no clause repeats a literal. In A2, k ≥ 2. The number of
 Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgraphs H ≤ G with every
 degree 2. The "ours" entries are our derivations; we have not finished a literature check.
@@ -89,6 +99,15 @@ degree 2. The "ours" entries are our derivations; we have not finished a literat
   N = 5m + n + 2 variables, width 3, and as many satisfying assignments as before (`cntN_hcS`).
   Anthropic's bound c·2^{9c·N·lglg N/√lg N} is then 2^{o(n)} whenever m = o(n·√lg n/lglg n).
   We prove the case m ≤ n·(lg n)^{1/2−θ}.
+- **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
+  distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
+  Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
+  For the least m with 2|S|·q^m ≤ 1, half of the check arrays make a given x semi-isolated
+  (`card_not_semi`, union bound). The semi-isolated points with the same check values lie in one
+  Hamming ball (`card_fiber_le`). Step II: if the surviving points lie within distance < 2r of each
+  other, fix the coordinates where the two furthest of them differ; then one point is left (`stepII`).
+  The count `iso_count` is exact. `iso_real` takes r = ⌊M/a⌋ + 1 and k = a·b and bounds the ball by
+  a^{r−1}·e^{M/a}. `isolation` then picks t, b and a, in this order, against δ.
 
 ## Checking the proofs
 
@@ -119,9 +138,12 @@ lake env lean CheckAxioms.lean
 
 ## Status and next steps
 
-- **A5b, deciding Hamiltonian cycle:** blocked for now. Cut & Count needs isolation, and the cheap
-  isolation methods all blow up the number of variables. The likely route is randomized, using the
-  sparse-hash isolation lemma of [7].
+- **A5b, deciding Hamiltonian cycle on graphs with O(n) edges, randomized, one-sided error:** in
+  progress. Step 1, the isolation lemma for arbitrary sets, is proved (`EthCor.Iso.isolation`, see
+  above). Step 2 adds the checks of a seed as clauses to the Cut & Count formula of A5a′, so that
+  #SAT ≡ #{Hamiltonian cycles passing the checks} (mod 2). Step 3 is the machine, with input
+  `code G` and a seed. If G has no Hamiltonian cycle, it outputs 0 for every seed. If G has one, it
+  outputs 1 for a 2^{−δn} fraction of the seeds.
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
 - **Parity of other connected structures:** next. The Cut & Count argument of A5a/A5a′ should
@@ -147,6 +169,7 @@ lean/
     Spectrum                              A4
     HamFormula, HamTM                     A5a
     HamCounter, HamSparseTM               A5a′
+    Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b, step 1)
 ```
 
 ## Use of AI

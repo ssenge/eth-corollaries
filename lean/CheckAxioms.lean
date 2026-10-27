@@ -9,3 +9,5 @@ import EthCor
 #print axioms EthCor.HamSTM.hcS_tm
 #print axioms EthCor.HamSTM.hc_parity_sparse
 #print axioms EthCor.HamSTM.hc_parity_bounded
+#print axioms EthCor.Iso.iso_count
+#print axioms EthCor.Iso.isolation

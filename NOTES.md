@@ -117,3 +117,45 @@ Check with `cd lean && lake build && lake env lean CheckAxioms.lean`.
   ≥ 2^{−εn}), stated as "∃ M on (G, seed): no HC ⇒ 0 for all seeds; HC ⇒ 1 for ≥ 2^{−εn} of the seeds". That means
   formalizing the CIKP isolation lemma (heavy). Deterministically, "¬ETH ⇒ HC in 2^{o(n)}" is not known (HC is not known
   to be SERF-reducible to SAT).
+
+## N1: deciding HC (sparse graphs) in randomized 2^{o(n)} — paper proof (2026-10-27)
+Paper check of [CIKP08] Lemma 3 (ECCC TR06-062 / JCSS 74(3)): the proof never uses that S is the solution set of a
+k-CNF. Step I (k′-sparse hyperplanes, semi-isolated solutions, Hamming-ball count) and Step II (fix the coordinates where
+the two furthest surviving solutions differ) only use S ⊆ {0,1}^M nonempty. The k-CNF only makes the output a k′-CNF.
+So it isolates an element of ANY nonempty S with probability 2^{−O(h(ε))M}, using O(M) XORs of width k′ = O(ε⁻¹ ln ε⁻¹).
+
+Version for Lean (all probabilities = counts over a product Fintype Ω; parameters t, k, mm, r = ⌈M/t⌉):
+- Row = (Fin k → Fin M) × (Fin k → Bool): indices J (with repetition), coefficients C; rv ρ x = Σ_l [C_l ∧ x(J_l)] ∈ ZMod 2.
+  rv x + rv y = rv (x xor y). For |z| = w: #{ρ : rv ρ z = 0} = 2^{k−1}(M^k + (M−w)^k) (flip C at the first hit index:
+  involution), so Pr ≤ q := (1 + (1 − r/M)^k)/2 when w ≥ r.
+- ω = (m ∈ Fin (mm+1), rows : Fin mm → Row, B : Fin mm → Bool, U : Fin M → Fin t, V : Fin M → Bool).
+  H(ω) = {x : rv(row_i) x = B_i for i < m, and x_j = V_j wherever U_j = 0}.
+- Step I. x ∈ S′(rows) iff no y ∈ S with dist(x,y) ≥ r agrees with x on rows < m. Union bound: #{rows : x ∉ S′} ≤ |S| q^m
+  |Row|^{mm}. Take m minimal with |S| q^m ≤ 1/2 (m ≥ 1, m ≤ mm = 3M+3 as q ≤ 3/4); then |S|2^{−m} ≥ (1+η)^{−mm}/4,
+  η = (1 − r/M)^k ≤ e^{−kr/M}. Σ_{x∈S} #{(rows,B) : x ∈ S′, rows(x) = B} ≥ |S|·½·|Row|^{mm}·2^{mm−m}; for fixed (rows,B)
+  the semi-isolated x with rows(x)=B lie in one ball of radius r−1, volume V ≤ (eM/(r−1))^{r−1} (Σ_{i≤R} C(M,i)(R/M)^R ≤
+  (1+R/M)^M ≤ e^R). So #{(rows,B) : T := S ∩ {rows = B} has a semi-isolated point} ≥ |S|2^{−m}|Row|^{mm}2^{mm}/(2V);
+  such T is nonempty with diameter < 2r.
+- Step II. u, ū ∈ T furthest apart, C = diff(u, ū), |C| < 2r. If U_j = 0 for j ∈ C and V_j = u_j wherever U_j = 0,
+  then S ∩ H(ω) = {u} (w ≠ u agreeing with u on C has dist(w, ū) = |C| + dist(w,u) > |C|). Per coordinate: j ∈ C:
+  1 of 2t choices; j ∉ C: 2t−1 of 2t. Fraction ≥ (2t)^{−2r}(1 − 1/(2t))^M.
+- Total: Pr[|S ∩ H(ω)| = 1] ≥ 1/(mm+1) · e^{−η·mm}/(8V) · (2t)^{−2r}(1−1/(2t))^M = 2^{−(O(lg t / t) + O(e^{−k/t}))M}.
+  With k = t², width t², this is 2^{−δM} for t = t(δ).
+- Use: S = Hamiltonian cycles of G as edge sets (M = m edges). Cut & Count with the extra edge clauses: #SAT ≡ |S ∩ H(ω)|
+  (mod 2). An XOR row is a CNF on the same variables: one clause per violating σ ∈ {0,1}^k (inconsistent σ give
+  tautologies). Width max(3, t²), N = 5m + n + 2 variables. No HC ⇒ output 0 for every ω; HC ⇒ output 1 for ≥ 2^{−δm}
+  of the ω. For m ≤ D·n: one-sided-error HC decision in 2^{δn}·2^{o(n)} for every δ.
+- Formalization plan: (1) EthCor/Isolation.lean — the lemma above for arbitrary S (pure counting); (2) XOR rows as CNF +
+  Cut & Count with extra edge clauses (parity = |S ∩ H| mod 2); (3) the machine: input = code G ++ the seed, as in HamTM.
+
+### N1 progress (2026-10-27)
+
+Step (1) is done: `lean/EthCor/Isolation.lean` (pure counting) and `lean/EthCor/IsoBound.lean`
+(parameters). Main theorems:
+- `Iso.iso_count`: exact counting form, for every nonempty S and all r, mm, t;
+- `Iso.iso_real`: explicit bound with r = ⌊M/a⌋+1, k = ab, mm = 3M+3;
+- `Iso.isolation`: ∀ δ > 0, ∃ k t M₀, ∀ M ≥ M₀, ∀ S ≠ ∅: |Ω| ≤ 2^{δM}·#{ω : |S ∩ H ω| = 1}.
+
+Standard axioms only. Next is step (2): XOR rows as CNF clauses. A row's support is
+{j : Σ_{l : J l = j} C l odd}, of size ≤ k, so the row is 2^{|T|−1} clauses of width |T| on the edge
+variables. The fixings become unit clauses. Then Cut & Count gives #SAT ≡ |HC ∩ H ω| (mod 2).

@@ -5,17 +5,17 @@ import Wrap.CodingExists
 import CountKSat.Host
 import Consequences.Main
 
-/-! # CNF with up to n·2^{(lg n)^{1/7}} clauses, of any width: counting in time 2^{o(n)}
+/-! # CNF with up to n·2^{(lg n)^{1/4}/(lg lg n)²} clauses, of any width: counting in time 2^{o(n)}
 
 The machine `growM K` reads the code `SatFree.enc φ`, walks the tree of `EthCor.GrowTree.stepW`
-(width `wN (2n)` ≈ lg(2n)^{1/6}) from `rootX`, and at every leaf runs Anthropic's machine of the
+(width `wN (2n)` ≈ lg(2n)^{1/4}/lg lg(2n)) from `rootX`, and at every leaf runs Anthropic's machine of the
 Main Theorem on the compact code (`MainTheoremForms.MainTheoremCompact`), simulated step by step
 through a coding of its configurations (`Wrap.sim`). The sum of the leaf counts is written in
 binary; `CountKSat.stHostW` turns the whole computation into one Turing machine.
 
 `cnf_grow`: one Turing machine with finite alphabets, and for every δ > 0 an n₀, such that for
-every CNF φ on n ≥ n₀ variables with at most n·2^{(lg n)^{1/7}} clauses, none of which repeats a
-literal, it outputs the number of satisfying assignments of φ within ⌊2^{δn}⌋ steps. -/
+every CNF φ on n ≥ n₀ variables with at most n·2^{(lg n)^{1/4}/(lg lg n)²} clauses, none of which
+repeats a literal, it outputs the number of satisfying assignments of φ within ⌊2^{δn}⌋ steps. -/
 
 namespace EthCor.GrowTM
 
@@ -212,14 +212,15 @@ theorem grow_runs {C : ℕ} (hM : Compact M₀ C) (K : Wrap.Coding M₀) {n D : 
 
 /-! ### The theorem -/
 
-/-- **CNF with up to n·2^{(lg n)^{1/7}} clauses, of any width, counted in time 2^{o(n)}.** One
-Turing machine with finite alphabets: for every δ > 0 there is n₀ such that for every CNF φ on
-n ≥ n₀ variables with at most n·2^{(lg n)^{1/7}} clauses, none of which repeats a literal, started on
-the code of φ it halts within ⌊2^{δn}⌋ steps with the number of satisfying assignments of φ in
-binary. -/
+/-- **CNF with up to n·2^{(lg n)^{1/4}/(lg lg n)²} clauses, of any width, counted in time 2^{o(n)}.**
+One Turing machine with finite alphabets: for every δ > 0 there is n₀ such that for every CNF φ on
+n ≥ n₀ variables with at most n·2^{(lg n)^{1/4}/(lg lg n)²} clauses, none of which repeats a literal,
+started on the code of φ it halts within ⌊2^{δn}⌋ steps with the number of satisfying assignments
+of φ in binary. The density is above n·2^{(lg n)^{1/4−ε}} for every ε > 0 and large n. -/
 theorem cnf_grow : ∃ M : TM2ComputableAux Bool Bool, (∀ i, Finite (M.tm.Γ i)) ∧
     ∀ δ : ℝ, 0 < δ → ∃ n₀ : ℕ, ∀ (n : ℕ) (φ : Sat3.CNF n), n₀ ≤ n →
-      (φ.length : ℝ) ≤ n * (2 : ℝ) ^ (Real.logb 2 n ^ (1 / 7 : ℝ)) → (∀ C ∈ φ, C.Nodup) →
+      (φ.length : ℝ) ≤ n * (2 : ℝ) ^ (Real.logb 2 n ^ (1 / 4 : ℝ) / Real.logb 2 (Real.logb 2 n) ^ 2) →
+        (∀ C ∈ φ, C.Nodup) →
         Wrap.Outputs M (SatFree.enc φ) (Nat.bits (SatK.numSat φ)) ⌊(2 : ℝ) ^ (δ * n)⌋₊ := by
   obtain ⟨M₀, C, hfin, hM⟩ := EthCor.compact
   obtain ⟨K⟩ := Wrap.coding_exists M₀ hfin
@@ -234,17 +235,18 @@ theorem cnf_grow : ∃ M : TM2ComputableAux Bool Bool, (∀ i, Finite (M.tm.Γ i
   obtain ⟨n₂, hn₂⟩ := expN_small C hη0
   obtain ⟨n₃, hn₃⟩ := poly_le P hη0
   obtain ⟨n₄, hn₄⟩ := poly_le Q (show 0 < δ / 2 by positivity)
-  refine ⟨n₁ + n₂ + n₃ + n₄ + 2, fun n φ hn hm hnd => ?_⟩
+  refine ⟨n₁ + n₂ + n₃ + n₄ + 4, fun n φ hn hm hnd => ?_⟩
   have hn2 : 2 ≤ n := by omega
+  change (φ.length : ℝ) ≤ n * (2 : ℝ) ^ sN n at hm
   -- the density
-  obtain ⟨D, hD⟩ : ∃ D : ℕ, D = ⌈(2 : ℝ) ^ (Real.logb 2 n ^ (1 / 7 : ℝ))⌉₊ := ⟨_, rfl⟩
-  have hDn : D ≤ n := hD ▸ ceil_le_n hn2
-  have hDr : (D : ℝ) ≤ (2 : ℝ) ^ (Real.logb 2 n ^ (1 / 7 : ℝ)) + 1 := by
+  obtain ⟨D, hD⟩ : ∃ D : ℕ, D = ⌈(2 : ℝ) ^ sN n⌉₊ := ⟨_, rfl⟩
+  have hDn : D ≤ n := hD ▸ ceil_le_n (by omega)
+  have hDr : (D : ℝ) ≤ (2 : ℝ) ^ sN n + 1 := by
     rw [hD]; exact (Nat.ceil_lt_add_one (by positivity)).le
   have hmD : φ.length ≤ D * n := by
-    have h1 : (2 : ℝ) ^ (Real.logb 2 n ^ (1 / 7 : ℝ)) ≤ D := hD ▸ Nat.le_ceil _
+    have h1 : (2 : ℝ) ^ sN n ≤ D := hD ▸ Nat.le_ceil _
     have h2 : (φ.length : ℝ) ≤ D * n := by
-      calc (φ.length : ℝ) ≤ n * (2 : ℝ) ^ (Real.logb 2 n ^ (1 / 7 : ℝ)) := hm
+      calc (φ.length : ℝ) ≤ n * (2 : ℝ) ^ sN n := hm
         _ ≤ n * D := mul_le_mul_of_nonneg_left h1 (Nat.cast_nonneg n)
         _ = D * n := mul_comm _ _
     exact_mod_cast h2

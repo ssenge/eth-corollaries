@@ -43,9 +43,9 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 
 | # | Lean theorem | Statement | Novelty |
 |---|---|---|---|
-| A2 | `EthCor.colorings_subexp` (also `colorings_uniform`) | One machine counts the proper k-colorings of an n-vertex graph within 2^{εn} steps, for every ε > 0, n ≥ n₀(ε) and all k with lg k ≤ (lg n)^{1/7}. | direct corollary; the growing range of k is the new part |
+| A2 | `EthCor.colorings_subexp` (also `colorings_uniform`) | One machine counts the proper k-colorings of an n-vertex graph within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all k with lg k ≤ (lg n)^{1/6−θ}. | direct corollary; the growing range of k is the new part |
 | A1 | `EthCor.CnfTM.cnf_counts` | For every D and δ > 0, one machine counts the satisfying assignments of any CNF with ≤ D·n clauses of **any width** within C·2^{δn} steps. | known equivalence ([5] + ¬ETH); formalized |
-| A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/7}} clauses** of any width within 2^{δn} steps, for every δ > 0. | ours |
+| A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/4}/(lg lg n)²} clauses** of any width within 2^{δn} steps, for every δ > 0. This density exceeds n·2^{(lg n)^{1/4−ε}} for every ε > 0. | ours |
 | A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given t and a CNF with clauses of ≤ r literals and ≤ D·n clauses, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
 
@@ -57,15 +57,20 @@ degree 2. The "ours" entries are our derivations; we have not finished a literat
 
 - **A2, colorings.** Write each color in b = ⌈log₂ k⌉ bits. This gives a CNF on n·b + 4 variables
   of width 2b with exactly one satisfying assignment per proper coloring (`cntN_colB`). The uniform
-  bound C·k²·N·r(N) with k = 2b and N = n·b is o(n) as long as b ≤ 2(lg n)^{1/7}.
+  bound C·k²·N·r(N) with k = 2b, N = n·b and r(N) = lglg N/√lg N is O(n·(lg n)^{−2θ}) = o(n) when
+  b ≤ 2(lg n)^{1/6−θ}, because b³ ≤ 8(lg n)^{1/2−3θ} and lglg N ≤ (lg N)^θ/(θ ln 2). The method
+  stops at b³ ≈ √lg n/lglg n.
 - **A1, any width, constant density.** Literal (u, b) becomes variable 2u or 2u+1, plus pair
   clauses, so every clause is positive. Then Anthropic's shortening tree from their Dominating Set
   corollary (`stepD`) cuts clauses to width w, with a new invariant for M = D·n clauses (theirs
   needs M ≤ n). Their `SIZED` counter runs at the leaves, combined by `walkSum` and `tm_of_stepped`.
-- **A1′, growing density.** The same tree with width w ≈ lg(2n)^{1/6} read off the node. The leaves
-  are counted by Anthropic's uniform compact-code machine, simulated as a stepped machine. The
-  exponent C·w²·N·lglg N/√lg N is at most 328C·n·lg(2n)^{−11/84}. The number of leaves is
-  2^{(2/w)·lg(e·w·(D+2))·n}, and the coefficient goes to 0.
+- **A1′, growing density.** The same tree, with the width w read off the node. Let ℓ = ⌊lg 2n⌋ and
+  L = ⌊lg ℓ⌋; then w = 2^{⌊L/4⌋−⌊lg L⌋} + 1 ≈ ℓ^{1/4}/L. The leaves are counted by Anthropic's
+  uniform compact-code machine, simulated as a stepped machine. Since
+  w²·L² ≤ 16√ℓ, the exponent C·w²·N·lglg N/√lg N is at most 32C·N/L = o(n). The tree has
+  2^{(2/w)·lg(e·w·(D+2))·n} leaves for D·n clauses. With lg D ≤ (lg n)^{1/4}/(lglg n)² ≤ 4w/(L−1)
+  the coefficient is at most (8 + 6√w)/w + 8/(L−1), which goes to 0. The method itself stops at
+  density n·2^{o((lg n)^{1/4}/√lglg n)}.
 - **A4, Max-SAT spectrum.** Use 2n + m variables: x_u, ¬x_u, and y_j ↔ (clause j holds). Assignments
   with exactly n + t true variables correspond to assignments with exactly t satisfied clauses
   (`cntS_specF`, explicit bijection). They are counted by Anthropic's `SIZED` counter. This covers
@@ -110,7 +115,11 @@ lake env lean CheckAxioms.lean
   isolation methods all blow up the number of variables. The likely route is randomized, using the
   sparse-hash isolation lemma of [7].
 - **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
-  a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Next up.
+  a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
+- **Parity of Hamiltonian cycles beyond bounded degree:** next. Graphs with O(n) edges but unbounded
+  degree need sequential counters in place of the (Δ+3)-wide degree clauses. The same Cut & Count
+  argument should give the parity of other connected structures, such as Steiner trees and
+  connected vertex covers of a given size.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.

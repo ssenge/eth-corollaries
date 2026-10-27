@@ -62,7 +62,9 @@ Set Cover in (2−ε)^n (Set Cover conjecture); practical SAT speedups.
 Check with `cd lean && lake build && lake env lean CheckAxioms.lean`.
 - **A2 done.** `EthCor.colorings_uniform` (EthCor/ColorTM.lean): one TM counts the proper k-colorings of G for all
   2 ≤ k ≤ n, input `unary k ++ code G`, within c·2^{c·(2b)²·(nb)·r(nb)} steps, b = ⌈log₂k⌉, r(N) = lglg(N+4)/√lg(N+4).
-  `EthCor.colorings_subexp` (EthCor/ColorSubexp.lean): the same machine runs in 2^{εn} for every ε > 0, n ≥ n₀(ε), k ≤ 2^{(lg n)^{1/7}}.
+  `EthCor.colorings_subexp` (EthCor/ColorSubexp.lean): the same machine runs in 2^{εn} for every ε > 0 and 0 < θ < 1/6,
+  n ≥ n₀(θ, ε), lg k ≤ (lg n)^{1/6−θ} (first version: 1/7). Numbers: b ≤ 2(lg n)^{1/6−θ}, so (2b)²·nb ≤ 32·n·(lg n)^{1/2−3θ},
+  and r(N) ≤ lg(N+4)^{a−1/2}/(a·ln 2) for any a > 0 (`rate_le_rpow`, a = θ); the exponent is O(n·(lg n)^{−2θ}) (`boundNK_le`).
   Proof: binary color CNF (n·b+4 vars, width 2b) → Anthropic's compact-code machine, via `Wrap.everyMachineCanBeWrapped`.
 - A1 correction: width k = o((log n)^{1/4}/√loglog n) is already in Anthropic's remark after Thm D(b). Only the
   arbitrary-width / m ≤ n·2^{(log n)^{1/4−ε}} part (CIP06 branching + many machine calls) is new.
@@ -73,11 +75,18 @@ Check with `cd lean && lake build && lake env lean CheckAxioms.lean`.
   their `SIZED` counter at the leaves; `walkSum`; `tm_of_stepped`. Mathematically this is CIP06 + ¬ETH (known equivalence);
   the growing-density version is below.
 - **A1, growing density, done.** `EthCor.GrowTM.cnf_grow` (EthCor/GrowTree.lean, GrowArith.lean, GrowTM.lean): ONE TM; for every
-  δ > 0 there is n₀ such that for every CNF φ on n ≥ n₀ variables with m ≤ n·2^{(lg n)^{1/7}} clauses (any width, no repeated
-  literal) it outputs #SAT(φ) within ⌊2^{δn}⌋ steps. Proof: same tree with width w = 2^{⌊lglg(2n)/6⌋}+1 ≈ lg(2n)^{1/6} read off
+  δ > 0 there is n₀ such that for every CNF φ on n ≥ n₀ variables with m ≤ n·2^{(lg n)^{1/7}} clauses (first version; now
+  n·2^{(lg n)^{1/4}/(lglg n)²}, see below; any width, no repeated literal) it outputs #SAT(φ) within ⌊2^{δn}⌋ steps. Proof: same
+  tree with width w = 2^{⌊lglg(2n)/6⌋}+1 ≈ lg(2n)^{1/6} read off
   the node (`stepW`); leaves counted by Anthropic's uniform compact-code machine (`MainTheoremCompact`), simulated as a
   stepped machine via `Wrap.sim`/`coding_exists` (space linear in time); `CountKSat.stHostW` for the final TM.
   Numbers: C·w²·N·lglgN/√lgN ≤ 328C·n·lg(2n)^{−11/84}; leaves ≤ 2^{(2/w)lg(e·w·(D+2))·n} with (2/w)lg(...) ≤ 96·y^{1/7}/w → 0.
+  **Improved (S1):** density m ≤ n·2^{s}, s = (lg n)^{1/4}/(lg lg n)², so above n·2^{(lg n)^{1/4−ε}} for every ε. Width
+  w = 2^{⌊L/4⌋−⌊lg L⌋}+1 with ℓ = ⌊lg 2n⌋, L = ⌊lg ℓ⌋, q = ⌊lg L⌋ (`wN`), so (w−1)⁴·2^{4q} ≤ ℓ < 16(w−1)⁴·2^{4q}
+  (`wN_bounds`, needs L ≥ 16), w²L² ≤ 16√ℓ and ℓ < 16(w−1)⁴L⁴ (`wN_facts`). Exponent ≤ 32C·N/L (`expN_le`); s ≤ 4(w−1)/(L−1)
+  (`sN_le`); (2/w)lg(e·w·(D+2)) ≤ (2/w)(4 + 3√w + s) → 0 (`log_part`, `width_small`). The method's limit is
+  w = o((lg n)^{1/4}/√lglg n), i.e. density n·2^{o((lg n)^{1/4}/√lglg n)}; we give up a factor (lg lg n)^{3/2} for simpler
+  arithmetic.
 - **A4 (Max-SAT spectrum), done.** `EthCor.Spectrum.maxsat_spectrum` (EthCor/Spectrum.lean): for every width r, density D, δ > 0,
   one TM, input `unary t ++ SatFree.enc φ` (φ width ≤ r, ≤ D·n clauses, t ≤ m), outputs #{a : exactly t clauses true} in
   C·2^{δn}. Proof: 2n+m variables (x_u on 2u, ¬x_u on 2u+1 via pairF, y_j ↔ C_j on 2n+j); satisfying assignments with

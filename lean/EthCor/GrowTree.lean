@@ -5,7 +5,8 @@ import Mathlib.Tactic
 
 /-! # The shortening tree with a width that grows with the number of variables
 
-`stepW` is the step of `GraphProblems.stepD` with the width `wN N` = 2^{⌊lg lg N / 6⌋} + 1 read off
+`stepW` is the step of `GraphProblems.stepD` with the width `wN N` = 2^{⌊L/4⌋ − ⌊lg L⌋} + 1,
+L = ⌊lg ⌊lg N⌋⌋, about (lg N)^{1/4}/lg lg N, read off
 the node (N = its number of variables). A step of `stepD` keeps the first component of a node, so
 from a root on N variables `stepW` is `stepD (wN N)` on the whole tree (`leaves_stepW`,
 `round_stepW`). The step keeps the closed clauses, so the pair clauses of `rootX` are in every leaf
@@ -20,28 +21,43 @@ open Groundwork Groundwork.Prog Groundwork.Sparsify CountKSat GraphProblems EthC
 
 /-! ### The width -/
 
-/-- The width for N variables: 2^{⌊lg lg N / 6⌋} + 1. -/
-def wN (N : ℕ) : ℕ := 2 ^ (Nat.log2 (Nat.log2 N) / 6) + 1
+/-- The width for N variables: 2^{⌊L/4⌋ − ⌊lg L⌋} + 1 with L = ⌊lg ⌊lg N⌋⌋, about
+(lg N)^{1/4}/lg lg N. -/
+def wN (N : ℕ) : ℕ := 2 ^ (Nat.log2 (Nat.log2 N) / 4 - Nat.log2 (Nat.log2 (Nat.log2 N))) + 1
 
-/-- (w − 1)⁶ ≤ ⌊lg N⌋ < 64·(w − 1)⁶. -/
-theorem wN_bounds {N : ℕ} (hN : 2 ≤ N) : (wN N - 1) ^ 6 ≤ Nat.log2 N ∧ Nat.log2 N < 64 * (wN N - 1) ^ 6 := by
-  have hl : 1 ≤ Nat.log2 N := (Nat.le_log2 (by omega)).2 (by simpa using hN)
-  have h1 : 2 ^ Nat.log2 (Nat.log2 N) ≤ Nat.log2 N := Nat.log2_self_le (by omega)
-  have h2 : Nat.log2 N < 2 ^ (Nat.log2 (Nat.log2 N) + 1) := Nat.lt_log2_self
-  obtain ⟨a, ha⟩ : ∃ a, a = Nat.log2 (Nat.log2 N) := ⟨_, rfl⟩
-  rw [← ha] at h1 h2
-  have e : wN N - 1 = 2 ^ (a / 6) := by simp [wN, ← ha]
-  rw [e, ← pow_mul]
+theorem four_mul_le_two_pow {q : ℕ} (hq : 4 ≤ q) : 4 * q ≤ 2 ^ q := by
+  induction q, hq using Nat.le_induction with
+  | base => norm_num
+  | succ q hq ih => rw [pow_succ]; omega
+
+/-- With ℓ = ⌊lg N⌋, L = ⌊lg ℓ⌋ ≥ 16 and q = ⌊lg L⌋: (w − 1)⁴·2^{4q} ≤ ℓ < 16·(w − 1)⁴·2^{4q}. -/
+theorem wN_bounds {N : ℕ} (hL : 16 ≤ Nat.log2 (Nat.log2 N)) :
+    (wN N - 1) ^ 4 * 2 ^ (4 * Nat.log2 (Nat.log2 (Nat.log2 N))) ≤ Nat.log2 N ∧
+      Nat.log2 N < 16 * ((wN N - 1) ^ 4 * 2 ^ (4 * Nat.log2 (Nat.log2 (Nat.log2 N)))) := by
+  have e : wN N - 1 = 2 ^ (Nat.log2 (Nat.log2 N) / 4 - Nat.log2 (Nat.log2 (Nat.log2 N))) := by simp [wN]
+  rw [e]
+  generalize hℓ : Nat.log2 N = ℓ at hL ⊢
+  generalize hLd : Nat.log2 ℓ = L at hL ⊢
+  generalize hq : Nat.log2 L = q
+  have hℓ0 : ℓ ≠ 0 := by rintro rfl; simp at hLd; omega
+  have h1 : 2 ^ L ≤ ℓ := hLd ▸ Nat.log2_self_le hℓ0
+  have h2 : ℓ < 2 ^ (L + 1) := hLd ▸ Nat.lt_log2_self
+  have hqL : q ≤ L / 4 := by
+    have h3 : L < 2 ^ (L / 4 + 1) := lt_of_lt_of_le (by omega) (four_mul_le_two_pow (by omega))
+    have := (Nat.log2_lt (by omega)).2 h3
+    omega
+  rw [← pow_mul, ← pow_add]
   constructor
   · exact (Nat.pow_le_pow_right (by norm_num) (by omega)).trans h1
-  · calc Nat.log2 N < 2 ^ (a + 1) := h2
-      _ ≤ 2 ^ (6 + a / 6 * 6) := Nat.pow_le_pow_right (by norm_num) (by omega)
-      _ = 64 * 2 ^ (a / 6 * 6) := by rw [pow_add]; norm_num
+  · calc ℓ < 2 ^ (L + 1) := h2
+      _ ≤ 2 ^ (4 + ((L / 4 - q) * 4 + 4 * q)) := Nat.pow_le_pow_right (by norm_num) (by omega)
+      _ = 16 * 2 ^ ((L / 4 - q) * 4 + 4 * q) := by rw [pow_add]; norm_num
 
 theorem one_le_wN_sub (N : ℕ) : 1 ≤ wN N - 1 := by simp [wN]; exact Nat.one_le_two_pow
 
 theorem wN_le (N : ℕ) : wN N ≤ N + 2 := by
-  have h1 : 2 ^ (Nat.log2 (Nat.log2 N) / 6) ≤ 2 ^ Nat.log2 (Nat.log2 N) := Nat.pow_le_pow_right (by norm_num) (Nat.div_le_self _ _)
+  have h1 : 2 ^ (Nat.log2 (Nat.log2 N) / 4 - Nat.log2 (Nat.log2 (Nat.log2 N))) ≤ 2 ^ Nat.log2 (Nat.log2 N) :=
+    Nat.pow_le_pow_right (by norm_num) (by omega)
   have h2 : 2 ^ Nat.log2 (Nat.log2 N) ≤ Nat.log2 N ∨ Nat.log2 N = 0 := by
     by_cases h : Nat.log2 N = 0
     · exact Or.inr h
@@ -57,11 +73,12 @@ section Poly
 variable {α : Type} [Enc α]
 
 theorem wN_polyT {f : α → ℕ} (hf : Unary f) : Unary fun a => wN (f a) := by
-  have he : Unary fun a => Nat.log2 (Nat.log2 (f a)) / 6 :=
+  have he : Unary fun a => Nat.log2 (Nat.log2 (f a)) / 4 - Nat.log2 (Nat.log2 (Nat.log2 (f a))) :=
     Unary.of_le hf (by have := hf.poly; fun_prop) fun a => by
-      have := Nat.log2_le_self (Nat.log2 (f a)); have := Nat.log2_le_self (f a); have := Nat.div_le_self (Nat.log2 (Nat.log2 (f a))) 6
+      have := Nat.log2_le_self (Nat.log2 (f a)); have := Nat.log2_le_self (f a)
       omega
-  have hp : PolyT fun a => 2 ^ (Nat.log2 (Nat.log2 (f a)) / 6) := PolyT.pow_unary (PolyT.const 2) he
+  have hp : PolyT fun a => 2 ^ (Nat.log2 (Nat.log2 (f a)) / 4 - Nat.log2 (Nat.log2 (Nat.log2 (f a)))) :=
+    PolyT.pow_unary (PolyT.const 2) he
   exact Unary.of_le (hf.add (Unary.const 2)) (by unfold wN; fun_prop) fun a => wN_le (f a)
 
 end Poly

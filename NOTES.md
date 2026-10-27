@@ -210,3 +210,13 @@ N2′ is done (2026-10-27): `lean/EthCor/ConnIso.lean` and `ConnIsoTM.lean`.
 - `conn_randomized`: ∀ r D δ ε, ∃ k t n₀ M C. The machine runs within C·2^{εn}; the bit is 0 for
   every seed when no solution exists, and |Seed| ≤ 2^{δn}·#{ω : out ω} when one does. SIZED(r+4)
   with δ' = ε/(2(12k+4)) works because N ≤ (12k+4)n.
+
+S3 is done (2026-10-27): `lean/EthCor/HamMathlib.lean`.
+- `numHamCycles_pos_iff` (n ≠ 1): 0 < numHamCycles G ⟺ G.IsHamiltonian (Mathlib). The ⇒ direction
+  uses `IsCycles.exists_cycle_toSubgraph_verts_eq_connectedComponentSupp`: a connected 2-regular H is
+  one cycle through all vertices (`exists_cycle_of_two`), then map it into G by `Hom.ofLE`. The ⇐
+  direction takes `p.toSubgraph.spanningCoe` (`two_of_cycle`).
+- `numHamCycles_eq`: numHamCycles G = #{edge sets of walks p with p.IsHamiltonianCycle}, by
+  `card_bij` with H ↦ H.edgeFinset (injective by `edgeFinset_inj`).
+- `ham_randomized_mathlib`: A5b with ¬G.IsHamiltonian / G.IsHamiltonian in place of the count
+  (n₀ + 2 so that n ≠ 1).

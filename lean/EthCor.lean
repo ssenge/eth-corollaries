@@ -20,3 +20,4 @@ import EthCor.ConnFormula
 import EthCor.ConnTM
 import EthCor.ConnIso
 import EthCor.ConnIsoTM
+import EthCor.HamMathlib

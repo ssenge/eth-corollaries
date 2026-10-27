@@ -51,7 +51,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
-| A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. | ours |
+| A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -65,7 +65,10 @@ Valiant–Vazirani hashing does not.
 
 `cnf_counts` and `cnf_grow` assume that no clause repeats a literal. In A2, k ≥ 2. The number of
 Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgraphs H ≤ G with every
-degree 2. The "ours" entries are our derivations; we have not finished a literature check.
+degree 2. This agrees with Mathlib. For n ≠ 1, `0 < numHamCycles G` if and only if
+`G.IsHamiltonian` (`EthCor.Ham.numHamCycles_pos_iff`). And `numHamCycles G` is the number of edge
+sets of walks in G with Mathlib's `IsHamiltonianCycle` (`EthCor.Ham.numHamCycles_eq`), so each
+Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are our derivations; we have not finished a literature check.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
 edges. In N2′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
@@ -172,7 +175,8 @@ lake env lean CheckAxioms.lean
 - The 2^{o(n)} algorithm is itself a Lean theorem in the dependency. These results are therefore not
   conditional on an unproved hypothesis. They are as sound as Anthropic's formalization.
 - Lean cannot tell whether a formal statement means what it should. Read the theorem statements and
-  the definitions they use by hand. Ours: `numHamCycles`, `spectrum`, `Seed`, the input codes
+  the definitions they use by hand. Ours: `numHamCycles` (proved equal to Mathlib's count, see
+  above), `spectrum`, `Seed`, the input codes
   (including `seedCode`). Anthropic's:
   the TM2 machine model and their statement files. Nobody has reviewed Anthropic's statements by
   hand yet.
@@ -186,7 +190,9 @@ lake env lean CheckAxioms.lean
   a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
 - **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
   a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
-  the domination clauses have width Δ + 1. Next on the plan: S3, N3 (Potts/Tutte), then A3.
+  the domination clauses have width Δ + 1.
+- **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
+  `IsHamiltonianCycle` (see the notes under the table). Next on the plan: N3 (Potts/Tutte), then A3.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.
@@ -211,6 +217,7 @@ lean/
     Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b)
     HamIso                                checks as clauses, one-sided-error parity (A5b)
     HamIsoTM                              seed code, the machine, ham_randomized (A5b)
+    HamMathlib                            numHamCycles vs Mathlib's IsHamiltonian (S3)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```

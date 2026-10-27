@@ -22,3 +22,6 @@ import EthCor
 #print axioms EthCor.ConnI.ci_parity
 #print axioms EthCor.ConnI.ci_decide
 #print axioms EthCor.ConnITM.conn_randomized
+#print axioms EthCor.Ham.numHamCycles_pos_iff
+#print axioms EthCor.Ham.numHamCycles_eq
+#print axioms EthCor.HamITM.ham_randomized_mathlib

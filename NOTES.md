@@ -350,3 +350,8 @@ Literature search (2026-10-28), labels updated in README ("Related and concurren
   A3 (IPZ01 Thm 5 + kernel), A3′ (Ganian–de Haan–Kanj–Szeider MFCS 2016).
 - Not found: A1′, A2 growing k, N5, A4 spectrum, N3, N6′, N2, N2′. Connectivity was open in this
   direction (IPZ01: HC only SNP-hard; Ganian et al.: FVS → 3-SAT open).
+- Rebuilt (2026-10-28, 16:12–17:00): Tulsyan's repo at ae323a3 on an APFS clone of our built lean/ tree
+  (same Anthropic rev 16a5ce4, Lean v4.33.1) plus his bridge sources. 25 modules, one at a time,
+  all built. `#print axioms` of `EthFollowup.ExactHC.theorem1` and `theorem2`: [propext,
+  Classical.choice, Quot.sound]. `hamCycles G` = 2-regular spanning edge sets of G that are connected,
+  the same as our `numHamCycles`.

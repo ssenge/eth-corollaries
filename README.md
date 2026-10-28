@@ -238,8 +238,12 @@ published anything yet.
   identity, not the CNF counter. An exact count gives parity and a deterministic decision, so it
   subsumes A5a, A5a′ and A5b. Our A5a and A5b were pushed earlier (27 October, 12:20 and
   19:33 UTC), but his result is stronger. He also formalizes the isolation lemma for arbitrary sets,
-  and sketches, without proof, Steiner tree and feedback vertex set on sparse graphs. We have read
-  his Lean statements; we have not rebuilt his development.
+  and sketches, without proof, Steiner tree and feedback vertex set on sparse graphs. We rebuilt
+  `theorem1` and `theorem2` from his repository (commit ae323a3) on our copy of Anthropic's
+  development (same revision, 16a5ce4). Both compile and depend only on `propext`,
+  `Classical.choice` and `Quot.sound`. His `hamCycles G` is the set of edge sets of G in which every
+  vertex meets exactly two edges and which form a connected graph, the same quantity as our
+  `numHamCycles G`. We have not reviewed his proofs beyond that.
 - **The two papers themselves** list corollaries. OpenAI [1, Cor. 1.3] counts independent sets and,
   for each fixed q, proper q-colorings in 2^{o(v)}, and perfect matchings in 2^{o(v+e)}; this
   covers N6. Anthropic [2, Cor. 7] counts independent sets, cliques, vertex covers and dominating

@@ -33,3 +33,4 @@ import EthCor.Perm
 import EthCor.PermTM
 import EthCor.SignedPerm
 import EthCor.SignedPermTM
+import EthCor.Special

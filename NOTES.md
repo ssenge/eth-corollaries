@@ -306,3 +306,15 @@ Python reference implementations (2026-10-28): `python/ethcor/`, one module per 
 clause for clause as in Lean, counters replaced by an exact DPLL weight-enumerator counter; 51 tests
 against brute force (`cd python && python3 -m pytest -q`). Not mirrored: the compact code `encK`
 handed to the Main Theorem's machine (Python passes the formula itself).
+
+Special cases formalized (2026-10-28): `lean/EthCor/Special.lean`.
+- `numHom_hInd`: hom(G, hInd) = #{S | G.IsIndepSet S} (hInd false only at (1,1)); `indep_subexp` from
+  `hom_subexp` at h = 2, θ = 1/12 (lg 2 = 1 ≤ (lg n)^{1/12} for n ≥ 2).
+- `cutSize`, `ind S`, `diag_iff_not_cut`, `cut_add_mono` (cut + mono = m); `pottsSpec_two`: N_j for q = 2
+  = #{S | cut S + j = m}; `maxcut_spectrum` from `potts_spectrum 2 D`. `spin`, `spinProd` (Sym2.lift),
+  `isingSum`; `isingSum_eq`: Σ s_u s_v = 2·mono − m; `ising_spectrum`.
+- `pottsSpec_zero`: N₀ = Anthropic's `numColorings` = Nat.card (G.Coloring (Fin q)); `chromatic_tutte`
+  (x = 1−q, y = 0 in ℚ), `flow_tutte` (x = 0, y = 1−q). Flow polynomial = ±T(0, 1−q) is Tutte's
+  theorem, cited, not formalized.
+- Lean notes: `tutte` clashes with `SimpleGraph.tutte` (write `Potts.tutte`, and ascribe ℚ to the
+  arguments); `Set.mem_setOf_eq` → `Set.mem_ofPred_eq`, `Sym2.map_pair_eq` → `Sym2.map_mk`.

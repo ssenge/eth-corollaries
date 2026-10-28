@@ -52,3 +52,11 @@ import EthCor
 #print axioms EthCor.SPerm.cnt_sperm
 #print axioms EthCor.SPerm.permanent_signed
 #print axioms EthCor.SPermTM.sperm_fpt
+#print axioms EthCor.Special.numHom_hInd
+#print axioms EthCor.Special.indep_subexp
+#print axioms EthCor.Special.pottsSpec_two
+#print axioms EthCor.Special.maxcut_spectrum
+#print axioms EthCor.Special.ising_spectrum
+#print axioms EthCor.Special.pottsSpec_zero
+#print axioms EthCor.Special.chromatic_tutte
+#print axioms EthCor.Special.flow_tutte

@@ -64,3 +64,4 @@ import EthCor
 #print axioms EthCor.Amplify.amplify_sq
 #print axioms EthCor.Amplify.ham_amplified
 #print axioms EthCor.Amplify.conn_amplified
+#print axioms EthCor.HamO.hc_parity_little_o

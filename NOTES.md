@@ -326,3 +326,10 @@ Amplification formalized (2026-10-28): `lean/EthCor/Amplify.lean`.
   seeds. The amplified algorithm is R runs of the same machine; no single TM looping over the seeds
   is built (A5b's machine is Anthropic's TM2 counter inside `Wrap.everyMachineCanBeWrapped`, which
   has no loop combinator).
+
+A5a′ for m = o(n·√lg n/lglg n) (2026-10-28): `lean/EthCor/HamLittleO.lean`.
+- `hc_parity_little_o`: the machine of `hcS_tm`, for every g with g(n)·r(n) → 0, r(n) = `SatK.rN 1 (1/2) n`
+  = lglg(n+4)/√lg(n+4), and every ε > 0: n₀ with 2^{εn} steps on graphs with |E| ≤ n·g(n).
+- `rate_three`: n ≤ N, N + 4 ≤ (n+4)³ → r(N) ≤ 3·r(n) (lg(N+4) ≤ 3 lg(n+4), lg 3 ≤ 2, lglg(n+4) ≥ 1).
+  `rate_tendsto` from `rate_le_rpow (1/4)`. `boundO_le`: c·2^{9c·N·r(N)} ≤ 2^{εn} for
+  N ≤ 5n·g(n) + n + 2, via N·r(N) ≤ 18ηn + 6η, η = ε/(4(162c + 1)).

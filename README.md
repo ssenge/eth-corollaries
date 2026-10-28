@@ -55,7 +55,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/4}/(lg lg n)²} clauses** of any width within 2^{δn} steps, for every δ > 0. This density exceeds n·2^{(lg n)^{1/4−ε}} for every ε > 0. | ours |
 | A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given a CNF with m ≤ D·n clauses of ≤ r literals and t ≤ m, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
 | A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
-| A5a′ | `EthCor.HamSTM.hc_parity_sparse` (also `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(θ, ε) vertices with **at most n·(lg n)^{1/2−θ} edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every θ, ε > 0. As a consequence, a single machine handles every degree bound Δ (`hc_parity_bounded`). | ours |
+| A5a′ | `EthCor.HamO.hc_parity_little_o` (also `HamSTM.hc_parity_sparse`, `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(g, ε) vertices with **at most n·g(n) edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every ε > 0 and every g with g(n)·lglg n/√lg n → 0, i.e. for **m = o(n·√lg n/lglg n)** edges. Special cases: m ≤ n·(lg n)^{1/2−θ} (`hc_parity_sparse`) and every degree bound Δ (`hc_parity_bounded`). | ours |
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
@@ -177,8 +177,10 @@ R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, from the count
   gets two bits, "one edge at this end chosen so far" and "two chosen so far". Clauses of width ≤ 3
   fix these bits from the edge bits (`auxOK_iff`) and forbid a third edge. The formula has
   N = 5m + n + 2 variables, width 3, and as many satisfying assignments as before (`cntN_hcS`).
-  Anthropic's bound c·2^{9c·N·lglg N/√lg N} is then 2^{o(n)} whenever m = o(n·√lg n/lglg n).
-  We prove the case m ≤ n·(lg n)^{1/2−θ}.
+  Anthropic's bound c·2^{9c·N·lglg N/√lg N} is then 2^{o(n)} whenever m = o(n·√lg n/lglg n)
+  (`hc_parity_little_o`). Since m ≤ n², N + 4 ≤ (n + 4)³, and then r(N) ≤ 3·r(n) for the rate
+  r(n) = lglg(n+4)/√lg(n+4) (`rate_three`), so the exponent is at most 27c·(5n·g(n) + n + 2)·r(n),
+  which is below εn/2 for large n since g(n)·r(n) → 0 and r(n) → 0 (`boundO_le`).
 - **N2, connected solutions.** Cut & Count on vertex sets. The variables are a vertex bit x_v, a
   side bit s_v and its complement s̄_v. The clauses are those of φ, then s̄_v = ¬s_v, s_v = 0 outside
   X, and s_u = s_v on every edge inside X (width ≤ max(r, 4)). Each complementary pair has exactly
@@ -393,7 +395,8 @@ HC_PARITY(G on n vertices, edges e_0 … e_{m−1}):
 
 A 2-factor with c cycles has 2^{c−1} side maps, which is odd exactly for c = 1. Lean:
 `Ham.inc`, `atMost2`, `atLeast2`, `edgeC`, `tautC`, `hcF`, `hc_parity`, `HamTM.formH`, `postH`,
-`hc_parity_tm`; `HamS.stepC`, `cntC`, `hcS`, `cntN_hcS`, `HamSTM.hcS_tm`, `hc_parity_sparse`.
+`hc_parity_tm`; `HamS.stepC`, `cntC`, `hcS`, `cntN_hcS`, `HamSTM.hcS_tm`, `hc_parity_sparse`,
+`HamO.hc_parity_little_o`.
 Python: `hamcycle.hcF`, `hc_parity`, `hcS`, `hc_parity_sparse`.
 
 ### A5b: Hamiltonian cycle with one-sided error
@@ -534,6 +537,7 @@ lean/
     Spectrum                              A4
     HamFormula, HamTM                     A5a
     HamCounter, HamSparseTM               A5a′
+    HamLittleO                            A5a′ for m = o(n·√lg n/lglg n) edges
     Isolation, IsoBound                   isolation lemma for arbitrary sets (A5b)
     HamIso                                checks as clauses, one-sided-error parity (A5b)
     HamIsoTM                              seed code, the machine, ham_randomized (A5b)

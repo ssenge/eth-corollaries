@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from .cnf import Fml, count
 from .graphs import Matrix, adjB, code, matrix, pairs, unary
-from .lists import log2, ones, rest, test_bit
+from .lists import dedup, log2, ones, rest, test_bit
 
 
 def nb(k: int) -> int:
@@ -80,3 +80,18 @@ def hom_word(x: list[bool]) -> int:
 def num_hom(adj: Matrix, H: Matrix) -> int:
     """The number of maps f : V(G) → [h] with H(f(u), f(v)) for every edge uv, by the algorithm."""
     return hom_word(unary(len(H)) + matrix(H) + code(adj))
+
+
+def formOf(x: list[bool]) -> Fml:
+    """The formula the front end `preC` writes on unary k ++ code G (Lean: `EthCor.formOf`)."""
+    k = ones(x)
+    g = rest(x)
+    return dedup(colB(k, ones(g), rest(g)))
+
+
+def formHom(x: list[bool]) -> Fml:
+    """The formula on unary h ++ hmat H ++ code G (Lean: `EthCor.Hom.formHom`)."""
+    h = ones(x)
+    r = rest(x)
+    g = r[h * h:]
+    return dedup(homB(h, ones(g), r[: h * h], rest(g)))

@@ -100,3 +100,25 @@ def num_parity(A: Matrix, Sg: Matrix, b: bool) -> int:
 def permanent_signed(A: Matrix, Sg: Matrix) -> int:
     """The permanent of the matrix with entries −1 (A and Sg), 1 (A, not Sg) and 0 (not A)."""
     return num_parity(A, Sg, False) - num_parity(A, Sg, True)
+
+
+def leafP(x: list[bool]) -> tuple[int, int, Fml]:
+    """The counter's input on unary n ++ hmat A (Lean: `EthCor.PermTM.leafP`)."""
+    n = ones(x)
+    E = ents(n, rest(x))
+    if n <= len(E):
+        return len(E), n, permF(E)
+    return 0, 0, [[]]
+
+
+def leafS(x: list[bool]) -> tuple[int, int, Fml]:
+    """The counter's input on b :: (unary n ++ hmat A ++ hmat S) (Lean: `EthCor.SPermTM.leafS`)."""
+    b = x[0] if x else False
+    y = list(x[1:])
+    n = ones(y)
+    r = rest(y)
+    E = ents(n, r[: n * n])
+    g = negs(n, r[n * n:], E)
+    if n <= len(E):
+        return len(E) + 1 + len(g) + len(g), n + len(g), sF(E, g, b)
+    return 0, 0, [[]]

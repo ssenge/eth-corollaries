@@ -333,3 +333,8 @@ A5a′ for m = o(n·√lg n/lglg n) (2026-10-28): `lean/EthCor/HamLittleO.lean`.
 - `rate_three`: n ≤ N, N + 4 ≤ (n+4)³ → r(N) ≤ 3·r(n) (lg(N+4) ≤ 3 lg(n+4), lg 3 ≤ 2, lglg(n+4) ≥ 1).
   `rate_tendsto` from `rate_le_rpow (1/4)`. `boundO_le`: c·2^{9c·N·r(N)} ≤ 2^{εn} for
   N ≤ 5n·g(n) + n + 2, via N·r(N) ≤ 18ηn + 6η, η = ε/(4(162c + 1)).
+
+Lean-vs-Python agreement (2026-10-28): `lean/Dump.lean` reads `name arg bits` lines and prints the Lean
+front end's output as JSON; `python/tests/test_lean_agreement.py` sends 92 random words (16 front ends)
+in one `lake env lean --run Dump.lean` call and compares clause for clause. All agree. Found on the
+way: Python's `dedup` needed a hashable key for clauses (lists).

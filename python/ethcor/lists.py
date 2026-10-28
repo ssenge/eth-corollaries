@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from typing import Hashable, Sequence, TypeVar
 
-T = TypeVar("T", bound=Hashable)
+T = TypeVar("T")
+
+
+def _key(a: object) -> Hashable:
+    """A hashable stand-in for a, with lists turned into tuples (clauses are lists of literals)."""
+    return tuple(_key(b) for b in a) if isinstance(a, list) else a  # type: ignore[return-value]
 
 
 def dedup(l: Sequence[T]) -> list[T]:
@@ -12,8 +17,9 @@ def dedup(l: Sequence[T]) -> list[T]:
     seen: set = set()
     out: list[T] = []
     for a in reversed(l):
-        if a not in seen:
-            seen.add(a)
+        k = _key(a)
+        if k not in seen:
+            seen.add(k)
             out.append(a)
     out.reverse()
     return out

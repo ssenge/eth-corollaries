@@ -453,7 +453,8 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 51 tests: every algorithm against brute force on small inputs
+python3 -m pytest -q                  # 52 tests: every algorithm against brute force on small inputs,
+                                      # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
 ```
@@ -462,6 +463,14 @@ The tests compare each algorithm with a direct enumeration of the quantity in th
 (colorings, homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles,
 connected vertex sets). They also check the shape bounds the Lean proofs use (width, number of
 variables and clauses), and the one-sided error of A5b and N2′ over random seeds.
+
+`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 92
+random input words to [`lean/Dump.lean`](lean/Dump.lean), which evaluates the Lean definitions
+(`formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`, `SPermTM.leafS`,
+`HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`, `NbTM.preN`,
+and the leaves of the trees of A1, A1′ and A3), and compares the formulas clause for clause. It
+needs the built Lean development (`cd lean && lake build`, about 1 minute per run of the test) and is
+skipped if `lake` is not on the PATH or `ETHCOR_SKIP_LEAN` is set.
 
 ## Checking the proofs
 
@@ -527,6 +536,7 @@ NOTES.md             deep dive on both papers, ten candidate problems, research 
 lean/
   lakefile.toml      pins Anthropic's formal-math `eth` development
   CheckAxioms.lean   prints the axioms of the main theorems
+  Dump.lean          evaluates the Lean front ends on input words (for the Python agreement test)
   EthCor.lean        imports everything
   EthCor/
     TimeArith.lean                        shared time-bound arithmetic
@@ -562,7 +572,8 @@ python/              reference implementations of all algorithms (see "Running t
     permanent.py     N6, N6′           vertex_cover.py   A3
     nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
     isolation.py     seeds, isolation  connected.py      N2, N2′
-  tests/             one test file per module, against brute force
+  tests/             one test file per module, against brute force; test_lean_agreement.py
+                     against the Lean front ends (via lean/Dump.lean)
 ```
 
 ## Use of AI

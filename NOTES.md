@@ -338,3 +338,15 @@ Lean-vs-Python agreement (2026-10-28): `lean/Dump.lean` reads `name arg bits` li
 front end's output as JSON; `python/tests/test_lean_agreement.py` sends 92 random words (16 front ends)
 in one `lake env lean --run Dump.lean` call and compares clause for clause. All agree. Found on the
 way: Python's `dedup` needed a hashable key for clauses (lists).
+
+Literature search (2026-10-28), labels updated in README ("Related and concurrent work") and paper:
+- Tulsyan, github.com/xennygrimmato/eth-hamiltonicity (repo created 27 Oct 22:13 UTC): unconditional
+  Lean `EthFollowup.ExactHC.theorem1` (exact #HC, |E| ≤ Dn, C·2^{δn}) and `theorem2` (one TM,
+  C·2^{C(m+n)/√lg(n+2)}), via Anthropic's network machinery + matrix-tree identity. Supersedes A5a,
+  A5a′, A5b. Statements read, development not rebuilt.
+- OpenAI Cor. 1.3 (#indep. sets, #q-colorings fixed q, #perfect matchings in 2^{o(v+e)}: covers N6);
+  Anthropic Cor. 7 (sized counts of indep. sets, cliques, VCs, dominating sets; fixed-k colorings).
+- Decision forms known: A1 (CIP06; Calabro thesis Lemma 10.12), A4 maximum (JLSU14 Thm 8),
+  A3 (IPZ01 Thm 5 + kernel), A3′ (Ganian–de Haan–Kanj–Szeider MFCS 2016).
+- Not found: A1′, A2 growing k, N5, A4 spectrum, N3, N6′, N2, N2′. Connectivity was open in this
+  direction (IPZ01: HC only SNP-hard; Ganian et al.: FVS → 3-SAT open).

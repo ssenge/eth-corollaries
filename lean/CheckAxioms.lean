@@ -49,3 +49,6 @@ import EthCor
 #print axioms EthCor.Perm.cntS_permF
 #print axioms EthCor.Perm.permanent_eq
 #print axioms EthCor.PermTM.perm_fpt
+#print axioms EthCor.SPerm.cnt_sperm
+#print axioms EthCor.SPerm.permanent_signed
+#print axioms EthCor.SPermTM.sperm_fpt

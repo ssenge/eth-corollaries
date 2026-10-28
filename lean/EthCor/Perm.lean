@@ -142,60 +142,80 @@ theorem asg_mem (σ : Equiv.Perm (Fin n)) (hσ : ∀ i, A (σ i) i = true) :
         exact ⟨t, by simp [asg, h1, h2], h2⟩
     rw [this, card_univ, Fintype.card_fin]
 
+theorem asg_inj {σ τ : Equiv.Perm (Fin n)} (hσ : ∀ i, A (σ i) i = true) (h : asg A σ = asg A τ) : σ = τ := by
+  ext j
+  obtain ⟨t, h1, h2⟩ := exists_idx A (hσ j)
+  have e : asg A σ t = asg A τ t := congrFun h t
+  have e1 : asg A σ t = true := by simp [asg, h1, h2]
+  rw [e1] at e
+  have e2 : row A t = τ (col A t) := of_decide_eq_true e.symm
+  rw [h1, h2] at e2
+  exact congrArg Fin.val e2
+
+theorem asg_surj {a : Fin (ents n (Hom.hmat A)).length → Bool}
+    (hsat : ∀ C ∈ permF (ents n (Hom.hmat A)), ∃ l ∈ C, ext a l.1 = l.2)
+    (hcard : (univ.filter fun t => a t = true).card = n) :
+    ∃ σ : Equiv.Perm (Fin n), (∀ i, A (σ i) i = true) ∧ asg A σ = a := by
+  have hno := (sat_permF _ _).1 hsat
+  -- the chosen entries have distinct columns, so every column has one
+  have hinj : ∀ s t, a s = true → a t = true → col A s = col A t → s = t := by
+    intro s t hs ht h
+    by_contra hst
+    have := hno s t hst hs ht
+    rw [clash_eq, h] at this
+    simp at this
+  have hsurj := surj_on_of_inj_on_of_card_le (s := univ.filter fun t => a t = true) (t := (univ : Finset (Fin n)))
+    (fun t _ => col A t) (fun _ _ => mem_univ _)
+    (fun s t hs ht h => hinj s t (mem_filter.1 hs).2 (mem_filter.1 ht).2 h)
+    (by rw [card_univ, Fintype.card_fin, hcard])
+  choose tc htc using fun j : Fin n => hsurj j (mem_univ _)
+  have hta : ∀ j, a (tc j) = true := fun j => (mem_filter.1 (htc j).1).2
+  have hcol : ∀ j, col A (tc j) = j := fun j => (htc j).2.symm
+  have hfinj : Function.Injective fun j => row A (tc j) := by
+    intro j j' h
+    have e : tc j = tc j' := by
+      by_contra hne
+      have := hno _ _ hne (hta j) (hta j')
+      rw [clash_eq] at this
+      simp only [h, decide_true, Bool.true_or] at this
+      exact absurd this (by decide)
+    rw [← hcol j, ← hcol j', e]
+  let σ := Equiv.ofBijective _ (Finite.injective_iff_bijective.1 hfinj)
+  have hσ : ∀ j, σ j = row A (tc j) := fun j => rfl
+  refine ⟨σ, fun j => ?_, ?_⟩
+  · rw [hσ, ← entry_true A (tc j), hcol]
+  · funext t
+    simp only [asg, hσ]
+    by_cases ht : a t = true
+    · rw [ht, decide_eq_true_iff, hinj _ _ (hta (col A t)) ht (hcol _)]
+    · rw [Bool.not_eq_true] at ht
+      rw [ht, decide_eq_false_iff_not]
+      intro h
+      have e := idx_eq A h.symm (hcol (col A t))
+      rw [← e, hta] at ht
+      exact absurd ht (by decide)
+
+/-- The solutions with n true variables that have a property Q are as many as the permutations along
+ones whose assignment has it. -/
+theorem card_asg (Q : (Fin (ents n (Hom.hmat A)).length → Bool) → Prop) [DecidablePred Q] :
+    (univ.filter fun a : Fin (ents n (Hom.hmat A)).length → Bool =>
+      ((∀ C ∈ permF (ents n (Hom.hmat A)), ∃ l ∈ C, ext a l.1 = l.2) ∧
+        (univ.filter fun i => a i = true).card = n) ∧ Q a).card =
+      (univ.filter fun σ : Equiv.Perm (Fin n) => (∀ i, A (σ i) i = true) ∧ Q (asg A σ)).card := by
+  symm
+  refine card_bij (fun σ _ => asg A σ) (fun σ hσ => ?_) (fun σ hσ τ hτ h => ?_) (fun a ha => ?_)
+  · obtain ⟨h1, h2⟩ := (mem_filter.1 hσ).2
+    exact mem_filter.2 ⟨mem_univ _, asg_mem A σ h1, h2⟩
+  · exact asg_inj A (mem_filter.1 hσ).2.1 h
+  · obtain ⟨⟨hsat, hcard⟩, hQ⟩ := (mem_filter.1 ha).2
+    obtain ⟨σ, hσ, rfl⟩ := asg_surj A hsat hcard
+    exact ⟨σ, mem_filter.2 ⟨mem_univ _, hσ, hQ⟩, rfl⟩
+
 /-- **The count is the number of permutations with A (σ i) i for all i.** -/
 theorem cntS_permF : cntS (ents n (Hom.hmat A)).length n (permF (ents n (Hom.hmat A))) = (univ.filter fun σ : Equiv.Perm (Fin n) => ∀ i, A (σ i) i = true).card := by
-  classical
-  symm
-  unfold cntS
-  refine card_bij (fun σ _ => asg A σ) (fun σ hσ => ?_) (fun σ hσ τ hτ h => ?_) (fun a ha => ?_)
-  · exact mem_filter.2 ⟨mem_univ _, asg_mem A σ (mem_filter.1 hσ).2⟩
-  · ext j
-    obtain ⟨t, h1, h2⟩ := exists_idx A ((mem_filter.1 hσ).2 j)
-    have e : asg A σ t = asg A τ t := congrFun h t
-    have e1 : asg A σ t = true := by simp [asg, h1, h2]
-    rw [e1] at e
-    have e2 : row A t = τ (col A t) := of_decide_eq_true e.symm
-    rw [h1, h2] at e2
-    exact congrArg Fin.val e2
-  · obtain ⟨hsat, hcard⟩ := (mem_filter.1 ha).2
-    have hno := (sat_permF _ _).1 hsat
-    -- the chosen entries have distinct columns, so every column has one
-    have hinj : ∀ s t, a s = true → a t = true → col A s = col A t → s = t := by
-      intro s t hs ht h
-      by_contra hst
-      have := hno s t hst hs ht
-      rw [clash_eq, h] at this
-      simp at this
-    have hsurj := surj_on_of_inj_on_of_card_le (s := univ.filter fun t => a t = true) (t := (univ : Finset (Fin n)))
-      (fun t _ => col A t) (fun _ _ => mem_univ _)
-      (fun s t hs ht h => hinj s t (mem_filter.1 hs).2 (mem_filter.1 ht).2 h)
-      (by rw [card_univ, Fintype.card_fin, hcard])
-    choose tc htc using fun j : Fin n => hsurj j (mem_univ _)
-    have hta : ∀ j, a (tc j) = true := fun j => (mem_filter.1 (htc j).1).2
-    have hcol : ∀ j, col A (tc j) = j := fun j => (htc j).2.symm
-    have hfinj : Function.Injective fun j => row A (tc j) := by
-      intro j j' h
-      have e : tc j = tc j' := by
-        by_contra hne
-        have := hno _ _ hne (hta j) (hta j')
-        rw [clash_eq] at this
-        simp only [h, decide_true, Bool.true_or] at this
-        exact absurd this (by decide)
-      rw [← hcol j, ← hcol j', e]
-    let σ := Equiv.ofBijective _ (Finite.injective_iff_bijective.1 hfinj)
-    have hσ : ∀ j, σ j = row A (tc j) := fun j => rfl
-    refine ⟨σ, mem_filter.2 ⟨mem_univ _, fun j => ?_⟩, ?_⟩
-    · rw [hσ, ← entry_true A (tc j), hcol]
-    · funext t
-      simp only [asg, hσ]
-      by_cases ht : a t = true
-      · rw [ht, decide_eq_true_iff, hinj _ _ (hta (col A t)) ht (hcol _)]
-      · rw [Bool.not_eq_true] at ht
-        rw [ht, decide_eq_false_iff_not]
-        intro h
-        have e := idx_eq A h.symm (hcol (col A t))
-        rw [← e, hta] at ht
-        exact absurd ht (by decide)
+  have h := card_asg A (fun _ => True)
+  simp only [and_true] at h
+  rw [cntS, h]
 
 end Count
 

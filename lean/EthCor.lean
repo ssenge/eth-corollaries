@@ -31,3 +31,5 @@ import EthCor.Nonblocker
 import EthCor.NonblockerTM
 import EthCor.Perm
 import EthCor.PermTM
+import EthCor.SignedPerm
+import EthCor.SignedPermTM

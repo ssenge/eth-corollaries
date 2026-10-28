@@ -36,3 +36,9 @@ import EthCor
 #print axioms EthCor.Vc.cnt_leafV_pos
 #print axioms EthCor.VcTM.tm_fpt
 #print axioms EthCor.VcTM.vc_fpt
+#print axioms EthCor.Hom.cntN_homB
+#print axioms EthCor.Hom.numHom_simple
+#print axioms EthCor.Hom.numColorings_eq
+#print axioms EthCor.Hom.hom_uniform
+#print axioms EthCor.Hom.hom_subexp
+#print axioms EthCor.Hom.hom_subexp_graph

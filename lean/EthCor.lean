@@ -25,3 +25,5 @@ import EthCor.Potts
 import EthCor.PottsTM
 import EthCor.VcTree
 import EthCor.VcTM
+import EthCor.HomFormula
+import EthCor.HomTM

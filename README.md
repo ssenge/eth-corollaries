@@ -41,12 +41,13 @@ large numbers, dense pairwise interaction) do not reduce this way.
 All theorems are in [`lean/EthCor/`](lean/EthCor). "One machine" means one
 `M : TM2ComputableAux Bool Bool` with finite alphabets; time is the number of TM2 steps until M
 halts with the stated output (`Wrap.Outputs`). Inputs are bit strings: a graph is `code G` = 1ⁿ0
-followed by its adjacency matrix; a CNF is `SatFree.enc φ` = 1ⁿ0, then each clause as 1, (1, literal
+followed by its adjacency matrix; a relation H on {0,…,h−1} is `hmat H`, its h² entries row by row; a CNF is `SatFree.enc φ` = 1ⁿ0, then each clause as 1, (1, literal
 in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 
 | # | Lean theorem | Statement | Novelty |
 |---|---|---|---|
 | A2 | `EthCor.colorings_subexp` (also `colorings_uniform`) | One machine counts the proper k-colorings of an n-vertex graph within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all k with lg k ≤ (lg n)^{1/6−θ}. | direct corollary; the growing range of k is the new part |
+| N5 | `EthCor.Hom.hom_subexp` (also `hom_uniform`, `hom_subexp_graph`; `Hom.numColorings_eq`, `Hom.numHom_simple`) | **Counting homomorphisms G → H with H in the input.** One machine is given h in unary, the h × h matrix of a relation H on {0,…,h−1} (loops allowed, not necessarily symmetric) and a graph G on n vertices. It outputs the number of maps f : V(G) → [h] that send every edge of G into H, within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all h with lg h ≤ (lg n)^{1/6−θ}. For a simple graph H this is the number of Mathlib homomorphisms `G →g H`; for H = K_h it is the number of proper h-colorings, so A2 is the special case. Another special case: the independent sets (H = an edge with a loop at one end). Under ETH, deciding G → H takes \|V(H)\|^{Ω(\|V(G)\|)} time in general [12]. | direct corollary; generalizes A2 |
 | A1 | `EthCor.CnfTM.cnf_counts` | For every D and δ > 0, one machine counts the satisfying assignments of any CNF with ≤ D·n clauses of **any width** within C·2^{δn} steps. | known equivalence ([5] + ¬ETH); formalized |
 | A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/4}/(lg lg n)²} clauses** of any width within 2^{δn} steps, for every δ > 0. This density exceeds n·2^{(lg n)^{1/4−ε}} for every ε > 0. | ours |
 | A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given t and a CNF with clauses of ≤ r literals and ≤ D·n clauses, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
@@ -91,6 +92,11 @@ not part of the Lean statement.
   bound C·k²·N·r(N) with k = 2b, N = n·b and r(N) = lglg N/√lg N is O(n·(lg n)^{−2θ}) = o(n) when
   b ≤ 2(lg n)^{1/6−θ}, because b³ ≤ 8(lg n)^{1/2−3θ} and lglg N ≤ (lg N)^θ/(θ ln 2). The method
   stops at b³ ≈ √lg n/lglg n.
+- **N5, homomorphisms.** The same encoding with b = ⌈log₂ h⌉ bits per vertex. Instead of «the two
+  ends of an edge have different colors», there is one clause of width 2b for every edge uv of G
+  and every pair (a, c) with H(a, c) false: not both u ↦ a and v ↦ c (`homB`). The satisfying
+  assignments are exactly the homomorphisms (`cntN_homB`). There are at most n²h² + O(nh) clauses,
+  still polynomial in n for h ≤ n, so the time bound of A2 carries over unchanged.
 - **A1, any width, constant density.** Literal (u, b) becomes variable 2u or 2u+1, plus pair
   clauses, so every clause is positive. Then Anthropic's shortening tree from their Dominating Set
   corollary (`stepD`) cuts clauses to width w, with a new invariant for M = D·n clauses (theirs
@@ -202,7 +208,8 @@ lake env lean CheckAxioms.lean
 - The 2^{o(n)} algorithm is itself a Lean theorem in the dependency. These results are therefore not
   conditional on an unproved hypothesis. They are as sound as Anthropic's formalization.
 - Lean cannot tell whether a formal statement means what it should. Read the theorem statements and
-  the definitions they use by hand. Ours: `numHamCycles` (proved equal to Mathlib's count, see
+  the definitions they use by hand. Ours: `numHom`, `hmat` (proved to match Mathlib's `G →g H` and
+  `numColorings`), `numHamCycles` (proved equal to Mathlib's count, see
   above), `spectrum`, `pottsSpec`, `mono`, `comps`, `tutte` (the rank-generating form; Mathlib has no
   Tutte polynomial to compare with), `Seed`, the input codes
   (including `seedCode`). Anthropic's:
@@ -219,6 +226,8 @@ lake env lean CheckAxioms.lean
 - **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
   a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
   the domination clauses have width Δ + 1.
+- **N5** is done (see the table). The range of h is that of A2; it ends where b³ ≈ √lg n/lglg n.
+  The number of clauses grows with h², not the number of variables, so dense targets cost nothing extra.
 - **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
   `IsHamiltonianCycle` (see the notes under the table).
 - **N3** is done (see the table). Here q is a constant: the formula has width q + 3, and `SIZED`
@@ -240,6 +249,7 @@ lean/
   EthCor/
     TimeArith.lean                        shared time-bound arithmetic
     ColorFormula, ColorTM, ColorSubexp    A2
+    HomFormula, HomTM                     homomorphisms G → H, H in the input (N5)
     CnfTree, CnfTM                        A1
     GrowTree, GrowArith, GrowTM           A1′
     Spectrum                              A4
@@ -284,6 +294,8 @@ and check proofs, to write the Lean formalisation, and to draft the text.
     permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
 11. L. Cai and D. Juedes. On the existence of subexponential parameterized algorithms. J. Comput.
     System Sci. 67(4):789–807, 2003.
+12. M. Cygan, F. V. Fomin, A. Golovnev, A. S. Kulikov, I. Mihajlin, J. Pachocki, and A. Socała.
+    Tight lower bounds on graph embedding problems. J. ACM 64(3):18, 2017.
 
 ## Citation
 

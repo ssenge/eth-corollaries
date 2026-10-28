@@ -245,3 +245,17 @@ A3 (= N4) is done for Vertex Cover (2026-10-27): `lean/EthCor/VcTree.lean` and `
 - `tm_fpt`: host with time ⌊C·(sz+2)^C·2^{δ·par}⌋ from `stHostW` (states poly in n, steps c·2^{δ·par}).
 - `vc_fpt`: ∀ ε > 0, one machine on code G ++ unary k (k ≤ n) decides VC ≤ k within C(n+2)^C 2^{εk}.
   d from `exists_width 1` at ε/4; SIZED width 2 at δ = ε/(4d).
+
+N5 is done (2026-10-28): `lean/EthCor/HomFormula.lean` and `HomTM.lean`. Counting homomorphisms
+G → H, H a relation on Fin h given in the input (generalizes A2).
+- `hmat H` (h² entries, row by row), `numHom G H` = #{f : Fin n → Fin h | ∀ u v, G.Adj u v → H (f u) (f v)}.
+- `homB h n mH m`: the invalid-code clauses, tautologies and padding of `colB`; the edge clauses are
+  forbid(u, a) ++ forbid(v, c) for every edge (u, v) of G and every (a, c) with H(a, c) = false.
+  `cntN_homB`: cntN (n·nb h + 4) = numHom (reuses `colOf`, `asgB`, `sat_forbid` from A2).
+- `numHom_simple`: numHom with H.Adj = Nat.card (G →g H); `numColorings_eq`: numColorings G k =
+  numHom G (≠).
+- `hom_uniform`: input unary h ++ hmat H ++ code G, bound boundNK c (2 nb h) (n nb h), 2 ≤ h ≤ n
+  (≤ n²h² + O(nh) clauses, so polynomial parts of degree 7 instead of 6). `hom_subexp`: 2^{εn} for
+  lg h ≤ (lg n)^{1/6−θ}, via `boundNK_le`. `hom_subexp_graph`: same with Mathlib's G →g H.
+- Generic helpers `allOccur_gen`, `two_le_length_gen`, `isKCNF_gen` (any formula with a list of
+  facts), for reuse.

@@ -82,11 +82,11 @@ without new variables per solution.
 within a stated number of steps. The theorems are built on Anthropic's Lean development, which proves
 its $2^{o(n)}$ algorithm as a theorem; so our results are unconditional theorems of Lean, as sound
 as Anthropic's formalization. They use the axioms \lean{propext}, \lean{Classical.choice} and
-\lean{Quot.sound} only. The development has about 9{,}700 lines in 27 files and 37 main theorems,
+\lean{Quot.sound} only. The development has about 10{,}200 lines in 29 files and 43 main theorems,
 whose axioms are printed by a check file. Source: \url{https://github.com/ssenge/eth-corollaries}.
 
 Lean cannot check that a formal statement says what is intended. The definitions behind the
-statements must be read by hand: ours (\lean{numHamCycles}, \lean{spectrum}, \lean{pottsSpec},
+statements must be read by hand: ours (\lean{numHom} and \lean{hmat}, checked against Mathlib's $G\to_g H$, \lean{numHamCycles}, \lean{spectrum}, \lean{pottsSpec},
 \lean{mono}, \lean{comps}, \lean{tutte}, \lean{Seed}, the input codes) and Anthropic's (the TM2 model
 and their statement files). For one of ours, the number of Hamiltonian cycles, we prove agreement with
 Mathlib's independent definition (Section~\ref{sec:mathlib}).
@@ -104,6 +104,7 @@ literature check for the entries marked ``new''.
 A1 & \#CNF-SAT, any width, $\le Dn$ clauses & known~\cite{CIP06} + $\neg$ETH\\
 A1$'$ & \#CNF-SAT, any width, $m\le n\,2^{(\lg n)^{1/4}/(\lg\lg n)^2}$, one machine & new\\
 A2 & \#$k$-colorings for all $k$ with $\lg k\le(\lg n)^{1/6-\theta}$, one machine & growing $k$ new\\
+N5 & \#homomorphisms $G\to H$, $H$ in the input, $\lg|V(H)|\le(\lg n)^{1/6-\theta}$, one machine & generalizes A2\\
 A4 & Max-SAT spectrum: \#assignments satisfying exactly $t$ clauses, width $r$, $\le Dn$ clauses & new\\
 N3 & Potts density of states, $q$ colors, $\le Dn$ edges; Tutte polynomial on $(x-1)(y-1)=q$ & corollary\\
 A5a & parity of \#Hamiltonian cycles, degree $\le\Delta$ & new\\
@@ -114,7 +115,7 @@ N2$'$ & Steiner tree, connected vertex cover, one-sided error, any density & new
 A3 & Vertex Cover in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{CJ03} + $\neg$ETH\\
 \bottomrule
 \end{tabularx}
-\caption{The results. A1 and A3 are formalizations of known equivalences, N3 is a direct corollary;
+\caption{The results. A1 and A3 are formalizations of known equivalences, N3 and N5 are direct corollaries;
 the others are our derivations.}
 \label{tab:results}
 \end{table}
@@ -186,6 +187,26 @@ and all $2\le k$ with $\lg k\le(\lg n)^{1/6-\theta}$.
 Colors are written in $b=\lceil\lg k\rceil$ bits; the CNF has $nb+4$ variables, width $2b$, and one
 satisfying assignment per proper coloring. The uniform bound with width $2b$ and $N=nb$ variables is
 $O(n(\lg n)^{-2\theta})$ in the exponent.
+
+\paragraph{Homomorphisms (N5).} The same encoding counts homomorphisms into a target that is part of
+the input. Let $H$ be a relation on $\{0,\dots,h-1\}$ (loops allowed, not necessarily symmetric),
+given by its $h^2$ entries, and let $\mathrm{hom}(G,H)$ be the number of maps $f:V(G)\to[h]$ with
+$H(f(u),f(v))$ for every edge $uv$.
+
+\begin{theorem}[\lean{hom_subexp}, \lean{hom_subexp_graph}]
+One machine, given $h$ in unary, the matrix of $H$ and an $n$-vertex graph $G$, outputs
+$\mathrm{hom}(G,H)$ within $2^{\varepsilon n}$ steps, for every $\varepsilon>0$, $0<\theta<1/6$,
+$n\ge n_0(\theta,\varepsilon)$ and all $h\ge2$ with $\lg h\le(\lg n)^{1/6-\theta}$. For a simple
+graph $H$ the output is the number of Mathlib homomorphisms $G\to_g H$ (\lean{numHom_simple}).
+\end{theorem}
+
+With $b=\lceil\lg h\rceil$ bits per vertex, every edge $uv$ of $G$ and every pair $(a,c)$ with
+$H(a,c)$ false give the clause ``not both $u\mapsto a$ and $v\mapsto c$'' of width $2b$
+(\lean{homB}, \lean{cntN_homB}). The variables and the width are those of A2; only the number of
+clauses grows, to at most $n^2h^2+O(nh)$, which the uniform bound does not see beyond a polynomial
+factor. For $H=K_h$ this is A2 (\lean{numColorings_eq}); for $H$ an edge with a loop at one end it
+counts independent sets. Under ETH, deciding whether $G\to H$ exists takes $|V(H)|^{\Omega(|V(G)|)}$
+time in general~\cite{CFGKMPS17}.
 
 \subsection{Spectra (A4) and the Potts model (N3)}
 
@@ -354,6 +375,8 @@ $k$-SAT: an isolation lemma for $k$-CNFs. J. Comput. System Sci. 74(3):386--393,
 relation to other models. Physica 57(4):536--564, 1972.
 \bibitem{DHMTW14} H. Dell, T. Husfeldt, D. Marx, N. Taslaman, and M. Wahlén. Exponential time
 complexity of the permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
+\bibitem{CFGKMPS17} M. Cygan, F. V. Fomin, A. Golovnev, A. S. Kulikov, I. Mihajlin, J. Pachocki,
+and A. Socała. Tight lower bounds on graph embedding problems. J. ACM 64(3):18, 2017.
 \bibitem{CJ03} L. Cai and D. Juedes. On the existence of subexponential parameterized algorithms. J.
 Comput. System Sci. 67(4):789--807, 2003.
 \end{thebibliography}

@@ -5,7 +5,10 @@ Hypothesis (ETH) is false. Every result below is a Lean 4 theorem about Turing m
 top of Anthropic's formalized 2^{o(n)} algorithm for #k-SAT, and depends only on the standard
 axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
-A write-up of all results, with statements and proof sketches, is in
+Every algorithm is written out step by step under [Algorithms](#algorithms), next to the Lean
+definitions it consists of. [`python/`](python) has a reference implementation of each one, tested
+against brute force (see [Running the algorithms](#running-the-algorithms)). A write-up of all
+results, with statements and proof sketches, is in
 [`paper/eth-corollaries.pdf`](paper/eth-corollaries.pdf) (source `paper/eth-corollaries.tex`).
 
 ## Background
@@ -57,7 +60,8 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases are the chromatic polynomial at q, at (1−q, 0), and the flow polynomial at q, at (0, 1−q). | direct corollary; formalized |
-| N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, [10, Thm 1.3] proves that no exp(o(m/log n)) algorithm exists for this problem. | direct corollary; formalized |
+| N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | direct corollary; formalized |
+| N6′ | `EthCor.SPermTM.sperm_fpt` (also `SPerm.cnt_sperm`, `SPerm.permanent_signed`) | **The permanent of a {−1, 0, 1} matrix in 2^{εm}·poly(n).** For every ε > 0, one machine is given a bit b, n in unary and two n × n 0/1 matrices A (the nonzero entries) and S (the entries −1). It outputs the number of permutations σ with A(σ i, i) for all i and an even (b = 0) or odd (b = 1) number of i with S(σ i, i), within C·(n+2)^C·2^{εm} steps, m the number of nonzero entries. The permanent of the matrix over ℤ (Mathlib's `Matrix.permanent`) is the first count minus the second (`permanent_signed`), so two runs give it. Under #ETH, no exp(o(m)) algorithm exists for this problem [10, Thm 1.3]. | direct corollary; formalized |
 | A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known equivalence ([11] + ¬ETH); formalized |
 | A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known equivalence (Ore [13], kernel [14] + ¬ETH); formalized |
 
@@ -132,6 +136,14 @@ not part of the Lean statement.
   ways). These σ are what Mathlib's `Matrix.permanent` of the 0/1 matrix adds up (`permanent_eq`).
   `SIZED` counts the solutions of size n in c·2^{εm}. The number of clauses, up to m², does not
   enter the exponent.
+- **N6′, signs.** Add a parity chain over the r entries g₀, …, g_{r−1} that are −1: a variable z
+  set to false, p_k = p_{k−1} ⊕ x_{g_k} (p_{−1} = z, four clauses of width 3), a complement
+  q_k = ¬p_k for every chain bit, and the unit clause p_{r−1} = b. The chain bits are determined by
+  the choice (`chain_det`), and each pair (p_k, q_k) has exactly one true bit, so the solutions with
+  n + r true variables are the permutations whose number of −1 entries has parity b (`cnt_sperm`).
+  The formula has m + 1 + 2r ≤ 3m + 1 variables and width 3, so `SIZED` at δ = ε/3 counts it in
+  c·2^{εm}. Each permutation contributes (−1)^{#(−1 entries)} to the permanent
+  (`permanent_signed`).
 - **A3, Vertex Cover parameterized by k.** Branch instead of kernelizing. While the budget is
   positive and some vertex v has at least d distinct neighbours, either v is in the cover (budget
   − 1) or all of its neighbours N(v) are (budget − |N(v)| ≤ budget − d) (`stepV`, `good_step`).
@@ -202,6 +214,249 @@ not part of the Lean statement.
   the input (`decode_seedCode`), so one machine serves every δ. Its bound c·2^{9c·N·lglg N/√lg N}
   is 2^{o(n)} because N = O(n) for m ≤ D·n.
 
+## Algorithms
+
+Every algorithm here has the same three parts. A front end reads the input and writes a CNF; it
+runs in polynomial time, which Lean proves (`PolyT`). One of Anthropic's counters counts the CNF.
+A short post-step reads the answer off the count. No result needs a new exponential-time
+algorithm: the work is in choosing a CNF whose number of variables (not clauses) is linear in the
+parameter, and in proving that its count is the quantity we want.
+
+The three counters, all from Anthropic's development [8]:
+
+| Name below | Computes | Time | Lean |
+|---|---|---|---|
+| `COUNT(N, F)` | the number of satisfying assignments of F on N variables | 2^{C·w²·N·lglg N/√lg N} for width w, one machine for all w | `MainTheoremForms.MainTheoremCompact` (our `EthCor.compact`) |
+| `SIZED_w(N, s, F)` | the number of satisfying assignments with exactly s true variables, F of width ≤ w | c·2^{δN} for every δ > 0, one machine per (w, δ) | `FromPrinted.Consequences.SIZED w`, theorem `SIZED_counts` |
+| `DOMCOUNT(G, s)` | the number of dominating sets of size s of G | c·2^{δn} | `FromPrinted.Consequences.DOMcount`, theorem `stDominatingCounted` |
+
+A literal (i, b) holds when x_i = b; |x| is the number of true variables. In Lean the front end and
+the counter are joined by `Stepped.mapIn` and `Stepped.mapOut`. The walks over search trees (A1, A1′,
+A3) are Anthropic's `walkSum` or our host `VcTM.tm_fpt`, which turn a stepped program into one
+Turing machine. The Python names refer to the package in [`python/`](python), where every front end
+is written clause for clause as in Lean.
+
+### A2, N5: colorings and homomorphisms
+
+```
+HOM(G on n vertices, H a relation on {0..h−1}):        # A2 is H = K_k: H(a, c) ⇔ a ≠ c
+  b := ⌈log₂ h⌉                                         # bits x_{vb}, …, x_{vb+b−1} spell the image of v
+  F := for every vertex v and every code c with h ≤ c < 2^b:  "the bits of v do not spell c"
+       for every edge {u, v}, in both orders, and every (a, c) with not H(a, c):
+           "not (the bits of u spell a and the bits of v spell c)"          # width 2b
+       x_i ∨ ¬x_i for every i < nb;   unit clauses x_{nb}, …, x_{nb+3}
+  return COUNT(nb + 4, F)
+```
+
+Lean: `nb`, `forbid`, `colB`, `Hom.homB`; front ends `preC`, `Hom.preHom`; `cntN_colB`,
+`Hom.cntN_homB`, `colorings_subexp`, `Hom.hom_subexp`. Python: `colorings.colB`, `homB`,
+`num_colorings`, `num_hom`.
+
+### A1: #SAT of any clause width, D·n clauses
+
+```
+CNF_ANY_WIDTH(φ on n variables, w):                     # w from δ and D (CnfTree.exists_width)
+  root: 2n variables, x_{2u} = "u is true", x_{2u+1} = "u is false";
+        closed: x_{2u} ∨ x_{2u+1} and ¬x_{2u} ∨ ¬x_{2u+1} for every u;
+        open:   every clause of φ as a set of positive variables, (u, b) ↦ x_{2u + [b false]}
+  total := 0
+  depth-first over the tree:
+    if some open clause C has more than w variables, with H its first w:
+      light child: drop C from the open clauses, add the positive clause H to the closed ones
+      heavy child: add ¬x_i for every i ∈ H, delete H from every open clause
+    else (a leaf): total += SIZED_w(2n, n, open clauses ++ closed clauses)
+  return total
+```
+
+Every leaf has width ≤ w. Exactly n true variables means one of x_{2u}, x_{2u+1} per u, so the
+leaves count the assignments of φ, and each one exactly once. Lean: `CnfTree.lv`, `pairF`, `rootX`,
+`cntS_rootX`, `shortens_of`; Anthropic's `stepD`, `leafD`, `walkSum`; machine `CnfTM.cnfM`,
+`cnf_counts`. Python: `cnf_anywidth.rootX`, `stepD`, `leafD`, `walk_sum`, `count_any_width`.
+
+### A1′: #SAT of any width, m ≤ n·2^{(lg n)^{1/4}/(lglg n)²} clauses
+
+```
+CNF_GROW(φ on n variables):
+  as CNF_ANY_WIDTH, but at a node on N variables the width is
+      w(N) := 2^{⌊L/4⌋ − ⌊lg L⌋} + 1,   L = ⌊lg ⌊lg N⌋⌋
+  and every leaf F is counted with COUNT(2n, dedup F)
+```
+
+Lean: `GrowTree.wN`, `stepW`; `GrowTM.leafF`, `leafM`, `growM`, `cnf_grow`. Python:
+`cnf_anywidth.wN`, `stepW`, `count_grow`.
+
+### A4: the Max-SAT spectrum
+
+```
+MAXSAT_SPECTRUM(φ = C_0 … C_{m−1} on n variables, width r, t):
+  variables x_0 … x_{2n−1} as in A1, y_j = x_{2n+j} for j < m
+  F := x_{2u} ∨ x_{2u+1}, ¬x_{2u} ∨ ¬x_{2u+1} for every u
+       y_j ↔ C_j for every j, with the literal (u, b) of C_j read as (x_{2u}, b)    # width r + 1
+  return SIZED_{r+2}(2n + m, n + t, F)                 # = #assignments satisfying exactly t clauses
+```
+
+Lean: `Spectrum.xl`, `yC`, `specF`, `preS`, `specM`, `cntS_specF`, `maxsat_spectrum`. Python:
+`spectrum.specF`, `maxsat_spectrum`.
+
+### N3: Potts density of states and the Tutte polynomial on a hyperbola
+
+```
+POTTS(G on n vertices with edges e_0 … e_{m−1}, q, j):
+  x_{vq+c} = "v has color c",  y_i = x_{nq+i} = "e_i is monochromatic"
+  F := for every v: x_{vq} ∨ … ∨ x_{vq+q−1};  ¬x_{vq+c} ∨ ¬x_{vq+c′} for c′ < c
+       for every edge e_i = (a, b) and color c:  x_{aq+c} ∧ x_{bq+c} → y_i,   y_i ∧ x_{aq+c} → x_{bq+c}
+  return SIZED_{q+3}(nq + m, n + j, F)                 # N_j: colorings with exactly j monochromatic edges
+
+TUTTE(G, x, y) with (x−1)(y−1) = q, x, y ≠ 1:          # post-step, exact arithmetic
+  return Σ_j N_j·y^j / ((x−1)^{k(E)}·(y−1)^n)
+```
+
+Lean: `PottsTM.amo`, `vtxF`, `colF`, `edgeM`, `monoF`, `pottsF`, `preP`, `pottsM`, `cnt_pottsF`,
+`potts_spectrum`, `tutte_tm`; `Potts.potts_fk`, `tutte_hyperbola`. Python: `potts.pottsF`,
+`potts_spectrum`, `tutte_hyperbola`.
+
+### N6, N6′: the permanent
+
+```
+PERMANENT_01(A, n × n 0/1):
+  E := the ones of A, row by row, as e_0 … e_{m−1}       # one variable x_t per one
+  if m < n: return 0
+  F := ¬x_s ∨ ¬x_t for every s < t such that e_s and e_t share a row or a column    # width 2
+  return SIZED_2(m, n, F)
+
+PERMANENT_SIGNED(A, S):            # entry (i, j) is 0 if not A, −1 if A and S, 1 if A and not S
+  E as above; g_0 … g_{r−1} := the indices t with S at e_t
+  if m < n: return 0
+  for b in {0, 1}:
+    F_b := F of PERMANENT_01, then
+           ¬z  with z = x_m
+           p_k = p_{k−1} ⊕ x_{g_k} for k < r, p_k = x_{m+1+k}, p_{−1} = z     # 4 clauses of width 3
+           q_k = ¬p_k for k < r, q_k = x_{m+1+r+k}
+           p_{r−1} = b
+    N_b := SIZED_3(m + 1 + 2r, n + r, F_b)            # permutations with (#(−1 entries) mod 2) = b
+  return N_0 − N_1
+```
+
+Lean: `Perm.ents`, `clash`, `permF`, `cntS_permF`, `permanent_eq`, `PermTM.leafP`, `permM`,
+`perm_fpt`; `SPerm.xorC`, `compC`, `chainF`, `sF`, `negs`, `numPar`, `cnt_sperm`,
+`permanent_signed`, `SPermTM.leafS`, `spermM`, `sperm_fpt`. Python: `permanent.permF`,
+`permanent01`, `chainF`, `sF`, `num_parity`, `permanent_signed`.
+
+### A3: Vertex Cover in poly(n)·2^{εk}
+
+```
+VERTEX_COVER(G, k):                # a degree d, large enough for ε (CnfTree.exists_width)
+  total := 0
+  depth-first from the node (k, E(G)):
+    node (k′, E′): if k′ > 0 and some end v of an edge of E′ has ≥ d distinct neighbours N(v):
+        children: (k′ − 1, E′ minus the edges at v)
+                  (k′ − |N(v)|, E′ minus the edges at N[v])        # a dead leaf if |N(v)| > k′
+    leaf (k′, E′): V′ := the ends of the edges of E′
+        if |V′| ≤ k′·d:
+            total += SIZED_2(|V′|, min(k′, |V′|), {x_u ∨ x_v : uv ∈ E′})
+  return total > 0
+```
+
+Lean: `Vc.nbs`, `cand`, `pick`, `delV`, `delN`, `stepV`, `verts`, `vcClauses`, `leafV`,
+`good_step`, `leaves_le`, `cnt_leafV_pos`; `VcTM.rootV`, `vcM`, `tm_fpt`, `vc_fpt`. Python:
+`vertex_cover.stepV`, `leafV`, `vc_word`, `has_vertex_cover`.
+
+### A3′: Nonblocker in poly(n)·2^{εk}
+
+```
+NONBLOCKER(G, k):                  # is there a dominating set with ≤ n − k vertices?
+  J := the vertices with a neighbour;  n′ := |J|
+  if 2k ≤ n′: return yes                                # Ore: G[J] has a dominating set of ≤ n′/2
+  if n′ < k:  return no
+  return DOMCOUNT(G[J], n′ − k) > 0                     # n′ < 2k vertices, so 2^{δn′} ≤ 2^{2δk}
+```
+
+A dominating set of size exactly n′ − k suffices, because supersets of dominating sets dominate.
+Lean: `Nb.niL`, `subM`, `ore`, `nb_iff`, `nb_answer`; `NbTM.preN`, `postN`, `nbM`, `nb_fpt`.
+Python: `nonblocker.niL`, `subM`, `preN`, `has_nonblocker`.
+
+### A5a, A5a′: the parity of the number of Hamiltonian cycles
+
+```
+HC_PARITY(G on n vertices, edges e_0 … e_{m−1}):
+  x_i = "e_i is chosen" (i < m),  s_v = x_{m+v} = the side of v
+  F := for every v: exactly two chosen edges at v
+           A5a:  ¬x_a ∨ ¬x_b ∨ ¬x_c for distinct a, b, c at v; at least two (width deg v)
+           A5a′: a sequential counter along the edges at v, 2 bits per (edge, end), width 3
+       for every edge e_i = (a, b): x_i → (s_a = s_b)
+       ¬s_0;   x_i ∨ ¬x_i for every variable
+  return COUNT(N, F) mod 2                              # N = m + n (A5a), 5m + n + 2 (A5a′)
+```
+
+A 2-factor with c cycles has 2^{c−1} side maps, which is odd exactly for c = 1. Lean:
+`Ham.inc`, `atMost2`, `atLeast2`, `edgeC`, `tautC`, `hcF`, `hc_parity`, `HamTM.formH`, `postH`,
+`hc_parity_tm`; `HamS.stepC`, `cntC`, `hcS`, `cntN_hcS`, `HamSTM.hcS_tm`, `hc_parity_sparse`.
+Python: `hamcycle.hcF`, `hc_parity`, `hcS`, `hc_parity_sparse`.
+
+### A5b: Hamiltonian cycle with one-sided error
+
+```
+HAM_RANDOMIZED(G, seed ω):         # ω: m₁ ≤ 3m + 3 parity checks on k edge bits each, fixings
+  F := the formula of A5a′ on N = 5m + n + 2 variables, then for every check i < 3m + 3
+       with terms (j_0, c_0) … (j_{k−1}, c_{k−1}):
+           a_{i,l} = a_{i,l−1} ⊕ (c_l ∧ x_{j_l}),  a_{i,−1} = z, a variable fixed to false   # width ≤ 3
+       a_{i,k−1} = (right-hand side of check i) for i < m₁
+       x_j = bit_j for every fixed coordinate j            # unit clauses
+  return COUNT(N + (3m + 3)·k, F) mod 2
+```
+
+If G has no Hamiltonian cycle the bit is 0. If it has one, at least a 2^{−δm} fraction of the seeds
+leaves exactly one Hamiltonian cycle passing all checks (`Iso.isolation`), and then the bit is 1.
+Lean: `HamI.xstep`, `rowF`, `isoF`, `hcI`, `iso_parity`, `iso_decide`; `HamITM.seedCode`,
+`decode_seedCode`, `formI`, `hcI_tm`, `ham_randomized`. Python: `hamcycle.isoF`, `hcI`, `formI`,
+`ham_randomized`; seeds in `isolation.Seed`, `random_seed`.
+
+### N2, N2′: connected solutions (Steiner tree, connected vertex cover)
+
+```
+CONN_PARITY(G on n vertices, ℓ, φ a CNF on the vertex bits):
+  x_v = "v ∈ X",  s_v = x_{n+v} (side),  s̄_v = x_{2n+v}
+  F := φ;  s̄_v = ¬s_v;  x_v ∨ ¬s_v  (s_v = 0 outside X)
+       for every edge uv: x_u ∧ x_v → (s_u = s_v)                         # width ≤ max(r, 4)
+  c := SIZED_{max(r,4)}(3n, n + ℓ, F)                   # = Σ_X 2^{#components of G[X]}
+  return ⌊c/2⌋ mod 2                                    # parity of #{X : |X| = ℓ, X ⊨ φ, G[X] connected}
+
+CONN_RANDOMIZED(G, ℓ, ω, φ):       # ω: checks on the n vertex bits, as in A5b
+  F := F of CONN_PARITY, ¬z with z = x_{3n}, the chains of ω at x_{3n+1}, …,
+       and a complement for every chain bit
+  c := SIZED(3n + 1 + 2·(3n+3)·k, n + ℓ + (3n+3)·k, F)
+  return ⌊c/2⌋ mod 2
+```
+
+For Steiner tree φ is the unit clauses x_t for the terminals t; for connected vertex cover it is
+x_u ∨ x_v for every edge. Lean: `Conn.sideF`, `edgeCC`, `connF`, `conn_parity`; `ConnTM.vcF`,
+`preC`, `preV`, `postC`, `conn_parity_tm`, `cvc_parity_tm`; `ConnI.compF`, `ciF`, `ci_parity`,
+`ci_decide`; `ConnITM.codeCI`, `preR`, `conn_randomized`. Python: `connected.connF`,
+`conn_parity`, `cvc_parity`, `steiner`, `ciF`, `conn_randomized`, `cvc_randomized`.
+
+## Running the algorithms
+
+[`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
+besides pytest). It builds exactly the formulas above, from the same input words as the Lean
+machines (`code G`, `unary`, `SatFree.enc`, `seedCode`). Anthropic's counters are replaced by an
+exact DPLL counter with component caching that returns the weight enumerator of the solutions
+(`ethcor.cnf.weight_counts`), so `SIZED_w(N, s, F)` is `count_sized(F, N, s)` and `COUNT(N, F)`
+is `count(F, N)`. The Python code therefore runs in exponential time; it is meant for checking the
+reductions, not for speed. The 2^{o(n)} counters exist only as Lean objects, and Anthropic reports
+no gain over 2^n below n ≈ 10^{10}.
+
+```sh
+cd python
+python3 -m pytest -q                  # 51 tests: every algorithm against brute force on small inputs
+python3 -c "from ethcor.permanent import permanent_signed as p; \
+  print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
+```
+
+The tests compare each algorithm with a direct enumeration of the quantity in the Lean statement
+(colorings, homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles,
+connected vertex sets). They also check the shape bounds the Lean proofs use (width, number of
+variables and clauses), and the one-sided error of A5b and N2′ over random seeds.
+
 ## Checking the proofs
 
 Requires [elan](https://github.com/leanprover/elan). The toolchain (Lean v4.33.1) is pinned in
@@ -245,8 +500,10 @@ lake env lean CheckAxioms.lean
   the domination clauses have width Δ + 1.
 - **N5** is done (see the table). The range of h is that of A2; it ends where b³ ≈ √lg n/lglg n.
   The number of clauses grows with h², not the number of variables, so dense targets cost nothing extra.
-- **N6** is done (see the table). Open: the matching polynomial of general graphs (the same
-  formula with clauses for edges sharing an endpoint, s = j) and weighted permanents.
+- **N6 and N6′** are done (see the table): 0/1 and {−1, 0, 1} entries. Open: the matching
+  polynomial of general graphs (the same formula with clauses for edges sharing an endpoint, s = j)
+  and permanents with larger integer weights, which need a counter modulo small primes or a
+  binary expansion of the weights.
 - **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
   `IsHamiltonianCycle` (see the notes under the table).
 - **N3** is done (see the table). Here q is a constant: the formula has width q + 3, and `SIZED`
@@ -283,8 +540,20 @@ lean/
     VcTree, VcTM                          Vertex Cover in poly(n)·2^{εk}, FPT host (A3)
     Nonblocker, NonblockerTM              Ore's theorem, Nonblocker in poly(n)·2^{εk} (A3′)
     Perm, PermTM                          the 0/1 permanent in poly(n)·2^{εm} (N6)
+    SignedPerm, SignedPermTM              the {−1, 0, 1} permanent: parity chain, sperm_fpt (N6′)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
+python/              reference implementations of all algorithms (see "Running the algorithms")
+  pyproject.toml     pytest configuration
+  ethcor/
+    cnf.py           formulas as in Lean; exact counters standing in for COUNT and SIZED
+    graphs.py, lists.py   input codes (code G, unary, hmat) and Lean's list functions
+    colorings.py     A2, N5            cnf_anywidth.py   A1, A1′ (incl. SatFree.enc and its reader)
+    spectrum.py      A4                potts.py          N3
+    permanent.py     N6, N6′           vertex_cover.py   A3
+    nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
+    isolation.py     seeds, isolation  connected.py      N2, N2′
+  tests/             one test file per module, against brute force
 ```
 
 ## Use of AI

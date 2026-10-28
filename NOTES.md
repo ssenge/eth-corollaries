@@ -286,3 +286,23 @@ N6 the 0/1 permanent is done (2026-10-28): `lean/EthCor/Perm.lean` and `PermTM.l
   ([], 0, [[]]) if m < n (then the permanent is 0, `cntS_zero_of_lt`). Time C(n+2)^C 2^{εm}.
 - [10] Thm 1.3 (arXiv 1206.1775): under #ETH, Perm^{0,1} not in exp(o(m/log n)), Perm^{-1,0,1} not in
   exp(o(m)). So N6 is the matching upper bound up to the log, given the claimed refutation.
+
+N6′ the {−1, 0, 1} permanent is done (2026-10-28): `lean/EthCor/SignedPerm.lean` and `SignedPermTM.lean`.
+- `chainF m g b` = [z false] ++ xorC (m+1+k) (m+k) (g k) ++ compC (m+1+k) (m+1+r+k) ++ [p_{r−1} = b],
+  z = x_m; `sF E g b = permF E ++ chainF |E| g b` on m + 1 + 2r variables, width 3. `negs n mS E`:
+  indices t < |E| with S at E[t].
+- `chain_det` (chain bits determined by the choice), `chainVal_eq` (p_k = parity of the first k + 1
+  −1 entries), `card_true_split`; `cnt_sF` generic in E, g; `cnt_sperm`: cntS (m+1+2r) (n+r) (sF ..)
+  = numPar A Sg b via `card_asg` with Q = parity. `permanent_signed`: Mathlib's ℤ-permanent =
+  numPar false − numPar true (each σ contributes (−1)^{#(−1 entries)}).
+- `sperm_fpt`: input b :: (unary n ++ hmat A ++ hmat Sg); `leafS`; SIZED_counts 3 at ε/3, N ≤ 3m + 1,
+  so T ≤ c·2^{ε/3}·2^{εm}; dead formula if m < n (numPar = 0 since the σ along A are cntS m n permF = 0).
+- fun_prop timed out inside one big `leafS_polyT`: it tried to unfold `nS`. Fixed by splitting into
+  `nS_unary`, `ES_polyT`, `gS_polyT`, `sFS_polyT`, `leafS_then_polyT` and putting `nS_unary.poly` in
+  context before `fun_prop`.
+- [10] Thm 1.3(i): under #ETH no exp(o(m)) for {−1, 0, 1}; N6′ is the matching upper bound.
+
+Python reference implementations (2026-10-28): `python/ethcor/`, one module per result, all front ends
+clause for clause as in Lean, counters replaced by an exact DPLL weight-enumerator counter; 51 tests
+against brute force (`cd python && python3 -m pytest -q`). Not mirrored: the compact code `encK`
+handed to the Main Theorem's machine (Python passes the formula itself).

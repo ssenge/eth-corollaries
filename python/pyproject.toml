@@ -1,0 +1,9 @@
+[project]
+name = "ethcor"
+version = "0.1.0"
+description = "Reference implementations of the algorithms of eth-corollaries"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -424,7 +424,7 @@ CONN_PARITY(G on n vertices, ℓ, φ a CNF on the vertex bits):
   x_v = "v ∈ X",  s_v = x_{n+v} (side),  s̄_v = x_{2n+v}
   F := φ;  s̄_v = ¬s_v;  x_v ∨ ¬s_v  (s_v = 0 outside X)
        for every edge uv: x_u ∧ x_v → (s_u = s_v)                         # width ≤ max(r, 4)
-  c := SIZED_{max(r,4)}(3n, n + ℓ, F)                   # = Σ_X 2^{#components of G[X]}
+  c := SIZED_{r+4}(3n, n + ℓ, F)                        # = Σ_X 2^{#components of G[X]}
   return ⌊c/2⌋ mod 2                                    # parity of #{X : |X| = ℓ, X ⊨ φ, G[X] connected}
 
 CONN_RANDOMIZED(G, ℓ, ω, φ):       # ω: checks on the n vertex bits, as in A5b

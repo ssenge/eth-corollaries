@@ -318,3 +318,11 @@ Special cases formalized (2026-10-28): `lean/EthCor/Special.lean`.
   theorem, cited, not formalized.
 - Lean notes: `tutte` clashes with `SimpleGraph.tutte` (write `Potts.tutte`, and ascribe ℚ to the
   arguments); `Set.mem_setOf_eq` → `Set.mem_ofPred_eq`, `Sym2.map_pair_eq` → `Sym2.map_mk`.
+
+Amplification formalized (2026-10-28): `lean/EthCor/Amplify.lean`.
+- `amplify`: |Ω|·p ≤ #{out = 1} → #{w : Fin R → Ω | ∀ i, out (w i) = 0} ≤ |Ω|^R·e^{−pR} (piFinset,
+  #{out = 0} ≤ (1 − p)|Ω| ≤ e^{−p}|Ω|). `amplify_sq`: R ≥ 2^{2δx} → ≤ |Ω|^R·e^{−2^{δx}}.
+- `ham_amplified`, `conn_amplified`: the machines of A5b and N2′ with these bounds for R-tuples of
+  seeds. The amplified algorithm is R runs of the same machine; no single TM looping over the seeds
+  is built (A5b's machine is Anthropic's TM2 counter inside `Wrap.everyMachineCanBeWrapped`, which
+  has no loop combinator).

@@ -60,3 +60,7 @@ import EthCor
 #print axioms EthCor.Special.pottsSpec_zero
 #print axioms EthCor.Special.chromatic_tutte
 #print axioms EthCor.Special.flow_tutte
+#print axioms EthCor.Amplify.amplify
+#print axioms EthCor.Amplify.amplify_sq
+#print axioms EthCor.Amplify.ham_amplified
+#print axioms EthCor.Amplify.conn_amplified

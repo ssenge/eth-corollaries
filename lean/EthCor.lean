@@ -34,3 +34,4 @@ import EthCor.PermTM
 import EthCor.SignedPerm
 import EthCor.SignedPermTM
 import EthCor.Special
+import EthCor.Amplify

@@ -87,9 +87,10 @@ edges. In N2′ they are the elements of `Seed n k t (3n + 3)`, checks on the ve
 is taken over all seeds, so it is the probability for a uniformly random seed. A seed has
 O(M·k·log M) bits, for M = m or n. Its code `seedCode ω` is W = M + k + (3M + 3) + 1 in unary,
 followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. In N2′ the input
-carries the seed's length in unary in front of it (`seedL`). Repeating the run with
-2^{2δn} independent seeds gives error at most e^{−2^{δn}}. This amplification step is standard and is
-not part of the Lean statement.
+carries the seed's length in unary in front of it (`seedL`). Running the machine on R independent
+seeds and answering yes if some run outputs 1 never errs on no-instances. On yes-instances it errs on
+at most a fraction e^{−R·2^{−δn}} of the R-tuples of seeds, which is at most e^{−2^{δn}} for
+R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, from the counting lemma `amplify`).
 
 ### Proof ideas
 
@@ -544,6 +545,7 @@ lean/
     Perm, PermTM                          the 0/1 permanent in poly(n)·2^{εm} (N6)
     SignedPerm, SignedPermTM              the {−1, 0, 1} permanent: parity chain, sperm_fpt (N6′)
     Special                               independent sets, Max-Cut, Ising, chromatic and flow points
+    Amplify                               error e^{−R·2^{−δn}} for R independent seeds (A5b, N2′)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 python/              reference implementations of all algorithms (see "Running the algorithms")

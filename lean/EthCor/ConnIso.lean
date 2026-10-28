@@ -7,7 +7,7 @@ The seeds of `EthCor.Iso` act on the n vertex bits. To the formula `connF n E ψ
 add a variable z = 3n set to false, the checks of ω as the chains of `EthCor.HamI.isoF` (variables
 3n + 1 + i), and for every chain bit its complement (`compF`). A chain bit and its complement hold
 one true bit, so the satisfying assignments with n + ℓ + mm·k true variables are those of `connF`
-with n + ℓ true variables whose vertex set passes the checks (`cnt_ciF`). By
+with n + ℓ true variables whose vertex set passes the checks (`stepC`–`stepE`). By
 `EthCor.Conn.conn_parity_P` half their number has the parity of the number of connected solutions
 of size ℓ that pass the checks (`ci_parity`). With the isolation lemma: no connected solution gives
 parity 0 for every seed; one gives parity 1 for at least a 2^{−δn} fraction of the seeds

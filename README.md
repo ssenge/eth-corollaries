@@ -57,6 +57,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases are the chromatic polynomial at q, at (1−q, 0), and the flow polynomial at q, at (0, 1−q). | direct corollary; formalized |
+| N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, [10, Thm 1.3] proves that no exp(o(m/log n)) algorithm exists for this problem. | direct corollary; formalized |
 | A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known equivalence ([11] + ¬ETH); formalized |
 | A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known equivalence (Ore [13], kernel [14] + ¬ETH); formalized |
 
@@ -124,6 +125,13 @@ not part of the Lean statement.
   (x−1)^{k(E)}·(y−1)^n times the term of A in the Tutte polynomial (`tutte_hyperbola`). Under #ETH,
   [10] proves lower bounds of the form 2^{Ω(n/polylog n)} for these evaluations on sparse simple
   graphs; here they take 2^{δn} for every δ > 0.
+- **N6, the permanent.** One variable per one of A. A clause of width 2 for every two ones in the
+  same row or column says that they are not both chosen (`permF`). An assignment with exactly n
+  true variables chooses n ones, no two in a column, so one in every column; their rows are
+  distinct, so it is a permutation σ with A(σ i, i) for all i (`cntS_permF`, a bijection both
+  ways). These σ are what Mathlib's `Matrix.permanent` of the 0/1 matrix adds up (`permanent_eq`).
+  `SIZED` counts the solutions of size n in c·2^{εm}. The number of clauses, up to m², does not
+  enter the exponent.
 - **A3, Vertex Cover parameterized by k.** Branch instead of kernelizing. While the budget is
   positive and some vertex v has at least d distinct neighbours, either v is in the cover (budget
   − 1) or all of its neighbours N(v) are (budget − |N(v)| ≤ budget − d) (`stepV`, `good_step`).
@@ -237,6 +245,8 @@ lake env lean CheckAxioms.lean
   the domination clauses have width Δ + 1.
 - **N5** is done (see the table). The range of h is that of A2; it ends where b³ ≈ √lg n/lglg n.
   The number of clauses grows with h², not the number of variables, so dense targets cost nothing extra.
+- **N6** is done (see the table). Open: the matching polynomial of general graphs (the same
+  formula with clauses for edges sharing an endpoint, s = j) and weighted permanents.
 - **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
   `IsHamiltonianCycle` (see the notes under the table).
 - **N3** is done (see the table). Here q is a constant: the formula has width q + 3, and `SIZED`
@@ -272,6 +282,7 @@ lean/
     PottsTM                               the Potts formula and machine, potts_spectrum (N3)
     VcTree, VcTM                          Vertex Cover in poly(n)·2^{εk}, FPT host (A3)
     Nonblocker, NonblockerTM              Ore's theorem, Nonblocker in poly(n)·2^{εk} (A3′)
+    Perm, PermTM                          the 0/1 permanent in poly(n)·2^{εm} (N6)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```

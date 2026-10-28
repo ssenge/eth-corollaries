@@ -46,3 +46,6 @@ import EthCor
 #print axioms EthCor.Nb.nb_iff
 #print axioms EthCor.Nb.nb_answer
 #print axioms EthCor.NbTM.nb_fpt
+#print axioms EthCor.Perm.cntS_permF
+#print axioms EthCor.Perm.permanent_eq
+#print axioms EthCor.PermTM.perm_fpt

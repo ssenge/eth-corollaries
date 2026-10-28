@@ -273,3 +273,16 @@ A3′ Nonblocker is done (2026-10-28): `lean/EthCor/Nonblocker.lean` and `Nonblo
   with N′ ≤ 2k in every case. `nb_fpt` via `VcTM.tm_fpt` with A = e = c + 2.
 - fun_prop timed out on `decide (2 * kX x ≤ (jX x).length)` (whnf of the defs); generic lemmas
   `dec2_polyT`, `declt_polyT` over opaque f, g fixed it.
+
+N6 the 0/1 permanent is done (2026-10-28): `lean/EthCor/Perm.lean` and `PermTM.lean`.
+- `ents n mA` = (pairs n).filter adjB (the ones, row by row; nodup), `clash` (same row or column),
+  `permF E` = [(a,false),(b,false)] for a < b < |E| with clash E[a] E[b] (width 2, ≤ m² clauses).
+- `cntS_permF`: cntS m n (permF E) = #{σ : Perm (Fin n) | ∀ i, A (σ i) i} by card_bij with
+  `asg σ t = decide (row t = σ (col t))`; surjectivity via `surj_on_of_inj_on_of_card_le` (the column
+  map is injective on the chosen entries and there are n of them) and Equiv.ofBijective of
+  j ↦ row (t_j). `permanent_eq`: Mathlib's permanent of the 0/1 ℕ-matrix = that card (prod_boole).
+  `length_ents`: m = #{(i,j) | A i j}.
+- `perm_fpt`: input unary n ++ hmat A; `leafP` gives SIZED (m vars, s = n, permF) or the dead formula
+  ([], 0, [[]]) if m < n (then the permanent is 0, `cntS_zero_of_lt`). Time C(n+2)^C 2^{εm}.
+- [10] Thm 1.3 (arXiv 1206.1775): under #ETH, Perm^{0,1} not in exp(o(m/log n)), Perm^{-1,0,1} not in
+  exp(o(m)). So N6 is the matching upper bound up to the log, given the claimed refutation.

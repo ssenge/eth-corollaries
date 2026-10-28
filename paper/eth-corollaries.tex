@@ -82,7 +82,7 @@ without new variables per solution.
 within a stated number of steps. The theorems are built on Anthropic's Lean development, which proves
 its $2^{o(n)}$ algorithm as a theorem; so our results are unconditional theorems of Lean, as sound
 as Anthropic's formalization. They use the axioms \lean{propext}, \lean{Classical.choice} and
-\lean{Quot.sound} only. The development has about 10{,}600 lines in 31 files and 47 main theorems,
+\lean{Quot.sound} only. The development has about 11{,}000 lines in 33 files and 50 main theorems,
 whose axioms are printed by a check file. Source: \url{https://github.com/ssenge/eth-corollaries}.
 
 Lean cannot check that a formal statement says what is intended. The definitions behind the
@@ -107,6 +107,7 @@ A2 & \#$k$-colorings for all $k$ with $\lg k\le(\lg n)^{1/6-\theta}$, one machin
 N5 & \#homomorphisms $G\to H$, $H$ in the input, $\lg|V(H)|\le(\lg n)^{1/6-\theta}$, one machine & generalizes A2\\
 A4 & Max-SAT spectrum: \#assignments satisfying exactly $t$ clauses, width $r$, $\le Dn$ clauses & new\\
 N3 & Potts density of states, $q$ colors, $\le Dn$ edges; Tutte polynomial on $(x-1)(y-1)=q$ & corollary\\
+N6 & 0/1 permanent in $C(n+2)^C2^{\varepsilon m}$, $m$ = number of ones & corollary\\
 A5a & parity of \#Hamiltonian cycles, degree $\le\Delta$ & new\\
 A5a$'$ & parity of \#Hamiltonian cycles, $\le n(\lg n)^{1/2-\theta}$ edges, any degree, one machine & new\\
 N2 & parity of \#connected vertex sets of size $\ell$ satisfying a CNF; any density & new\\
@@ -116,7 +117,7 @@ A3 & Vertex Cover in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{CJ03} + $\neg$ETH
 A3$'$ & Nonblocker in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{Ore62,DFFPR06} + $\neg$ETH\\
 \bottomrule
 \end{tabularx}
-\caption{The results. A1, A3 and A3$'$ are formalizations of known equivalences, N3 and N5 are direct corollaries;
+\caption{The results. A1, A3 and A3$'$ are formalizations of known equivalences, N3, N5 and N6 are direct corollaries;
 the others are our derivations.}
 \label{tab:results}
 \end{table}
@@ -239,6 +240,24 @@ $\prod_e(1+v[e\text{ mono}])$ over $A\subseteq E$ and count the colorings consta
 $(V,A)$, which are $q^{k(A)}$ many. This gives the chromatic polynomial at $q$ (the point $(1-q,0)$)
 and the flow polynomial at $q$ (the point $(0,1-q)$). Under \#ETH, Dell et al.~\cite{DHMTW14} prove
 lower bounds of the form $2^{\Omega(n/\mathrm{polylog}\,n)}$ for such evaluations on sparse graphs.
+
+\subsection{The 0/1 permanent (N6)}
+
+\begin{theorem}[\lean{perm_fpt}]
+For every $\varepsilon>0$, one machine, given an $n\times n$ matrix $A$ with entries in $\{0,1\}$
+($n$ in unary, then the $n^2$ entries), outputs Mathlib's \lean{Matrix.permanent} of $A$ within
+$C(n+2)^C2^{\varepsilon m}$ steps, where $m$ is the number of ones of $A$.
+\end{theorem}
+
+There is one variable per one of $A$, and a clause $\neg x_a\vee\neg x_b$ for every two ones in the
+same row or column (\lean{permF}, width 2, at most $m^2$ clauses). An assignment with exactly $n$
+true variables chooses $n$ ones, no two in a column, hence one in every column, and their rows are
+distinct; so it is a permutation $\sigma$ with $A_{\sigma(i),i}=1$ for all $i$, and conversely
+(\lean{cntS_permF}). These are the nonzero terms of the permanent (\lean{permanent_eq}). \SIZED{}
+counts the solutions of size $n$ in $c\,2^{\varepsilon m}$ steps; the number of clauses does not enter
+the exponent. Under \#ETH, the 0/1 permanent with $m$ nonzero entries has no $\exp(o(m/\log n))$
+algorithm~\cite[Thm.~1.3]{DHMTW14}; with the claimed refutation it takes $2^{\varepsilon m}\poly(n)$
+for every $\varepsilon>0$.
 
 \section{Connectivity through parity}
 

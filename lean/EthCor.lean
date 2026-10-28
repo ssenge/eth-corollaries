@@ -29,3 +29,5 @@ import EthCor.HomFormula
 import EthCor.HomTM
 import EthCor.Nonblocker
 import EthCor.NonblockerTM
+import EthCor.Perm
+import EthCor.PermTM

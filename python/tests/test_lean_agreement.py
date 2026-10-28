@@ -3,9 +3,9 @@
 For random small inputs, the input word goes to both: to `lean/Dump.lean`, which runs the Lean
 definitions (`EthCor.formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`,
 `SPermTM.leafS`, `HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`,
-`ConnITM.preR`, `NbTM.preN`, the leaves of `Vc.stepV` with `leafV`, of `stepD` with `leafD` and of
-`GrowTree.stepW` with `GrowTM.leafF`), and to the Python functions of the same names. The outputs
-must be equal clause for clause.
+`ConnITM.preR`, `NbTM.preN`, the leaves of `Vc.stepV` with `leafV`, of `stepD` with `leafD` (from
+`CnfTree.rootX`, `CdsTM.rootC` and `CdsITM.rootR`) and of `GrowTree.stepW` with `GrowTM.leafF`), and
+to the Python functions of the same names. The outputs must be equal clause for clause.
 
 Needs the built Lean development (`cd lean && lake build`); skipped if `lake` is not on the PATH or
 ETHCOR_SKIP_LEAN is set. One run of Lean loads Mathlib, so all queries go in one batch.
@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 from ethcor import cnf_anywidth as ca
-from ethcor import colorings, connected, hamcycle, nonblocker, permanent, potts, spectrum, vertex_cover
+from ethcor import cds, colorings, connected, hamcycle, nonblocker, permanent, potts, spectrum, vertex_cover
 from ethcor.graphs import code, matrix, random_graph, random_relation, unary
 from ethcor.isolation import random_seed
 
@@ -98,6 +98,11 @@ def cases(rng: random.Random):
             w_v = random_seed(n, kk, t, 3 * n + 3, rng)
             x = connected.codeCI(G, l, w_v, phi)
             out.append(("ci", 0, x, connected.preR(x)))
+            w = rng.randint(1, 3)
+            x = code(G) + unary(l)
+            out.append(("cds", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootC(x))]))
+            x = cds.codeCD(G, l, w_v)
+            out.append(("cdr", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootR(x))]))
             m = len(hamcycle.EH(code(G)))
             if m >= 1:
                 w_e = random_seed(m, kk, t, 3 * m + 3, rng)
@@ -118,5 +123,5 @@ def test_python_matches_lean():
     for (name, arg, x, expected), line in zip(cs, lines):
         assert json.loads(line) == norm(expected), f"{name} arg={arg} on {bits(x)}"
         seen.add(name)
-    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "nb", "vc", "perm",
-                    "sperm", "spec", "cnf", "grow"}
+    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "cds", "cdr", "nb", "vc",
+                    "perm", "sperm", "spec", "cnf", "grow"}

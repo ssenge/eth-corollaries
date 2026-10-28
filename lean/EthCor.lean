@@ -36,3 +36,6 @@ import EthCor.SignedPermTM
 import EthCor.Special
 import EthCor.Amplify
 import EthCor.HamLittleO
+import EthCor.CdsTree
+import EthCor.CdsTM
+import EthCor.CdsIsoTM

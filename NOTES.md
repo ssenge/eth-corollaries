@@ -355,3 +355,24 @@ Literature search (2026-10-28), labels updated in README ("Related and concurren
   all built. `#print axioms` of `EthFollowup.ExactHC.theorem1` and `theorem2`: [propext,
   Classical.choice, Quot.sound]. `hamCycles G` = 2-regular spanning edge sets of G that are connected,
   the same as our `numHamCycles`.
+
+N7, N7′ connected dominating set on graphs of any density (2026-10-28): `lean/EthCor/CdsTree.lean`,
+`CdsTM.lean`, `CdsIsoTM.lean`. Quick literature check first: nothing on CDS in 2^{o(n)} for dense
+graphs. Tulsyan's findings list dominating set (dense) as not covered and CDS only for sparse graphs.
+Under ETH, CDS has no 2^{o(n)} algorithm on intersection graphs of convex objects (de Berg,
+Kisfaludi-Bak, arXiv:2601.08425).
+- The problem: N2 needs φ of bounded width r, but the n domination clauses N[v] have unbounded width.
+- `CdsTree.rootN N s n m F`: root with N variables, target s, the n clauses `nbhd n m` open, and any
+  closed F. `InvC N s W R P`: Anthropic's `Inv` with the open variables bounded by R = n (not by N = 3n)
+  and closed width W = w + 4. `shortensN`: depth 2n, ≤ 2^{εn} leaves via
+  `sum_choose_le_two_rpow` with k = L = 2, leaves of width ≤ w + 4 with ≤ |F| + 3n clauses, the count
+  identity `cntS N s (domF ++ F) = Σ leaves`, and a stack bound.
+- `CdsTM.cds_parity_tm`: walkSum (stepD w) from `rootC` = rootN (3n) (n+ℓ) n (mH x) (sideF ++ edgeCC),
+  `SIZED (w+4)` at δ/12 on 3n variables, `postC`. `hcf`: domF ++ sideF ++ edgeCC = connF n E domF, then
+  `conn_parity`. `numCDS` via Anthropic's `Sets.sat_domF`.
+- `CdsITM.cds_randomized`: root `rootR` with closed `formD` = ciF for ψ = []; `ci_decide` with ψ = domF.
+  `cds_amplified` via `Amplify.amplify`, `amplify_sq`.
+- Python `ethcor/cds.py`, `tests/test_cds.py` (7 tests); Dump.lean `cds`, `cdr` (leaves of stepD
+  from rootC, rootR): now 106 words, 18 front ends, all agree. CheckAxioms: 69 theorems, standard axioms.
+- Corollary (classical, not formalized): for connected G with n ≥ 3, γ_c(G) = n − maxleaf(G)
+  (Caro, West, Yuster 2000), and supersets of a CDS are CDS, so N7′ also decides Max Leaf Spanning Tree.

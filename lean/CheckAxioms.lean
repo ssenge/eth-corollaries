@@ -65,3 +65,6 @@ import EthCor
 #print axioms EthCor.Amplify.ham_amplified
 #print axioms EthCor.Amplify.conn_amplified
 #print axioms EthCor.HamO.hc_parity_little_o
+#print axioms EthCor.CdsTM.cds_parity_tm
+#print axioms EthCor.CdsITM.cds_randomized
+#print axioms EthCor.CdsITM.cds_amplified

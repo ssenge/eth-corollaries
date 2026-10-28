@@ -4,10 +4,10 @@ import EthCor
 
 Reads lines `name arg bits` from stdin and prints, for each, what the Lean front end of the
 algorithm `name` writes for the counter on the input word `bits` (a string of 0 and 1), as JSON.
-`arg` is the number of colors q for `potts`, the degree d for `vc` and the width w for `cnf`, and is
-ignored otherwise. Triples (1^N, s, F) are printed as [N, s, F], formulas as lists of clauses of
-[variable, 0/1]. The Python tests (`python/tests/test_lean_agreement.py`) compare these outputs
-with the Python reference implementation. Run with `lake env lean --run Dump.lean`. -/
+`arg` is the number of colors q for `potts`, the degree d for `vc` and the width w for `cnf`, `cds`
+and `cdr`, and is ignored otherwise. Triples (1^N, s, F) are printed as [N, s, F], formulas as
+lists of clauses of [variable, 0/1]. The Python tests (`python/tests/test_lean_agreement.py`)
+compare these outputs with the Python reference implementation. Run with `lake env lean --run Dump.lean`. -/
 
 open Groundwork CountKSat GraphProblems
 
@@ -44,6 +44,8 @@ def run (name : String) (arg : ℕ) (x : List Bool) : String :=
       (EthCor.CnfTree.rootX (FreeCode.readFree x))).map leafD)
   | "grow" => jlist (fun y => "[" ++ toString y.1.1.length ++ "," ++ jfml (EthCor.GrowTM.leafF y) ++ "]")
       (Sparsify.leaves EthCor.GrowTree.stepW 1000 (EthCor.CnfTree.rootX (FreeCode.readFree x)))
+  | "cds" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.CdsTM.rootC x)).map leafD)
+  | "cdr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.CdsITM.rootR x)).map leafD)
   | _ => "\"unknown\""
 
 end Dump

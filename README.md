@@ -63,6 +63,8 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A5a′ | `EthCor.HamO.hc_parity_little_o` (also `HamSTM.hc_parity_sparse`, `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(g, ε) vertices with **at most n·g(n) edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every ε > 0 and every g with g(n)·lglg n/√lg n → 0, i.e. for **m = o(n·√lg n/lglg n)** edges. Special cases: m ≤ n·(lg n)^{1/2−θ} (`hc_parity_sparse`) and every degree bound Δ (`hc_parity_bounded`). | independent; superseded by [15, Theorem 2], which counts exactly for m = o(n·√lg n) |
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
+| N7 | `EthCor.CdsTM.cds_parity_tm` (also `CdsTree.shortensN`) | **Parity of connected dominating sets.** For every δ > 0, one machine is given a graph G on n vertices of **any density** and 1 ≤ ℓ ≤ n in unary. It outputs whether G has an odd number of connected dominating sets with ℓ vertices (every vertex is in X or has a neighbour in X, and G[X] is connected), within C·2^{δn} steps. Unlike in N2, the clauses of domination have unbounded width; Anthropic's shortening tree for dominating sets cuts them inside the Cut & Count formula. | ours |
+| N7′ | `EthCor.CdsITM.cds_randomized` (also `cds_amplified`) | **Connected dominating set, randomized, one-sided error.** For every δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ and the code of a seed ω (`codeCD`), for any graph on n ≥ n₀ vertices of **any density**, it halts within C·2^{εn} steps with one bit. If G has no connected dominating set of size ℓ, the bit is 0 for every seed. If it has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. For connected G with n ≥ 3, a connected dominating set of size ℓ exists exactly if one of size at most ℓ does, which holds exactly if G has a spanning tree with at least n − ℓ leaves [19]; so this also decides Max Leaf Spanning Tree (these two facts are not formalized). | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | independent; superseded by the deterministic exact count of [15] |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases (`EthCor.Special`): for q = 2 the Max-Cut spectrum (`maxcut_spectrum`) and the density of states of the ±1 Ising model (`ising_spectrum`); N₀ is the number of Mathlib colorings `G.Coloring (Fin q)` (`pottsSpec_zero`), which is (−q)^{k(E)}·(−1)^n·T(G; 1−q, 0) (`chromatic_tutte`); and T(G; 0, 1−q) (`flow_tutte`), which by Tutte's classical theorem is ± the flow polynomial at q. | direct corollary; formalized |
 | N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | known: perfect matchings in 2^{o(v+e)} [1, Cor. 1.3]; formalized |
@@ -89,14 +91,15 @@ sets of walks in G with Mathlib's `IsHamiltonianCycle` (`EthCor.Ham.numHamCycles
 Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are results we did not find in the literature search of 28 October 2026 (see [Related and concurrent work](#related-and-concurrent-work)). That means we did not find them, not that they are certainly new.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
-edges. In N2′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
+edges. In N2′ and N7′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
 is taken over all seeds, so it is the probability for a uniformly random seed. A seed has
 O(M·k·log M) bits, for M = m or n. Its code `seedCode ω` is W = M + k + (3M + 3) + 1 in unary,
-followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. In N2′ the input
-carries the seed's length in unary in front of it (`seedL`). Running the machine on R independent
+followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. In N2′ and N7′ the
+input carries the seed's length in unary in front of it (`seedL`). Running the machine on R independent
 seeds and answering yes if some run outputs 1 never errs on no-instances. On yes-instances it errs on
 at most a fraction e^{−R·2^{−δn}} of the R-tuples of seeds, which is at most e^{−2^{δn}} for
-R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, from the counting lemma `amplify`).
+R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, `EthCor.CdsITM.cds_amplified`, from
+the counting lemma `amplify`).
 
 ### Proof ideas
 
@@ -204,6 +207,21 @@ R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, from the count
   `conn_parity_P` with the checks as the property P). The isolation lemma on the set of connected
   solutions, a subset of {0,1}^n, gives `ci_decide`. The formula has 3n + 1 + 2(3n+3)k = O(n)
   variables for fixed k, so `SIZED` runs in C·2^{εn}.
+- **N7, N7′, connected dominating set.** Take the formula of N2 with φ the clauses of domination:
+  for every vertex v, x_v or x_u for a neighbour u. These n clauses have unbounded width, so the
+  formula cannot go to `SIZED` directly. Anthropic's tree for dominating sets [2, Cor. 7] cuts long
+  positive clauses: in a clause with more than w variables, either one of its first w variables is
+  true (the clause is replaced by these w) or all w are false (they are deleted from every open
+  clause). Every assignment satisfies exactly one child, so the counts of the leaves add up
+  (`cntS_step`). Here the domination clauses are open and the clauses of the side bits and the edges
+  are closed and carried along (`CdsTree.rootN`). The invariant of [2] bounds the variables of the
+  open clauses by the number of variables; ours bounds them by n while the formula has 3n variables
+  (`InvC`). So a path still has at most n light and n/w heavy steps, the tree has at most
+  Σ_{j ≤ 2n/w} C(2n, j) ≤ 2^{εn} leaves for a suitable w, and every leaf has width at most w + 4
+  (`shortensN`). `SIZED_{w+4}` counts each leaf with n + ℓ true variables, and bit 1 of the sum is
+  the parity of N2 (`cds_parity_tm`). N7′ puts the closed clauses of N2′ (z, the chains of ω and
+  their complements) at the root instead (`CdsITM.rootR`); the tree and its bound are the same,
+  and `ci_decide` with φ the domination clauses gives the one-sided error (`cds_randomized`).
 - **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
   distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
   Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
@@ -255,7 +273,10 @@ published anything yet.
     Jonsson, Lagerkvist, Schmidt and Uppman [16, Thm 8].
   - A3: Impagliazzo, Paturi and Zane [4, Thm 5], with a kernel.
   - A3′: Ganian, de Haan, Kanj and Szeider [17], with Ore's bound or the kernel.
-- **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2 and N2′.
+- **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2, N2′, N7 and
+  N7′. Tulsyan lists dominating set on dense graphs as not covered and sketches connected dominating
+  set only for sparse graphs [15]. Under ETH, connected dominating set has no 2^{o(n)} algorithm
+  even on some geometric intersection graphs [20].
   Connectivity problems were open in this direction. Impagliazzo, Paturi and Zane list Hamiltonian
   Circuit only as SNP-hard [4], and Ganian et al. state as an open problem whether Feedback Vertex
   Set reduces to 3-CNF-SAT in this way [17].
@@ -481,6 +502,27 @@ x_u ∨ x_v for every edge. Lean: `Conn.sideF`, `edgeCC`, `connF`, `conn_parity`
 `ci_decide`; `ConnITM.codeCI`, `preR`, `conn_randomized`. Python: `connected.connF`,
 `conn_parity`, `cvc_parity`, `steiner`, `ciF`, `conn_randomized`, `cvc_randomized`.
 
+### N7, N7′: connected dominating set
+
+```
+CDS_PARITY(G on n vertices, ℓ):
+  open   := for every v: [v] + neighbours(v)                  # domination, unbounded width
+  closed := s̄_v = ¬s_v;  x_v ∨ ¬s_v;  for every edge uv: x_u ∧ x_v → (s_u = s_v)
+  c := 0
+  for every leaf (open', closed') of the tree of stepD_w from (open, closed):   # ≤ 2^{εn} leaves
+    c += SIZED_{w+4}(3n, n + ℓ, open' as positive clauses + closed')
+  return ⌊c/2⌋ mod 2                                 # parity of #connected dominating sets of size ℓ
+
+CDS_RANDOMIZED(G, ℓ, ω):
+  the same walk, with closed := the clauses of CONN_RANDOMIZED for φ = [], on
+  3n + 1 + 2·(3n+3)·k variables with target n + ℓ + (3n+3)·k
+```
+
+w comes from `CdsTree.shortensN_exists` for ε = δ/4. Lean: `CdsTree.rootN`, `InvC`, `shortensN`;
+`CdsTM.numCDS`, `rootC`, `cdsM`, `cds_parity_tm`; `CdsITM.codeCD`, `formD`, `rootR`, `cdrM`,
+`cds_randomized`, `cds_amplified`. Python: `cds.rootC`, `rootR`, `cds_parity`, `cds_randomized`,
+`num_cds`.
+
 ## Running the algorithms
 
 [`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
@@ -494,7 +536,7 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 52 tests: every algorithm against brute force on small inputs,
+python3 -m pytest -q                  # 59 tests: every algorithm against brute force on small inputs,
                                       # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
@@ -502,14 +544,15 @@ python3 -c "from ethcor.permanent import permanent_signed as p; \
 
 The tests compare each algorithm with a direct enumeration of the quantity in the Lean statement
 (colorings, homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles,
-connected vertex sets). They also check the shape bounds the Lean proofs use (width, number of
-variables and clauses), and the one-sided error of A5b and N2′ over random seeds.
+connected vertex sets, connected dominating sets). They also check the shape bounds the Lean proofs
+use (width, number of variables and clauses), and the one-sided error of A5b, N2′ and N7′ over
+random seeds.
 
-`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 92
+`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 106
 random input words to [`lean/Dump.lean`](lean/Dump.lean), which evaluates the Lean definitions
 (`formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`, `SPermTM.leafS`,
 `HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`, `NbTM.preN`,
-and the leaves of the trees of A1, A1′ and A3), and compares the formulas clause for clause. It
+and the leaves of the trees of A1, A1′, A3, N7 and N7′), and compares the formulas clause for clause. It
 needs the built Lean development (`cd lean && lake build`, about 1 minute per run of the test) and is
 skipped if `lake` is not on the PATH or `ETHCOR_SKIP_LEAN` is set.
 
@@ -553,9 +596,10 @@ lake env lean CheckAxioms.lean
   parity, N2).
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
-- **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
-  a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
-  the domination clauses have width Δ + 1.
+- **N2, N2′, N7 and N7′** are done (see the table). N7 combines the Cut & Count formula with
+  Anthropic's shortening tree, so it handles clauses of unbounded width. The same tree should handle
+  other connected problems with at most n positive clauses on the vertex bits, for example connected
+  total domination (open neighbourhoods). Open: connected dominating set deterministically.
 - **N5** is done (see the table). The range of h is that of A2; it ends where b³ ≈ √lg n/lglg n.
   The number of clauses grows with h², not the number of variables, so dense targets cost nothing extra.
 - **N6 and N6′** are done (see the table): 0/1 and {−1, 0, 1} entries. Open: the matching
@@ -605,6 +649,8 @@ lean/
     Amplify                               error e^{−R·2^{−δn}} for R independent seeds (A5b, N2′)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
+    CdsTree                               the shortening tree under any closed clauses (N7)
+    CdsTM, CdsIsoTM                       connected dominating set: parity (N7), randomized (N7′)
 python/              reference implementations of all algorithms (see "Running the algorithms")
   pyproject.toml     pytest configuration
   ethcor/
@@ -615,6 +661,7 @@ python/              reference implementations of all algorithms (see "Running t
     permanent.py     N6, N6′           vertex_cover.py   A3
     nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
     isolation.py     seeds, isolation  connected.py      N2, N2′
+    cds.py           N7, N7′
   tests/             one test file per module, against brute force; test_lean_agreement.py
                      against the Lean front ends (via lean/Dump.lean)
 ```
@@ -662,6 +709,10 @@ and check proofs, to write the Lean formalisation, and to draft the text.
     MFCS 2016, LIPIcs 58:42.
 18. C. Calabro. The Exponential Complexity of Satisfiability Problems. PhD thesis, UC San Diego,
     2009.
+19. Y. Caro, D. B. West, and R. Yuster. Connected domination and spanning trees with many leaves.
+    SIAM J. Discrete Math. 13(2):202–211, 2000.
+20. M. de Berg and S. Kisfaludi-Bak. Lower bounds for dominating set in ball graphs and for
+    weighted dominating set in unit-ball graphs. arXiv:2601.08425, 2026.
 
 ## Citation
 

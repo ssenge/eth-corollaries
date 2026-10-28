@@ -259,3 +259,17 @@ G → H, H a relation on Fin h given in the input (generalizes A2).
   lg h ≤ (lg n)^{1/6−θ}, via `boundNK_le`. `hom_subexp_graph`: same with Mathlib's G →g H.
 - Generic helpers `allOccur_gen`, `two_le_length_gen`, `isKCNF_gen` (any formula with a list of
   facts), for reuse.
+
+A3′ Nonblocker is done (2026-10-28): `lean/EthCor/Nonblocker.lean` and `NonblockerTM.lean`.
+- `ore`: no isolated vertices → ∃ dominating D, 2|D| ≤ n (minimum D; `compl_dominating`: univ \ D
+  dominates, else D.erase v would).
+- `niL n m` (vertices with a neighbour, by List.any on the matrix), `emb`, `core G = G.comap emb`,
+  `matrix_core : matrix (core G) = subM n (matrix G) (niL ..)` (via `List.map_getElem_finRange`).
+- `nb_iff`: ∃ D dom, |D| + k ≤ n ↔ same for core G and n′ (isolated vertices ⊆ every D;
+  `card_iso_add`: #isolated + n′ = n). `nb_answer`: ↔ 2k ≤ n′ ∨ (k ≤ n′ ∧ 0 < numDominatingSets
+  (core G) (n′ − k)).
+- Machine `nbM = mapOut (mapIn preN DOMcount) postN`: preN writes codeWith ⊥₀ 0 (count 1), codeWith ⊥₁ 0
+  (count 0) or codeWith (core G) (n′−k); DOMcount from `stDominatingCounted (ε/2)`; time c·2^{(ε/2)N′}
+  with N′ ≤ 2k in every case. `nb_fpt` via `VcTM.tm_fpt` with A = e = c + 2.
+- fun_prop timed out on `decide (2 * kX x ≤ (jX x).length)` (whnf of the defs); generic lemmas
+  `dec2_polyT`, `declt_polyT` over opaque f, g fixed it.

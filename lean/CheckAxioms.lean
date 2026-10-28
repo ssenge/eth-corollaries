@@ -42,3 +42,7 @@ import EthCor
 #print axioms EthCor.Hom.hom_uniform
 #print axioms EthCor.Hom.hom_subexp
 #print axioms EthCor.Hom.hom_subexp_graph
+#print axioms EthCor.Nb.ore
+#print axioms EthCor.Nb.nb_iff
+#print axioms EthCor.Nb.nb_answer
+#print axioms EthCor.NbTM.nb_fpt

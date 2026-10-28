@@ -58,6 +58,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases are the chromatic polynomial at q, at (1−q, 0), and the flow polynomial at q, at (0, 1−q). | direct corollary; formalized |
 | A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known equivalence ([11] + ¬ETH); formalized |
+| A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known equivalence (Ore [13], kernel [14] + ¬ETH); formalized |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -134,6 +135,14 @@ not part of the Lean statement.
   `tm_fpt` makes one Turing machine of the walk with time poly(n)·2^{εk}. Cai and Juedes [11] showed
   that a 2^{o(k)}·poly(n) algorithm for Vertex Cover refutes ETH; this is the converse direction,
   with the claimed refutation as input.
+- **A3′, Nonblocker.** Isolated vertices are in every dominating set, so G has a dominating set of
+  size ≤ n − k exactly if the graph induced on the n′ vertices with a neighbour has one of size
+  ≤ n′ − k (`nb_iff`). That graph has no isolated vertex, so by Ore's theorem [13] it has a
+  dominating set with at most n′/2 vertices: the complement of a minimum dominating set dominates
+  (`compl_dominating`, `ore`). Hence the answer is yes if 2k ≤ n′ and no if n′ < k. Otherwise
+  n′ < 2k, and the front end hands the induced graph and s = n′ − k to Anthropic's counter of
+  dominating sets of size s (`DOMcount`), which takes c·2^{(ε/2)n′} ≤ c·2^{εk} steps. The host
+  `tm_fpt` of A3 makes one Turing machine of it.
 - **A5a, parity of Hamiltonian cycles (Cut & Count [6]).** The CNF has one bit per edge and one side
   bit per vertex. It says: every vertex is on exactly two chosen edges, the two ends of a chosen edge
   share a side, and s₀ is false. A chosen 2-factor with c cycles has 2^{c−1} side maps. That number
@@ -221,8 +230,8 @@ lake env lean CheckAxioms.lean
 - **A5b** is done (see the table). Open: a deterministic version, and graphs with more than O(n)
   edges. The formula has N ≈ 3m·k variables, so the bound stays 2^{o(n)} only while
   m·k = o(n·√lg n/lglg n).
-- **A3** is done for Vertex Cover (see the table). Nonblocker, the other linear-kernel problem
-  in the plan, is still open: dominating sets do not branch the same way.
+- **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
+  branching: Ore's bound leaves at most 2k relevant vertices.
 - **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
   a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
   the domination clauses have width Δ + 1.
@@ -262,6 +271,7 @@ lean/
     Potts                                 Fortuin–Kasteleyn, Tutte polynomial on hyperbolas (N3)
     PottsTM                               the Potts formula and machine, potts_spectrum (N3)
     VcTree, VcTM                          Vertex Cover in poly(n)·2^{εk}, FPT host (A3)
+    Nonblocker, NonblockerTM              Ore's theorem, Nonblocker in poly(n)·2^{εk} (A3′)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```
@@ -296,6 +306,9 @@ and check proofs, to write the Lean formalisation, and to draft the text.
     System Sci. 67(4):789–807, 2003.
 12. M. Cygan, F. V. Fomin, A. Golovnev, A. S. Kulikov, I. Mihajlin, J. Pachocki, and A. Socała.
     Tight lower bounds on graph embedding problems. J. ACM 64(3):18, 2017.
+13. O. Ore. Theory of Graphs. AMS Colloquium Publications 38, 1962.
+14. F. Dehne, M. Fellows, H. Fernau, E. Prieto, and F. Rosamond. Nonblocker: parameterized
+    algorithmics for minimum dominating set. SOFSEM 2006, LNCS 3831, 237–245.
 
 ## Citation
 

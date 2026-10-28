@@ -82,7 +82,7 @@ without new variables per solution.
 within a stated number of steps. The theorems are built on Anthropic's Lean development, which proves
 its $2^{o(n)}$ algorithm as a theorem; so our results are unconditional theorems of Lean, as sound
 as Anthropic's formalization. They use the axioms \lean{propext}, \lean{Classical.choice} and
-\lean{Quot.sound} only. The development has about 10{,}200 lines in 29 files and 43 main theorems,
+\lean{Quot.sound} only. The development has about 10{,}600 lines in 31 files and 47 main theorems,
 whose axioms are printed by a check file. Source: \url{https://github.com/ssenge/eth-corollaries}.
 
 Lean cannot check that a formal statement says what is intended. The definitions behind the
@@ -113,9 +113,10 @@ N2 & parity of \#connected vertex sets of size $\ell$ satisfying a CNF; any dens
 A5b & Hamiltonian cycle, one-sided error, $\le Dn$ edges & new\\
 N2$'$ & Steiner tree, connected vertex cover, one-sided error, any density & new\\
 A3 & Vertex Cover in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{CJ03} + $\neg$ETH\\
+A3$'$ & Nonblocker in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{Ore62,DFFPR06} + $\neg$ETH\\
 \bottomrule
 \end{tabularx}
-\caption{The results. A1 and A3 are formalizations of known equivalences, N3 and N5 are direct corollaries;
+\caption{The results. A1, A3 and A3$'$ are formalizations of known equivalences, N3 and N5 are direct corollaries;
 the others are our derivations.}
 \label{tab:results}
 \end{table}
@@ -306,7 +307,7 @@ every chain bit gets a complement bit so that the number of true variables stays
 requires. The machines read the seed from the input, so one machine serves every $\delta$. Repeating
 with $2^{2\delta n}$ independent seeds gives error $e^{-2^{\delta n}}$; this step is not formalized.
 
-\section{Vertex Cover parameterized by the solution size (A3)}
+\section{Parameterized by the solution size: Vertex Cover (A3), Nonblocker (A3$'$)}
 
 \begin{theorem}[\lean{vc_fpt}]
 For every $\varepsilon>0$, one machine, given a graph $G$ on $n$ vertices (of any density) and $k\le
@@ -323,6 +324,21 @@ $\sum_{j\le(k+d)/d}\binom{k+d}{j}\le 2^{\varepsilon'(k+d)}$ leaves once $(1/d)\l
 (\lean{leaves_le}). At a leaf all degrees are below $d$, so a cover of size $k'$ leaves at most $k'd$
 vertices on the edges (\lean{card_V_le}); \SIZED{} decides the leaf on these vertices, in
 $2^{\delta kd}$ steps, and $\delta=\varepsilon/(4d)$ makes it $2^{\varepsilon k/4}$.
+
+\paragraph{Nonblocker.} The dual of Dominating Set asks for $k$ vertices whose complement dominates.
+
+\begin{theorem}[\lean{nb_fpt}]
+For every $\varepsilon>0$, one machine, given $G$ on $n$ vertices and $k\le n$, decides whether $G$
+has a dominating set of at most $n-k$ vertices within $C(n+2)^C2^{\varepsilon k}$ steps.
+\end{theorem}
+
+Isolated vertices lie in every dominating set, so the question is the same for the graph induced on
+the $n'$ vertices with a neighbour and the bound $n'-k$ (\lean{nb_iff}). That graph has no isolated
+vertex, and by Ore's theorem~\cite{Ore62} it has a dominating set of at most $n'/2$ vertices: the
+complement of a minimum dominating set dominates (\lean{ore}). So the answer is yes for $2k\le n'$, no
+for $n'<k$, and otherwise $n'<2k$ and Anthropic's counter of dominating sets of a given size runs on
+the induced graph in $c\,2^{(\varepsilon/2)n'}\le c\,2^{\varepsilon k}$ steps. This is the linear kernel
+of~\cite{DFFPR06} in its simplest form, with the claimed refutation as the exponential part.
 
 \section{Checking a definition against Mathlib}\label{sec:mathlib}
 
@@ -377,6 +393,9 @@ relation to other models. Physica 57(4):536--564, 1972.
 complexity of the permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
 \bibitem{CFGKMPS17} M. Cygan, F. V. Fomin, A. Golovnev, A. S. Kulikov, I. Mihajlin, J. Pachocki,
 and A. Socała. Tight lower bounds on graph embedding problems. J. ACM 64(3):18, 2017.
+\bibitem{Ore62} O. Ore. Theory of Graphs. AMS Colloquium Publications 38, 1962.
+\bibitem{DFFPR06} F. Dehne, M. Fellows, H. Fernau, E. Prieto, and F. Rosamond. Nonblocker:
+parameterized algorithmics for minimum dominating set. SOFSEM 2006, LNCS 3831, 237--245.
 \bibitem{CJ03} L. Cai and D. Juedes. On the existence of subexponential parameterized algorithms. J.
 Comput. System Sci. 67(4):789--807, 2003.
 \end{thebibliography}

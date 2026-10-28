@@ -5,6 +5,9 @@ Hypothesis (ETH) is false. Every result below is a Lean 4 theorem about Turing m
 top of Anthropic's formalized 2^{o(n)} algorithm for #k-SAT, and depends only on the standard
 axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
+A write-up of all results, with statements and proof sketches, is in
+[`paper/eth-corollaries.pdf`](paper/eth-corollaries.pdf) (source `paper/eth-corollaries.tex`).
+
 ## Background
 
 **ETH** [3] says that 3-SAT on n variables cannot be solved in time 2^{o(n)}.
@@ -228,6 +231,7 @@ lake env lean CheckAxioms.lean
 
 ```
 README.md            this file
+paper/               the write-up (LaTeX source and PDF)
 NOTES.md             deep dive on both papers, ten candidate problems, research log
 lean/
   lakefile.toml      pins Anthropic's formal-math `eth` development

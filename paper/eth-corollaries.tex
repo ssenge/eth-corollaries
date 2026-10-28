@@ -1,0 +1,361 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,tabularx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\lean}[1]{\texttt{\detokenize{#1}}}
+
+\newcommand{\SIZED}{\textsf{SIZED}}
+\newcommand{\poly}{\operatorname{poly}}
+
+\title{Machine-checked algorithmic consequences of a $2^{o(n)}$ algorithm for \#$k$-SAT}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In October 2026 two groups claimed that the Exponential Time Hypothesis is false, and both
+formalized their algorithms in Lean. A refuted lower bound gives no algorithm by itself: each
+consequence needs a reduction to \#SAT with few variables and, for a uniform bound, small clause
+width. We prove such consequences as Lean 4 theorems about Turing machines, on top of Anthropic's
+formalized $2^{o(n)}$ algorithm, using only the standard axioms. The results include: counting the
+satisfying assignments of CNFs of any width with up to $n\cdot 2^{(\lg n)^{1/4}/(\lg\lg n)^2}$
+clauses; counting $k$-colorings for $\lg k \le (\lg n)^{1/6-\theta}$ with one machine; the Max-SAT
+spectrum; the density of states of the $q$-state Potts model and the Tutte polynomial on the
+hyperbolas $(x-1)(y-1)=q\in\mathbb N$ for graphs with $O(n)$ edges; the parity of the number of
+Hamiltonian cycles in graphs with $n(\lg n)^{1/2-\theta}$ edges; the parity of connected solutions
+(Steiner trees, connected vertex covers) on dense graphs; randomized algorithms with one-sided error
+for Hamiltonian cycle on $O(n)$-edge graphs and for Steiner tree and connected vertex cover on any
+graph, via a formalized isolation lemma for arbitrary sets; and Vertex Cover in
+$2^{\varepsilon k}\poly(n)$ for every $\varepsilon>0$ without a kernel. Each running time is
+$2^{\varepsilon n}$ (or $2^{\varepsilon k}\poly(n)$) for every $\varepsilon > 0$. The Hamiltonian
+cycle count is checked against Mathlib's definition. Everything is conditional only on the
+correctness of Lean and of the statements of Anthropic's formalization; it is not conditional on any
+unproved hypothesis.
+\end{abstract}
+
+\section{Introduction}
+
+The Exponential Time Hypothesis (ETH) of Impagliazzo and Paturi~\cite{IP01} says that 3-SAT on $n$
+variables needs time $2^{\Omega(n)}$. Much of fine-grained complexity rests on it. In October 2026
+two groups claimed that it is false.
+
+\begin{itemize}
+\item OpenAI~\cite{openai} claims \#$k$-SAT for every fixed $k$ in time
+$(n+m)^{O_k(1)}\cdot 2^{O_k(n\lg\lg n/\sqrt{\lg n})}$, deterministic and in polynomial space. The
+core tool is the contraction of Boolean tensor networks with $s$ wires in time
+$2^{O(s/\sqrt{\log s})}$.
+\item Anthropic~\cite{anthropic} claims \#$k$-SAT with one machine for all $k$ in time
+$2^{C\min(k^2 n\lg\lg n/\sqrt{\lg n},\; km/\sqrt{\lg m})}$ with an absolute constant $C$, via
+sum-product computations on the clause graph.
+\end{itemize}
+
+Both papers are unrefereed and both come with Lean formalizations~\cite{formalmath}. A review led by
+Impagliazzo, Paturi and Williams is under way; its organizers stress that taking part is not a
+certification. If the claims hold, ETH, SETH, \#ETH, Gap-ETH and NSETH fall. The OV conjecture, the
+CNF-SAT hypothesis for $\poly(n)$ clauses of unbounded width, the $k$-Clique conjecture and the Set
+Cover conjecture still stand. The algorithms are galactic: Anthropic reports no gain over $2^n$
+below $n\approx 10^{10}$.
+
+\paragraph{Corollaries are not automatic.} A lower bound that is refuted gives no algorithm. To get a
+$2^{o(n)}$ algorithm for a problem $X$ one needs a reduction from $X$ to (\#)SAT with
+$o(n\sqrt{\lg n}/\lg\lg n)$ variables and, for the uniform bound, small clause width. Problems in
+size-constrained SNP reduce this way~\cite{IPZ01}. Problems with global constraints (connectivity,
+orderings, large numbers) and dense pairwise interactions do not. Our results are reductions of this
+kind, some standard and some new, with two recurring tools: Cut \& Count~\cite{CNPPRW11} turns
+connectivity into a parity of a count, and sparse parity checks~\cite{CIKP08} isolate one solution
+without new variables per solution.
+
+\paragraph{What we prove and how.} Every result is a Lean~4 theorem that a single Turing machine
+(Mathlib's multi-stack model TM2, finite alphabets) halts on a stated input with a stated output
+within a stated number of steps. The theorems are built on Anthropic's Lean development, which proves
+its $2^{o(n)}$ algorithm as a theorem; so our results are unconditional theorems of Lean, as sound
+as Anthropic's formalization. They use the axioms \lean{propext}, \lean{Classical.choice} and
+\lean{Quot.sound} only. The development has about 9{,}700 lines in 27 files and 37 main theorems,
+whose axioms are printed by a check file. Source: \url{https://github.com/ssenge/eth-corollaries}.
+
+Lean cannot check that a formal statement says what is intended. The definitions behind the
+statements must be read by hand: ours (\lean{numHamCycles}, \lean{spectrum}, \lean{pottsSpec},
+\lean{mono}, \lean{comps}, \lean{tutte}, \lean{Seed}, the input codes) and Anthropic's (the TM2 model
+and their statement files). For one of ours, the number of Hamiltonian cycles, we prove agreement with
+Mathlib's independent definition (Section~\ref{sec:mathlib}).
+
+\paragraph{Results.} Table~\ref{tab:results} lists the results. ``One machine'' means one fixed TM;
+constants $C$ and thresholds $n_0$ depend on the stated parameters only. We have not finished a
+literature check for the entries marked ``new''.
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}lXl@{}}
+\toprule
+& Statement (time $2^{\varepsilon n}$ resp.\ $C2^{\delta n}$ for every $\varepsilon,\delta>0$) & Status\\
+\midrule
+A1 & \#CNF-SAT, any width, $\le Dn$ clauses & known~\cite{CIP06} + $\neg$ETH\\
+A1$'$ & \#CNF-SAT, any width, $m\le n\,2^{(\lg n)^{1/4}/(\lg\lg n)^2}$, one machine & new\\
+A2 & \#$k$-colorings for all $k$ with $\lg k\le(\lg n)^{1/6-\theta}$, one machine & growing $k$ new\\
+A4 & Max-SAT spectrum: \#assignments satisfying exactly $t$ clauses, width $r$, $\le Dn$ clauses & new\\
+N3 & Potts density of states, $q$ colors, $\le Dn$ edges; Tutte polynomial on $(x-1)(y-1)=q$ & corollary\\
+A5a & parity of \#Hamiltonian cycles, degree $\le\Delta$ & new\\
+A5a$'$ & parity of \#Hamiltonian cycles, $\le n(\lg n)^{1/2-\theta}$ edges, any degree, one machine & new\\
+N2 & parity of \#connected vertex sets of size $\ell$ satisfying a CNF; any density & new\\
+A5b & Hamiltonian cycle, one-sided error, $\le Dn$ edges & new\\
+N2$'$ & Steiner tree, connected vertex cover, one-sided error, any density & new\\
+A3 & Vertex Cover in $C(n+2)^C2^{\varepsilon k}$ & known~\cite{CJ03} + $\neg$ETH\\
+\bottomrule
+\end{tabularx}
+\caption{The results. A1 and A3 are formalizations of known equivalences, N3 is a direct corollary;
+the others are our derivations.}
+\label{tab:results}
+\end{table}
+
+\section{The interface}
+
+We use three parts of Anthropic's development as black boxes.
+
+\begin{theorem}[\SIZED, Anthropic]\label{thm:sized}
+For every width $w$ and $\delta>0$ there are a machine $\SIZED_w$ (a polynomial-time stepped
+computation) and $c$ such that for all $N$, $s\le N$ and every CNF $\psi$ on $N$ variables with clauses
+of at most $w$ literals, $\SIZED_w$ on $(1^N, s, \psi)$ returns the number $\mathrm{cnt}_s(\psi)$ of
+satisfying assignments with exactly $s$ true variables, within $c\cdot 2^{\delta N}$ steps of size at
+most $c(N+|\psi|+2)^c$.
+\end{theorem}
+
+The number of clauses of $\psi$ only enters the polynomial factor. This is what makes dense graphs
+possible whenever the variables are the vertices.
+
+\paragraph{Stepped machines, trees and the host.} Anthropic's machines are \emph{stepped}: a
+computation is cut into polynomial-time steps, and a theorem turns a stepped machine that runs in
+$T$ steps of state size $S$ into a TM2 machine with time $q(T+1)(|x|+S+1)^q$. A depth-first walk
+over the tree of a step function $\sigma\to\mathrm{Option}(\sigma\times\sigma)$ that sums a stepped
+computation over the leaves is again stepped (\lean{walkSum}), with a bound on the number of leaves
+when every path has at most $D$ steps and at most $T/q$ ``heavy'' steps. The host theorem
+\lean{tm_of_stepped} gives time $\lfloor C2^{\delta n}\rfloor$ from $c\,2^{\delta n/2}$ steps; we add
+an FPT version \lean{tm_fpt} with time $\lfloor C(n+2)^C 2^{\delta p}\rfloor$ for a parameter $p$.
+
+\paragraph{Encodings.} A graph on $n$ vertices is coded as $1^n0$ followed by its adjacency matrix,
+a number $t$ in unary as $1^t0$, a CNF as $1^n0$ followed by its clauses, each literal in
+$\lfloor\lg 2n\rfloor+1$ bits.
+
+\section{Counting}
+
+\subsection{CNF of any width (A1, A1$'$)}
+
+\begin{theorem}[\lean{cnf_counts}]
+For every $D$ and $\delta>0$ one machine counts the satisfying assignments of every CNF with $n$
+variables and at most $Dn$ clauses, of any width, within $C2^{\delta n}$ steps.
+\end{theorem}
+
+This is the width--density duality of Calabro, Impagliazzo and Paturi~\cite{CIP06} combined with
+$\neg$ETH. The literal $(u,b)$ becomes the variable $2u$ or $2u+1$, with pair clauses making them
+complementary, so every clause is positive. Anthropic's clause-shortening tree from their
+Dominating Set corollary cuts clauses to width $w$; we replace its invariant (which needs at most
+$n$ clauses) by one for $M=Dn$ clauses. The tree has at most $2^{(2/w)\lg(ew(D+2))n}$ leaves, and
+\SIZED{} counts at each leaf.
+
+\begin{theorem}[\lean{cnf_grow}]
+One machine: for every $\delta>0$ there is $n_0$ such that for every CNF on $n\ge n_0$ variables with
+at most $n\cdot 2^{(\lg n)^{1/4}/(\lg\lg n)^2}$ clauses of any width, it outputs the number of
+satisfying assignments within $2^{\delta n}$ steps.
+\end{theorem}
+
+The width is now read off the node: with $\ell=\lfloor\lg 2n\rfloor$ and $L=\lfloor\lg\ell\rfloor$,
+$w=2^{\lfloor L/4\rfloor-\lfloor\lg L\rfloor}+1\approx\ell^{1/4}/L$. The leaves are counted by
+Anthropic's uniform machine, whose exponent $Cw^2N\lg\lg N/\sqrt{\lg N}$ is at most $32CN/L=o(n)$
+since $w^2L^2\le 16\sqrt\ell$. The tree coefficient is at most $(8+6\sqrt w)/w+8/(L-1)\to 0$ for
+$\lg D\le 4w/(L-1)$. The method stops at density $n2^{o((\lg n)^{1/4}/\sqrt{\lg\lg n})}$.
+
+\subsection{Colorings with a growing number of colors (A2)}
+
+\begin{theorem}[\lean{colorings_subexp}]
+One machine counts the proper $k$-colorings of an $n$-vertex graph, given $k$ and the graph, within
+$2^{\varepsilon n}$ steps, for every $\varepsilon>0$, $0<\theta<1/6$, $n\ge n_0(\theta,\varepsilon)$
+and all $2\le k$ with $\lg k\le(\lg n)^{1/6-\theta}$.
+\end{theorem}
+
+Colors are written in $b=\lceil\lg k\rceil$ bits; the CNF has $nb+4$ variables, width $2b$, and one
+satisfying assignment per proper coloring. The uniform bound with width $2b$ and $N=nb$ variables is
+$O(n(\lg n)^{-2\theta})$ in the exponent.
+
+\subsection{Spectra (A4) and the Potts model (N3)}
+
+\begin{theorem}[\lean{maxsat_spectrum}]
+For every width $r$, density $D$ and $\delta>0$, one machine outputs, given $t$ and a CNF $\varphi$
+with clauses of at most $r$ literals and at most $Dn$ clauses, the number of assignments that satisfy
+exactly $t$ clauses of $\varphi$, within $C2^{\delta n}$ steps.
+\end{theorem}
+
+On $2n+m$ variables ($x_u$, $\bar x_u$, and $y_j\leftrightarrow C_j$) the satisfying assignments with
+exactly $n+t$ true variables are the assignments with exactly $t$ satisfied clauses. This covers the
+Max-Cut spectrum and the density of states of the $\pm1$ Ising model on $O(n)$-edge graphs.
+
+For a graph $G$ and $q$ colors let $N_j$ be the number of colorings $\sigma:V\to[q]$ with exactly $j$
+monochromatic edges, $k(A)$ the number of components of $(V,A)$, and
+$T(G;x,y)=\sum_{A\subseteq E}(x-1)^{k(A)-k(E)}(y-1)^{|A|+k(A)-n}$ the Tutte polynomial.
+
+\begin{theorem}[\lean{potts_spectrum}, \lean{potts_fk}, \lean{tutte_hyperbola}, \lean{tutte_tm}]
+For every $q\ge1$, $D$ and $\delta>0$, one machine outputs $N_j$ given $G$ with at most $Dn$ edges and
+$j$, within $C2^{\delta n}$ steps. Moreover, in every commutative ring,
+$\sum_j N_j(1+v)^j=\sum_{A\subseteq E}q^{k(A)}v^{|A|}$, and in every field, if $(x-1)(y-1)=q$ and
+$x,y\ne1$, then $(x-1)^{k(E)}(y-1)^nT(G;x,y)=\sum_j N_jy^j$.
+\end{theorem}
+
+The CNF has variables $x_{vq+c}$ ($v$ has color $c$) and $y_i$ (edge $i$ is monochromatic), $nq+m$
+in all, and width $q+3$. Its satisfying assignments with $n+j$ true variables are the colorings with
+$j$ monochromatic edges. The identities are the Fortuin--Kasteleyn expansion~\cite{FK72}: expand
+$\prod_e(1+v[e\text{ mono}])$ over $A\subseteq E$ and count the colorings constant on the components of
+$(V,A)$, which are $q^{k(A)}$ many. This gives the chromatic polynomial at $q$ (the point $(1-q,0)$)
+and the flow polynomial at $q$ (the point $(0,1-q)$). Under \#ETH, Dell et al.~\cite{DHMTW14} prove
+lower bounds of the form $2^{\Omega(n/\mathrm{polylog}\,n)}$ for such evaluations on sparse graphs.
+
+\section{Connectivity through parity}
+
+\subsection{Hamiltonian cycles (A5a, A5a$'$)}
+
+Let $\mathrm{hc}(G)$ be the number of connected spanning subgraphs of $G$ with all degrees 2.
+
+\begin{theorem}[\lean{hc_parity_subexp}, \lean{hc_parity_sparse}]
+For every $\Delta$, one machine decides whether a graph with all degrees at most $\Delta$ has an odd
+number of Hamiltonian cycles, within $2^{\varepsilon n}$ steps for $n\ge n_0(\varepsilon)$. One machine
+decides it for all graphs with at most $n(\lg n)^{1/2-\theta}$ edges, within $2^{\varepsilon n}$ steps
+for $n\ge n_0(\theta,\varepsilon)$.
+\end{theorem}
+
+The Cut \& Count CNF~\cite{CNPPRW11} has an edge bit per edge and a side bit per vertex, and says
+that every vertex is on exactly two chosen edges, the ends of a chosen edge share a side, and vertex
+0 has side 0. A 2-factor with $c$ cycles has $2^{c-1}$ side maps, which is odd exactly when $c=1$.
+For bounded degree the formula has width $\Delta+3$; for any degree a sequential counter with two bits
+per (edge, end) replaces the cardinality constraints, giving width 3 and $5m+n+2$ variables. Anthropic's
+bound $2^{9cN\lg\lg N/\sqrt{\lg N}}$ is then $2^{o(n)}$ for $m=o(n\sqrt{\lg n}/\lg\lg n)$.
+
+\subsection{Connected solutions on dense graphs (N2)}
+
+\begin{theorem}[\lean{conn_parity_tm}, \lean{cvc_parity_tm}]
+For every width $r$, exponent $D$ and $\delta>0$ one machine, given a graph $G$ on $n$ vertices of any
+density, $1\le\ell\le n$ and a CNF $\varphi$ on the vertices with clauses of at most $r$ literals and at
+most $(n+2)^D$ clauses, outputs the parity of the number of $X\subseteq V$ with $|X|=\ell$,
+$X\models\varphi$ and $G[X]$ connected, within $C2^{\delta n}$ steps.
+\end{theorem}
+
+The variables are a vertex bit $x_v$, a side bit $s_v$ and a complement bit $\bar s_v$; the clauses
+are those of $\varphi$, $\bar s_v=\neg s_v$, $s_v\to x_v$ and $s_u=s_v$ on edges inside $X$. The
+satisfying assignments with $n+\ell$ true variables are the pairs $(X,s)$, $2^{\mathrm{cc}(G[X])}$ per
+$X$, and half their number is odd exactly when $G[X]$ is connected. The formula has $3n$ variables
+whatever the number of edges. With $\varphi$ the unit clauses of a terminal set this counts the vertex
+sets of Steiner trees on $\ell$ vertices; with $\varphi$ the edge clauses, connected vertex covers.
+
+\section{Isolation and one-sided error}
+
+\begin{theorem}[\lean{isolation}; Calabro, Impagliazzo, Kabanets, Paturi~\cite{CIKP08}]
+For every $\delta>0$ there are $k,t$ such that for $M\ge M_0(\delta)$ and every nonempty
+$S\subseteq\{0,1\}^M$, at least a $2^{-\delta M}$ fraction of the seeds leaves exactly one point of
+$S$. A seed is $3M+3$ parity checks on $k$ coordinates, a number of them to use, and for every
+coordinate a value in $\{0,\dots,t-1\}$ and a bit (the coordinate is fixed to the bit when the value
+is 0).
+\end{theorem}
+
+\cite{CIKP08} states this for solution sets of $k$-CNFs, but the proof uses only that $S$ is
+nonempty. A check on $k$ coordinates becomes a chain of $k$ auxiliary variables
+$a_l=a_{l-1}\oplus(c_l\wedge x_{j_l})$ in clauses of width at most 3, determined by the main
+variables; so isolation keeps the number of variables linear, unlike Valiant--Vazirani hashing.
+
+\begin{theorem}[\lean{ham_randomized}, \lean{conn_randomized}]
+(a) For every $D,\delta,\varepsilon>0$ there are $k,t,n_0$ and one machine that, on a graph with
+$n\ge n_0$ vertices and at most $Dn$ edges and a seed $\omega$, halts within $2^{\varepsilon n}$ steps
+with a bit that is 0 for every seed if $G$ has no Hamiltonian cycle, and 1 for at least a
+$2^{-\delta n}$ fraction of the seeds if it has one.
+(b) The same, for graphs of any density, holds for the existence of a vertex set of size $\ell$ that
+satisfies a CNF $\varphi$ as in N2 and induces a connected subgraph; in particular for Steiner trees
+on $\ell$ vertices and connected vertex covers of size $\ell$, within $C2^{\varepsilon n}$ steps.
+\end{theorem}
+
+For (a), the checks act on the edge bits; the count modulo 2 of the Hamiltonian cycles passing the
+checks is odd for a $2^{-\delta m}$ fraction of seeds. For (b), the checks act on the vertex bits, and
+every chain bit gets a complement bit so that the number of true variables stays fixed, as \SIZED{}
+requires. The machines read the seed from the input, so one machine serves every $\delta$. Repeating
+with $2^{2\delta n}$ independent seeds gives error $e^{-2^{\delta n}}$; this step is not formalized.
+
+\section{Vertex Cover parameterized by the solution size (A3)}
+
+\begin{theorem}[\lean{vc_fpt}]
+For every $\varepsilon>0$, one machine, given a graph $G$ on $n$ vertices (of any density) and $k\le
+n$, decides whether $G$ has a vertex cover of at most $k$ vertices within $C(n+2)^C2^{\varepsilon k}$
+steps.
+\end{theorem}
+
+Cai and Juedes~\cite{CJ03} showed that such an algorithm refutes ETH; the converse with a linear
+kernel is folklore. We avoid the kernel. While the budget $k'$ is positive and a vertex $v$ has at
+least $d$ distinct neighbours, branch: $v$ is in the cover (budget $k'-1$) or all of $N(v)$ is (budget
+$k'-|N(v)|\le k'-d$). A node is good iff one child is (\lean{good_step}). Along a path the budget
+drops by 1 or by at least $d$, so with Anthropic's tree bound the tree has at most
+$\sum_{j\le(k+d)/d}\binom{k+d}{j}\le 2^{\varepsilon'(k+d)}$ leaves once $(1/d)\lg(ed)\le\varepsilon'$
+(\lean{leaves_le}). At a leaf all degrees are below $d$, so a cover of size $k'$ leaves at most $k'd$
+vertices on the edges (\lean{card_V_le}); \SIZED{} decides the leaf on these vertices, in
+$2^{\delta kd}$ steps, and $\delta=\varepsilon/(4d)$ makes it $2^{\varepsilon k/4}$.
+
+\section{Checking a definition against Mathlib}\label{sec:mathlib}
+
+Mathlib defines Hamiltonian cycles as closed walks that are cycles and visit every vertex once
+(\lean{Walk.IsHamiltonianCycle}), and \lean{SimpleGraph.IsHamiltonian}.
+
+\begin{theorem}[\lean{numHamCycles_pos_iff}, \lean{numHamCycles_eq}]
+For $n\ne1$, $\mathrm{hc}(G)>0$ iff $G$ is Hamiltonian in Mathlib's sense. Moreover $\mathrm{hc}(G)$
+equals the number of edge sets of Mathlib Hamiltonian cycles of $G$.
+\end{theorem}
+
+The proof uses Mathlib's result that a connected graph with all degrees 2 is a single cycle through
+its vertices. With it, (a) of the previous section is stated directly for \lean{G.IsHamiltonian}
+(\lean{ham_randomized_mathlib}).
+
+\section{Discussion}
+
+The results mark where the claimed algorithms reach. The variable count is the currency: $O(n)$
+variables give $2^{\varepsilon n}$, $n\cdot r(n)$ variables with $r=o(\sqrt{\lg n}/\lg\lg n)$ still
+give $2^{o(n)}$, and the clause width must stay below about $(\lg n)^{1/4}$ for the uniform bound.
+Open directions: deterministic decision versions of A5b and N2$'$; Hamiltonian cycle and Steiner tree
+with more edges; the Tutte polynomial off the integer hyperbolas; Nonblocker and other
+linear-kernel problems; and the Tier B problems of the repository notes (dense Max-Cut, the permanent,
+CNF-SAT with $\poly(n)$ clauses, planar problems below $2^{O(\sqrt n)}$, Subset Sum), where the
+refutations remove a lower bound but no reduction is known.
+
+\section*{Use of AI}
+Claude Opus 5.5 (Anthropic) was used throughout this research: to explore approaches, to develop and
+check proofs, to write the Lean formalization, and to draft the text.
+
+\begin{thebibliography}{99}
+\bibitem{openai} OpenAI. The Exponential Time Hypothesis is False. Preprint, 17 October 2026,
+revised 25 October 2026. \url{https://github.com/openai/math}, family 378.
+\bibitem{anthropic} Anthropic. A $2^{o(n)}$ Time Algorithm for 3-SAT. hexagon:2610.00577v1, 26
+October 2026.
+\bibitem{formalmath} Anthropic. formal-math: Lean formalizations, subdirectory \texttt{eth}.
+\url{https://github.com/anthropics/formal-math}.
+\bibitem{IP01} R. Impagliazzo and R. Paturi. On the complexity of $k$-SAT. J. Comput. System Sci.
+62(2):367--375, 2001.
+\bibitem{IPZ01} R. Impagliazzo, R. Paturi, and F. Zane. Which problems have strongly exponential
+complexity? J. Comput. System Sci. 63(4):512--530, 2001.
+\bibitem{CIP06} C. Calabro, R. Impagliazzo, and R. Paturi. A duality between clause width and clause
+density for SAT. CCC 2006.
+\bibitem{CNPPRW11} M. Cygan, J. Nederlof, M. Pilipczuk, M. Pilipczuk, J. M. M. van Rooij, and J. O.
+Wojtaszczyk. Solving connectivity problems parameterized by treewidth in single exponential time.
+FOCS 2011.
+\bibitem{CIKP08} C. Calabro, R. Impagliazzo, V. Kabanets, and R. Paturi. The complexity of Unique
+$k$-SAT: an isolation lemma for $k$-CNFs. J. Comput. System Sci. 74(3):386--393, 2008.
+\bibitem{FK72} C. M. Fortuin and P. W. Kasteleyn. On the random-cluster model I. Introduction and
+relation to other models. Physica 57(4):536--564, 1972.
+\bibitem{DHMTW14} H. Dell, T. Husfeldt, D. Marx, N. Taslaman, and M. Wahlén. Exponential time
+complexity of the permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
+\bibitem{CJ03} L. Cai and D. Juedes. On the existence of subexponential parameterized algorithms. J.
+Comput. System Sci. 67(4):789--807, 2003.
+\end{thebibliography}
+
+\end{document}

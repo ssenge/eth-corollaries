@@ -11,6 +11,11 @@ against brute force (see [Running the algorithms](#running-the-algorithms)). A w
 results, with statements and proof sketches, is in
 [`paper/eth-corollaries.pdf`](paper/eth-corollaries.pdf) (source `paper/eth-corollaries.tex`).
 
+Some of the results have since turned out to be known or superseded. In particular, Tulsyan [15]
+counts Hamiltonian cycles exactly and deterministically, which subsumes A5a, A5a′ and A5b; see
+[Related and concurrent work](#related-and-concurrent-work). The Novelty column of the table says
+which results are still ours.
+
 ## Background
 
 **ETH** [3] says that 3-SAT on n variables cannot be solved in time 2^{o(n)}.
@@ -49,29 +54,30 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 
 | # | Lean theorem | Statement | Novelty |
 |---|---|---|---|
-| A2 | `EthCor.colorings_subexp` (also `colorings_uniform`) | One machine counts the proper k-colorings of an n-vertex graph within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all k with lg k ≤ (lg n)^{1/6−θ}. | direct corollary; the growing range of k is the new part |
-| N5 | `EthCor.Hom.hom_subexp` (also `hom_uniform`, `hom_subexp_graph`; `Hom.numColorings_eq`, `Hom.numHom_simple`) | **Counting homomorphisms G → H with H in the input.** One machine is given h in unary, the h × h matrix of a relation H on {0,…,h−1} (loops allowed, not necessarily symmetric) and a graph G on n vertices. It outputs the number of maps f : V(G) → [h] that send every edge of G into H, within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all h with lg h ≤ (lg n)^{1/6−θ}. For a simple graph H this is the number of Mathlib homomorphisms `G →g H`; for H = K_h it is the number of proper h-colorings, so A2 is the special case. Another special case: the independent sets (H = an edge with a loop at one end; `Special.numHom_hInd`, `Special.indep_subexp`, with Mathlib's `IsIndepSet`). Under ETH, deciding G → H takes \|V(H)\|^{Ω(\|V(G)\|)} time in general [12]. | direct corollary; generalizes A2 |
-| A1 | `EthCor.CnfTM.cnf_counts` | For every D and δ > 0, one machine counts the satisfying assignments of any CNF with ≤ D·n clauses of **any width** within C·2^{δn} steps. | known equivalence ([5] + ¬ETH); formalized |
+| A2 | `EthCor.colorings_subexp` (also `colorings_uniform`) | One machine counts the proper k-colorings of an n-vertex graph within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all k with lg k ≤ (lg n)^{1/6−θ}. | fixed k is in [1, Cor. 1.3] and [2, Cor. 7]; the growing range of k is ours |
+| N5 | `EthCor.Hom.hom_subexp` (also `hom_uniform`, `hom_subexp_graph`; `Hom.numColorings_eq`, `Hom.numHom_simple`) | **Counting homomorphisms G → H with H in the input.** One machine is given h in unary, the h × h matrix of a relation H on {0,…,h−1} (loops allowed, not necessarily symmetric) and a graph G on n vertices. It outputs the number of maps f : V(G) → [h] that send every edge of G into H, within 2^{εn} steps, for every ε > 0 and θ > 0, n ≥ n₀(θ, ε) and all h with lg h ≤ (lg n)^{1/6−θ}. For a simple graph H this is the number of Mathlib homomorphisms `G →g H`; for H = K_h it is the number of proper h-colorings, so A2 is the special case. Another special case: the independent sets (H = an edge with a loop at one end; `Special.numHom_hInd`, `Special.indep_subexp`, with Mathlib's `IsIndepSet`); these counts are already in [1, Cor. 1.3] and, for every size s, in [2, Cor. 7]. Under ETH, deciding G → H takes \|V(H)\|^{Ω(\|V(G)\|)} time in general [12]. | direct corollary; generalizes A2 |
+| A1 | `EthCor.CnfTM.cnf_counts` | For every D and δ > 0, one machine counts the satisfying assignments of any CNF with ≤ D·n clauses of **any width** within C·2^{δn} steps. | known: [5] for decision; counting uses the same count-preserving branching, as in [2, Cor. 7]; formalized |
 | A1′ | `EthCor.GrowTM.cnf_grow` | One machine counts the satisfying assignments of any CNF on n ≥ n₀(δ) variables with **m ≤ n·2^{(lg n)^{1/4}/(lg lg n)²} clauses** of any width within 2^{δn} steps, for every δ > 0. This density exceeds n·2^{(lg n)^{1/4−ε}} for every ε > 0. | ours |
-| A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given a CNF with m ≤ D·n clauses of ≤ r literals and t ≤ m, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours |
-| A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | ours |
-| A5a′ | `EthCor.HamO.hc_parity_little_o` (also `HamSTM.hc_parity_sparse`, `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(g, ε) vertices with **at most n·g(n) edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every ε > 0 and every g with g(n)·lglg n/√lg n → 0, i.e. for **m = o(n·√lg n/lglg n)** edges. Special cases: m ≤ n·(lg n)^{1/2−θ} (`hc_parity_sparse`) and every degree bound Δ (`hc_parity_bounded`). | ours |
+| A4 | `EthCor.Spectrum.maxsat_spectrum` | For every width r, density D and δ > 0, one machine outputs, given a CNF with m ≤ D·n clauses of ≤ r literals and t ≤ m, the number of assignments satisfying **exactly t clauses**, within C·2^{δn} steps. | ours (the spectrum); for the maximum, the equivalence with ETH is known [16, Thm 8] |
+| A5a | `EthCor.HamTM.hc_parity_subexp` (also `hc_parity_tm`) | For every Δ, one machine decides whether a graph on n ≥ n₀(ε) vertices with all degrees ≤ Δ has an **odd number of Hamiltonian cycles**, within 2^{εn} steps, for every ε > 0. | independent; superseded by the exact count of [15] |
+| A5a′ | `EthCor.HamO.hc_parity_little_o` (also `HamSTM.hc_parity_sparse`, `hc_parity_bounded`, `hcS_tm`) | One machine decides whether a graph on n ≥ n₀(g, ε) vertices with **at most n·g(n) edges**, of any degree, has an odd number of Hamiltonian cycles, within 2^{εn} steps, for every ε > 0 and every g with g(n)·lglg n/√lg n → 0, i.e. for **m = o(n·√lg n/lglg n)** edges. Special cases: m ≤ n·(lg n)^{1/2−θ} (`hc_parity_sparse`) and every degree bound Δ (`hc_parity_bounded`). | independent; superseded by [15, Theorem 2], which counts exactly for m = o(n·√lg n) |
 | N2 | `EthCor.ConnTM.conn_parity_tm` (also `cvc_parity_tm`) | **Parity of connected solutions.** For every width r, exponent D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n, and a CNF φ on the vertices with clauses of ≤ r literals and ≤ (n+2)^D clauses. It outputs whether the number of vertex sets X with \|X\| = ℓ, X ⊨ φ and G[X] connected is odd, within C·2^{δn} steps. Special cases: with φ = unit clauses for a terminal set T, the sets X ⊇ T of size ℓ with G[X] connected, which are the vertex sets of the Steiner trees on ℓ vertices; and the connected vertex covers of size ℓ. The latter has its own machine on input `code G ++ unary ℓ` (`cvc_parity_tm`). | ours |
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
-| A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
+| A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | independent; superseded by the deterministic exact count of [15] |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases (`EthCor.Special`): for q = 2 the Max-Cut spectrum (`maxcut_spectrum`) and the density of states of the ±1 Ising model (`ising_spectrum`); N₀ is the number of Mathlib colorings `G.Coloring (Fin q)` (`pottsSpec_zero`), which is (−q)^{k(E)}·(−1)^n·T(G; 1−q, 0) (`chromatic_tutte`); and T(G; 0, 1−q) (`flow_tutte`), which by Tutte's classical theorem is ± the flow polynomial at q. | direct corollary; formalized |
-| N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | direct corollary; formalized |
+| N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | known: perfect matchings in 2^{o(v+e)} [1, Cor. 1.3]; formalized |
 | N6′ | `EthCor.SPermTM.sperm_fpt` (also `SPerm.cnt_sperm`, `SPerm.permanent_signed`) | **The permanent of a {−1, 0, 1} matrix in 2^{εm}·poly(n).** For every ε > 0, one machine is given a bit b, n in unary and two n × n 0/1 matrices A (the nonzero entries) and S (the entries −1). It outputs the number of permutations σ with A(σ i, i) for all i and an even (b = 0) or odd (b = 1) number of i with S(σ i, i), within C·(n+2)^C·2^{εm} steps, m the number of nonzero entries. The permanent of the matrix over ℤ (Mathlib's `Matrix.permanent`) is the first count minus the second (`permanent_signed`), so two runs give it. Under #ETH, no exp(o(m)) algorithm exists for this problem [10, Thm 1.3]. | direct corollary; formalized |
-| A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known equivalence ([11] + ¬ETH); formalized |
-| A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known equivalence (Ore [13], kernel [14] + ¬ETH); formalized |
+| A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known: Vertex Cover is complete for size-constrained SNP [4, Thm 5], and a 2k-vertex kernel gives 2^{o(k)}·poly(n); see also [11]; formalized |
+| A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known: Nonblocker is in Linear Monadic NP [17], with Ore's bound [13] or the kernel [14]; formalized |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
 2^{−δM} fraction of the seeds ω leaves exactly one point of S. A seed consists of 3M + 3 parity checks
 on k coordinates each, a number m of them to use, and for every coordinate a value in {0,…,t−1} and a
 bit; the coordinate is fixed to the bit when the value is 0. This is the isolation lemma of [7].
-[7] states it for solution sets of k-CNFs, but its proof uses only that S is nonempty, and that is
-what we formalize. Sparse checks matter here: a check on k coordinates is 2^{k−1} clauses of width k
+[7] states it for solution sets of k-CNFs, but its proof uses only that S is nonempty; Calabro calls
+the technique oblivious to the formula [18, §9.3]. That is what we formalize. Tulsyan [15] formalizes
+the same lemma for arbitrary finite sets. Sparse checks matter here: a check on k coordinates is 2^{k−1} clauses of width k
 on the same variables. So isolating among the solutions of a CNF keeps the number of variables, which
 Valiant–Vazirani hashing does not.
 
@@ -80,7 +86,7 @@ Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgrap
 degree 2. This agrees with Mathlib. For n ≠ 1, `0 < numHamCycles G` if and only if
 `G.IsHamiltonian` (`EthCor.Ham.numHamCycles_pos_iff`). And `numHamCycles G` is the number of edge
 sets of walks in G with Mathlib's `IsHamiltonianCycle` (`EthCor.Ham.numHamCycles_eq`), so each
-Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are our derivations; we have not finished a literature check.
+Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are results we did not find in the literature search of 28 October 2026 (see [Related and concurrent work](#related-and-concurrent-work)). That means we did not find them, not that they are certainly new.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
 edges. In N2′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
@@ -218,6 +224,37 @@ R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, from the count
   (`iso_decide`). The machine reads k, the number of checks used, the checks and the fixings from
   the input (`decode_seedCode`), so one machine serves every δ. Its bound c·2^{9c·N·lglg N/√lg N}
   is 2^{o(n)} because N = O(n) for m ≤ D·n.
+
+## Related and concurrent work
+
+This is a literature search of 28 October 2026. It covered papers, preprints, blogs and GitHub. It
+could not reach X/Twitter or some journal full texts, and the review of the two claims has not
+published anything yet.
+
+- **Tulsyan [15]**, posted 27–28 October 2026, independently of this repository, also builds on
+  Anthropic's Lean development. His `theorem1` counts the Hamiltonian cycles of graphs with
+  |E| ≤ D·n exactly and deterministically in C·2^{δn} steps. His `theorem2` is one machine with
+  C·2^{C(m+n)/√lg(n+2)} steps. His method uses Anthropic's network machinery with a matrix-tree
+  identity, not the CNF counter. An exact count gives parity and a deterministic decision, so it
+  subsumes A5a, A5a′ and A5b. Our A5a and A5b were pushed earlier (27 October, 12:20 and
+  19:33 UTC), but his result is stronger. He also formalizes the isolation lemma for arbitrary sets,
+  and sketches, without proof, Steiner tree and feedback vertex set on sparse graphs. We have read
+  his Lean statements; we have not rebuilt his development.
+- **The two papers themselves** list corollaries. OpenAI [1, Cor. 1.3] counts independent sets and,
+  for each fixed q, proper q-colorings in 2^{o(v)}, and perfect matchings in 2^{o(v+e)}; this
+  covers N6. Anthropic [2, Cor. 7] counts independent sets, cliques, vertex covers and dominating
+  sets of each size s, and proper k-colorings for fixed k, on graphs of any density. In their Lean
+  code these are `stIndep`, `stCliques`, `stDominatingCounted` and `tm_of_colorings`.
+- **Decision and optimization forms known before.**
+  - A1: Calabro, Impagliazzo and Paturi [5]; see [18, Lemma 10.12].
+  - The maximum in A4 (Max-r-SAT and Max-Cut with linearly many constraints):
+    Jonsson, Lagerkvist, Schmidt and Uppman [16, Thm 8].
+  - A3: Impagliazzo, Paturi and Zane [4, Thm 5], with a kernel.
+  - A3′: Ganian, de Haan, Kanj and Szeider [17], with Ore's bound or the kernel.
+- **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2 and N2′.
+  Connectivity problems were open in this direction. Impagliazzo, Paturi and Zane list Hamiltonian
+  Circuit only as SNP-hard [4], and Ganian et al. state as an open problem whether Feedback Vertex
+  Set reduces to 3-CNF-SAT in this way [17].
 
 ## Algorithms
 
@@ -505,9 +542,11 @@ lake env lean CheckAxioms.lean
 
 ## Status and next steps
 
-- **A5b** is done (see the table). Open: a deterministic version, and graphs with more than O(n)
-  edges. The formula has N ≈ 3m·k variables, so the bound stays 2^{o(n)} only while
-  m·k = o(n·√lg n/lglg n).
+- **A5a, A5a′, A5b** are done (see the table), and superseded by Tulsyan's exact count [15]. Open
+  for both: Hamiltonian cycle on graphs with ω(n·√lg n) edges.
+- **N2′** is randomized. Open: deterministic Steiner tree and connected vertex cover on dense
+  graphs, and the exact number of connected vertex sets of size ℓ on dense graphs (we have its
+  parity, N2).
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
 - **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
@@ -609,6 +648,16 @@ and check proofs, to write the Lean formalisation, and to draft the text.
 13. O. Ore. Theory of Graphs. AMS Colloquium Publications 38, 1962.
 14. F. Dehne, M. Fellows, H. Fernau, E. Prieto, and F. Rosamond. Nonblocker: parameterized
     algorithmics for minimum dominating set. SOFSEM 2006, LNCS 3831, 237–245.
+15. V. Tulsyan. Counting Hamiltonian cycles in sparse graphs in subexponential time, assuming the
+    new #SAT algorithms. October 2026. https://github.com/xennygrimmato/eth-hamiltonicity (Lean:
+    `EthFollowup.ExactHC.theorem1`, `theorem2`).
+16. P. Jonsson, V. Lagerkvist, J. Schmidt, and H. Uppman. Relating the time complexity of
+    optimization problems in light of the exponential-time hypothesis. MFCS 2014, LNCS 8635,
+    408–419. arXiv:1406.3247.
+17. R. Ganian, R. de Haan, I. Kanj, and S. Szeider. On existential MSO and its relation to ETH.
+    MFCS 2016, LIPIcs 58:42.
+18. C. Calabro. The Exponential Complexity of Satisfiability Problems. PhD thesis, UC San Diego,
+    2009.
 
 ## Citation
 

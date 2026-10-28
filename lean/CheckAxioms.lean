@@ -31,3 +31,8 @@ import EthCor
 #print axioms EthCor.PottsTM.cnt_pottsF
 #print axioms EthCor.PottsTM.potts_spectrum
 #print axioms EthCor.PottsTM.tutte_tm
+#print axioms EthCor.Vc.good_step
+#print axioms EthCor.Vc.leaves_le
+#print axioms EthCor.Vc.cnt_leafV_pos
+#print axioms EthCor.VcTM.tm_fpt
+#print axioms EthCor.VcTM.vc_fpt

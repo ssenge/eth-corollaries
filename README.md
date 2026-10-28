@@ -53,6 +53,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N2′ | `EthCor.ConnITM.conn_randomized` | **Steiner tree and connected vertex cover, randomized, one-sided error.** For every width r, exponent D, δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ, the code of a seed ω and φ (`codeCI`), for any graph on n ≥ n₀ vertices of **any density** and φ as in N2, it halts within C·2^{εn} steps with one bit. If no vertex set of size ℓ satisfies φ and induces a connected subgraph, the bit is 0 for every seed. If one does, the bit is 1 for at least a 2^{−δn} fraction of the seeds. With φ = the terminals this decides whether a Steiner tree on ℓ vertices exists; with φ = the edges, whether a connected vertex cover of size ℓ exists. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | ours |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases are the chromatic polynomial at q, at (1−q, 0), and the flow polynomial at q, at (0, 1−q). | direct corollary; formalized |
+| A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known equivalence ([11] + ¬ETH); formalized |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -113,6 +114,17 @@ not part of the Lean statement.
   (x−1)^{k(E)}·(y−1)^n times the term of A in the Tutte polynomial (`tutte_hyperbola`). Under #ETH,
   [10] proves lower bounds of the form 2^{Ω(n/polylog n)} for these evaluations on sparse simple
   graphs; here they take 2^{δn} for every δ > 0.
+- **A3, Vertex Cover parameterized by k.** Branch instead of kernelizing. While the budget is
+  positive and some vertex v has at least d distinct neighbours, either v is in the cover (budget
+  − 1) or all of its neighbours N(v) are (budget − |N(v)| ≤ budget − d) (`stepV`, `good_step`).
+  Every step lowers the budget by 1 or by at least d, so the tree has at most
+  Σ_{j ≤ (k+d)/d} C(k+d, j) ≤ 2^{ε(k+d)} leaves once (1/d)·lg(e·d) ≤ ε (`leaves_le`, from
+  Anthropic's tree bound). At a leaf every vertex has fewer than d neighbours, so a cover of size
+  ≤ k′ leaves at most k′·d vertices on the edges (`card_V_le`). `SIZED` then decides the leaf on these
+  vertices in 2^{δkd} steps (`cnt_leafV_pos`). With δ = ε/(4d) this is 2^{εk/4} per leaf. The host
+  `tm_fpt` makes one Turing machine of the walk with time poly(n)·2^{εk}. Cai and Juedes [11] showed
+  that a 2^{o(k)}·poly(n) algorithm for Vertex Cover refutes ETH; this is the converse direction,
+  with the claimed refutation as input.
 - **A5a, parity of Hamiltonian cycles (Cut & Count [6]).** The CNF has one bit per edge and one side
   bit per vertex. It says: every vertex is on exactly two chosen edges, the two ends of a chosen edge
   share a side, and s₀ is false. A chosen 2-factor with c cycles has 2^{c−1} side maps. That number
@@ -199,16 +211,15 @@ lake env lean CheckAxioms.lean
 - **A5b** is done (see the table). Open: a deterministic version, and graphs with more than O(n)
   edges. The formula has N ≈ 3m·k variables, so the bound stays 2^{o(n)} only while
   m·k = o(n·√lg n/lglg n).
-- **A3, linear-kernel FPT problems in 2^{o(k)}·poly(n):** Vertex Cover, Nonblocker. The plan avoids
-  a kernel: branch on vertices of degree > d, then run `SIZED` on the ≤ 2kd vertices left. Planned.
+- **A3** is done for Vertex Cover (see the table). Nonblocker, the other linear-kernel problem
+  in the plan, is still open: dominating sets do not branch the same way.
 - **N2 and N2′** are done (see the table). The same formula should handle other "connected X with
   a CNF property" problems, for example connected dominating set on bounded-degree graphs, where
   the domination clauses have width Δ + 1.
 - **S3** is done: `numHamCycles` is checked against Mathlib's `IsHamiltonian` and
   `IsHamiltonianCycle` (see the notes under the table).
 - **N3** is done (see the table). Here q is a constant: the formula has width q + 3, and `SIZED`
-  takes a fixed width. Open: the Tutte polynomial off the hyperbolas (x−1)(y−1) ∈ ℕ. Next on the
-  plan: A3.
+  takes a fixed width. Open: the Tutte polynomial off the hyperbolas (x−1)(y−1) ∈ ℕ.
 - The full list of ten candidate problems is in [NOTES.md](NOTES.md), together with the research
   log and the deep dive on both papers. It includes harder Tier B items: dense Max-Cut, the
   permanent, CNF-SAT with poly(n) clauses, planar problems below 2^{O(√n)}, and Subset Sum.
@@ -236,6 +247,7 @@ lean/
     HamMathlib                            numHamCycles vs Mathlib's IsHamiltonian (S3)
     Potts                                 Fortuin–Kasteleyn, Tutte polynomial on hyperbolas (N3)
     PottsTM                               the Potts formula and machine, potts_spectrum (N3)
+    VcTree, VcTM                          Vertex Cover in poly(n)·2^{εk}, FPT host (A3)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
 ```
@@ -266,6 +278,8 @@ and check proofs, to write the Lean formalisation, and to draft the text.
    other models. Physica 57(4):536–564, 1972.
 10. H. Dell, T. Husfeldt, D. Marx, N. Taslaman, and M. Wahlén. Exponential time complexity of the
     permanent and the Tutte polynomial. ACM Trans. Algorithms 10(4):21, 2014.
+11. L. Cai and D. Juedes. On the existence of subexponential parameterized algorithms. J. Comput.
+    System Sci. 67(4):789–807, 2003.
 
 ## Citation
 

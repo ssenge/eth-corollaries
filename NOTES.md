@@ -232,3 +232,16 @@ N3 is done (2026-10-27): `lean/EthCor/Potts.lean` and `PottsTM.lean`.
   |E(G)| ≤ length of the edge list, `card_le_length`).
 - `potts_spectrum q D hq hδ`: input code G ++ unary j, output bits of N_j, C·2^{δn}, |E| ≤ D·n.
   `tutte_tm` packages it with `tutte_hyperbola`. q must be constant (SIZED has fixed width).
+
+A3 (= N4) is done for Vertex Cover (2026-10-27): `lean/EthCor/VcTree.lean` and `VcTM.lean`.
+- Node (k, E). `stepV d`: if k > 0 and some endpoint v has ≥ d distinct neighbours (`nbs`, deduped
+  filterMap), branch into (k−1, E∖v) and (k−|N(v)|, E∖N[v]); if |N(v)| > k the second child is (0, E).
+  `good_step`: Good x ↔ Good l ∨ Good h (no nodup or loop assumptions needed).
+- Tree bound via Anthropic's `length_leaves_le` with Inv: p = a + b, t = d·b, a + t ≤ k + d,
+  x.1 ≠ 0 → x.1 + a + t ≤ k. Leaves ≤ Σ_{j ≤ (k+d)/d} C(k+d, j) ≤ 2^{ε(k+d)} (`sum_choose_le_two_rpow`
+  with k=1, L=1, τ=d).
+- Leaf: |V| ≤ k·d for a good leaf (`card_V_le`), else dead formula [[]] on 0 variables. `leafV`
+  renames V by idxOf, s = min(k, |V|); `cnt_leafV_pos`: 0 < cntS ↔ Good.
+- `tm_fpt`: host with time ⌊C·(sz+2)^C·2^{δ·par}⌋ from `stHostW` (states poly in n, steps c·2^{δ·par}).
+- `vc_fpt`: ∀ ε > 0, one machine on code G ++ unary k (k ≤ n) decides VC ≤ k within C(n+2)^C 2^{εk}.
+  d from `exists_width 1` at ε/4; SIZED width 2 at δ = ε/(4d).

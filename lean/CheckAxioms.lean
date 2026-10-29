@@ -74,3 +74,6 @@ import EthCor
 #print axioms EthCor.CdsTree.shortensP
 #print axioms EthCor.PosTM.pos_parity_tm
 #print axioms EthCor.PosTM.pos_randomized
+#print axioms EthCor.MinTM.conn_grow
+#print axioms EthCor.MinTM.min_conn_randomized
+#print axioms EthCor.MinTM.min_pos_randomized

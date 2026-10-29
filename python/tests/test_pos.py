@@ -50,3 +50,20 @@ def test_pos_randomized():
         seen.add(want)
     assert seen == {False, True}
 
+
+
+def test_min_iff():
+    """`MinTM.min_iff`: in a connected graph, a connected X with at most ℓ vertices meeting a positive φ
+    exists iff one with exactly ℓ does (so the runs of N2′ and N8′ decide the minimum versions)."""
+    rng = random.Random(3)
+    checked = 0
+    for adj in instances(rng, 300, nmax=6):
+        n = len(adj)
+        if not _connected_in(adj, list(range(n))):
+            continue
+        psi = positive_cnf(rng, n)
+        have = [num_conn(adj, psi, l) > 0 for l in range(n + 1)]
+        for l in range(1, n + 1):
+            assert any(have[1:l + 1]) == have[l], (adj, psi, l)
+        checked += 1
+    assert checked >= 50

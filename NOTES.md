@@ -432,3 +432,11 @@ generalized tree in `CdsTree.lean`.
   Dump `pos`, `posr`: 113 words, 20 front ends agree. 64 tests. CheckAxioms: 75 theorems, standard axioms.
 - Tulsyan re-check (c01f010, 11:06 UTC): theorem3 (exact #HC for avg degree 2^{o(√lg n)}) and exact
   directed HC/ATSP now in Lean; nothing on hitting sets/groups/total domination.
+
+N8″ minimum Steiner tree / connected vertex cover / Group Steiner tree (2026-10-29): `lean/EthCor/MinConnTM.lean`.
+- `MinTM.conn_grow`: G connected, G[X] connected, |X| ≤ ℓ ≤ n ⇒ ∃ Y ⊇ X, G[Y] connected, |Y| = ℓ (boundary
+  dart of a walk from X to a vertex outside, Mathlib `Walk.exists_boundary_dart`).
+- `Meets φ X`, `numConn_pos_iff` (positive φ), `min_iff` (connected G): ≤ ℓ ↔ 0 < numConn G φ ℓ.
+- `min_conn_randomized r D` from `conn_randomized`, `min_pos_randomized D` from `pos_randomized`; G.Connected
+  is a hypothesis (disconnected G: run per component). Python: `test_pos.test_min_iff` (brute force).
+  65 tests; CheckAxioms 78 theorems, standard axioms.

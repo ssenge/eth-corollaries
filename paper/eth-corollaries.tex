@@ -35,7 +35,7 @@
 In October 2026 two groups claimed algorithms for \#$k$-SAT in time $2^{o(n)}$, which would refute
 the Exponential Time Hypothesis, and both formalized their algorithms in Lean. A refuted lower bound
 yields no algorithm by itself: every consequence needs a reduction to \#SAT whose number of
-variables is linear in the relevant parameter. We give such reductions for twenty-three problems and
+variables is linear in the relevant parameter. We give such reductions for twenty-four problems and
 prove each resulting algorithm as a Lean~4 theorem about a single Turing machine, on top of
 Anthropic's formalization and with the standard axioms only. The new results are: the parity of
 the number of connected vertex sets of size $\ell$ that satisfy a given CNF, on graphs of any
@@ -54,7 +54,8 @@ $k$ with $\lg k\le(\lg n)^{1/6-\theta}$; and the Max-SAT spectrum. We also forma
 corollaries (homomorphisms into a target in the input, the density of states of the Potts model and
 the Tutte polynomial on the hyperbolas $(x-1)(y-1)=q$, the permanent of $\{-1,0,1\}$ matrices in
 $2^{\varepsilon m}\poly(n)$) and known consequences (\#CNF-SAT of any width with linearly many
-clauses, the 0/1 permanent, Vertex Cover and Nonblocker in $2^{\varepsilon k}\poly(n)$). Our results
+clauses, the 0/1 permanent, Vertex Cover and Nonblocker in $2^{\varepsilon k}\poly(n)$, and odd cycle transversal on graphs
+of any density). Our results
 on Hamiltonian cycles, the parity for $o(n\sqrt{\lg n}/\lg\lg n)$ edges and one-sided error for
 $O(n)$ edges, were obtained independently of Tulsyan's concurrent exact count, which supersedes
 them. All bounds hold for every $\varepsilon>0$. We also give reference implementations of all
@@ -111,7 +112,7 @@ $2^{o(\sqrt{\lg n})}$.
 unbounded width with superlinearly many clauses (A1$'$), $k$-colorings for $k$ growing with $n$ (A2)
 and the Max-SAT spectrum (A4), with direct corollaries for homomorphisms, the Potts model and the
 Tutte polynomial, and permanents.
-\item \emph{Twenty-one algorithms} (Table~\ref{tab:results}; N7$''$ and N8$''$ reuse machines), each one a polynomial-time reduction to
+\item \emph{Twenty-two algorithms} (Table~\ref{tab:results}; N7$''$ and N8$''$ reuse machines), each one a polynomial-time reduction to
 one of three counters from Anthropic's development, followed by a simple post-step. They are written
 out as pseudocode in Sections~\ref{sec:conn}--\ref{sec:fpt}.
 \item \emph{Machine-checked statements.} Each algorithm is a Lean~4 theorem stating that one Turing
@@ -139,7 +140,7 @@ shortening for A1 and, inside a Cut \& Count formula, for N7; degree branching f
 parameter or the width before counting at the leaves.
 
 \paragraph{Honest labels.} Table~\ref{tab:results} marks each result, after a literature search
-of 28~October 2026 (papers, preprints, blogs and repositories). A1, A3, A3$'$ and N6 are known
+of 28~October 2026 (papers, preprints, blogs and repositories). A1, A3, A3$'$, N6 and N10 are known
 consequences that we formalize. N3, N5 and N6$'$ are direct corollaries: the reduction is the
 obvious one. A5a, A5a$'$ and A5b are superseded by concurrent work~\cite{Tul26}. The remaining
 results, N2, N2$'$, N7, N7$'$, N7$''$, N8, N8$'$, N8$''$, N9, N9$'$, A1$'$, the range of $k$ in A2 and the spectrum in A4, are ours: we did not find
@@ -177,6 +178,7 @@ A5a$'$ & $\oplus$Hamiltonian cycles, $m=o(n\sqrt{\lg n}/\lg\lg n)$, one machine;
 A5b & Hamiltonian cycle, one-sided error, $m\le Dn$, one machine; $2^{\varepsilon n}$ & superseded~\cite{Tul26}\\
 A3 & Vertex Cover; $C(n+2)^C2^{\varepsilon k}$ & known~\cite{IPZ01,CJ03}\\
 A3$'$ & Nonblocker; $C(n+2)^C2^{\varepsilon k}$ & known~\cite{GdHKS16,DFFPR06}\\
+N10 & odd cycle transversal, deterministic, any density; $C2^{\delta n}$ & known~\cite{IPZ01}\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -208,7 +210,8 @@ fixed $k$, on graphs of any density.
 
 \paragraph{Related work.} The sparsification lemma~\cite{IPZ01} and the width--density duality of
 Calabro, Impagliazzo and Paturi~\cite{CIP06} relate SAT variants with few variables; A1 is the latter
-duality combined with the claimed algorithm. For the maximum in A4, the equivalence of Max-$r$-SAT
+duality combined with the claimed algorithm. Odd cycle transversal is in size-constrained SNP, so its
+decision version (N10) reduces to 3-SAT with $O(n)$ variables~\cite[Thm.~5]{IPZ01}. For the maximum in A4, the equivalence of Max-$r$-SAT
 and Max-Cut with linearly many constraints with ETH is due to Jonsson, Lagerkvist, Schmidt and
 Uppman~\cite[Thm.~8]{JLSU14}; Ganian, de Haan, Kanj and Szeider~\cite{GdHKS16} show the same for
 Nonblocker and Dominating Set. For connectivity problems the direction we need was open:
@@ -774,6 +777,32 @@ Under \#ETH the permanent of $\{-1,0,1\}$ matrices has no $\exp(o(m))$ algorithm
 matrices none in $\exp(o(m/\log m))$~\cite[Thm.~1.3]{DHMTW14}. Ryser's formula~\cite{Ryser63} takes
 $O(2^nn)$ time.
 
+\subsection{Odd cycle transversal (N10)}
+
+An odd cycle transversal is a set $X$ of vertices such that $G-X$ is bipartite. The complement bits
+of N2 decide it with one sized count.
+
+\begin{theorem}[\lean{oct_tm}]\label{thm:oct}
+For every $\delta>0$ there are $C$ and one machine that, given a graph $G$ on $n$ vertices (of any
+density) and $n-k$ in unary, $k\le n$, decides within $C2^{\delta n}$ steps whether $G$ has an odd
+cycle transversal with at most $k$ vertices.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The formula has, for each vertex $v$, a bit $x_v$ ($v$ is kept), a color $s_v$ and
+$\bar s_v=\neg s_v$, with $s_v=0$ if $v$ is not kept, and for each edge $uv$ the clauses
+$\neg x_u\vee\neg x_v\vee s_u\vee s_v$ and $\neg x_u\vee\neg x_v\vee\neg s_u\vee\neg s_v$. Its
+solutions with $n+s$ true variables are the pairs of a set $Y$ of $s$ vertices and a proper
+2-coloring of $G[Y]$, so $\SIZED_4(3n,n+s,\cdot)$ is positive iff some $s$ vertices induce a
+bipartite subgraph (\lean{oct_pos}, with Mathlib's \lean{IsBipartite}). Induced bipartite subgraphs
+are closed under removing vertices, so for $s=n-k$ this holds iff an odd cycle transversal with at
+most $k$ vertices exists (\lean{oct_iff}). The formula has $3n$ variables for any number of edges.
+\end{proof}
+
+The decision version is known (see the related work); N10 is its formalized, deterministic form, and
+running it for $k=0,1,\dots$ gives the minimum. The count weights each transversal by the
+2-colorings of the rest, so it does not give the number of transversals.
+
 %======================================================================
 \section{Hamiltonian cycles}\label{sec:ham}
 
@@ -909,9 +938,9 @@ exponential part.
 %======================================================================
 \section{Formalization and reference implementation}\label{sec:formal}
 
-\paragraph{The Lean development.} The development consists of 48 Lean files with about 15{,}300
+\paragraph{The Lean development.} The development consists of 49 Lean files with about 15{,}600
 lines on top of Anthropic's development (pinned to a fixed revision) and Mathlib. A check file prints
-the axioms of 84 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
+the axioms of 87 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
 \lean{Quot.sound} only, and there is no \lean{sorry}. Every main theorem quantifies over the
 machine existentially and states its finite alphabets, its output (\lean{Wrap.Outputs}) and its
 time bound explicitly. The polynomial-time front ends are verified with Anthropic's \lean{PolyT}
@@ -928,7 +957,8 @@ $n\ne1$), and it equals the number of edge sets of walks with Mathlib's \lean{Is
 connected graph with all degrees 2 is a single cycle. The homomorphism count equals the number of
 Mathlib homomorphisms $G\to_g H$ for simple $H$ (\lean{numHom_simple}), both permanents are
 stated with Mathlib's \lean{Matrix.permanent}, the spanning trees of N7$''$ are subgraphs with
-Mathlib's \lean{IsTree}, and the forests of N9 are induced subgraphs with Mathlib's \lean{IsAcyclic}. The remaining definitions (the spectrum, the Potts
+Mathlib's \lean{IsTree}, the forests of N9 are induced subgraphs with Mathlib's \lean{IsAcyclic}, and N10 uses Mathlib's
+\lean{IsBipartite}. The remaining definitions (the spectrum, the Potts
 counts, the Tutte polynomial, the seeds and the input codes) must be read by hand, as must
 Anthropic's model of computation and statement files.
 
@@ -939,16 +969,16 @@ are Lean theorems; the proof sketches summarize the Lean proofs. Not formalized 
 cite from the literature (lower bounds, earlier algorithms, Tutte's identity between $T(G;0,1-q)$ and
 nowhere-zero flows) and the novelty labels of Table~\ref{tab:results}.
 
-\paragraph{The reference implementation.} A Python package of about 2{,}300 lines mirrors every
+\paragraph{The reference implementation.} A Python package of about 2{,}400 lines mirrors every
 front end and post-step clause by clause, with the same variable indices and from the same input
 words as the Lean machines. Anthropic's counters are replaced by an exact DPLL counter with
 component caching that returns the weight enumerator of the solutions, so the implementation runs
 in exponential time; its purpose is to make the reductions concrete and testable. The tests
 compare every algorithm with a direct enumeration of the quantity in the Lean statement (colorings,
 homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles, connected
-vertex sets, connected dominating sets, spanning trees, induced forests), check the shape bounds that the Lean proofs
+vertex sets, connected dominating sets, spanning trees, induced forests, bipartite induced subgraphs), check the shape bounds that the Lean proofs
 use, and measure the one-sided error of A5b, N2$'$, N7$'$, N7$''$, N8$'$ and N9$'$ over random seeds. A further test checks that the Python front ends are the Lean ones:
-a small Lean program evaluates the Lean definitions of all 22 front ends on 131 random input words,
+a small Lean program evaluates the Lean definitions of all 23 front ends on 130 random input words,
 and the formulas agree clause for clause.
 
 \paragraph{Availability.} The Lean development, the Python package and the instructions to check
@@ -968,7 +998,7 @@ $n\approx10^{10}$.
 $2^{\varepsilon n}$ for every $\varepsilon$; $n\cdot r(n)$ variables with $r=o(\sqrt{\lg n}/\lg\lg
 n)$ still give $2^{o(n)}$; for the uniform bound the clause width must stay below about $(\lg
 n)^{1/4}$. A sized counter makes the number of clauses irrelevant, which is why dense graphs are
-possible for N2, N2$'$, N7, N7$'$, N8, N8$'$, N8$''$, A3 and A3$'$, and complement bits make it compatible with auxiliary
+possible for N2, N2$'$, N7, N7$'$, N8, N8$'$, N8$''$, N10, A3 and A3$'$, and complement bits make it compatible with auxiliary
 variables.
 
 \paragraph{Open problems.} Colorings and homomorphisms into targets with $\lg h\ge(\lg
@@ -979,7 +1009,7 @@ number of connected vertex sets of size $\ell$ on dense graphs, of which N2 give
 Hamiltonian cycle on graphs of average degree $2^{\Omega(\sqrt{\lg n})}$, beyond Tulsyan's
 bound~\cite{Tul26}; positive CNFs of unbounded width with superlinearly many clauses, such as Group
 Steiner tree with $\omega(n)$ groups; feedback vertex set on graphs with $\omega(n)$ edges, and
-deterministically; the Tutte
+deterministically; the number of odd cycle transversals of each size; the Tutte
 polynomial off the integer hyperbolas; permanents with larger integer entries; the matching
 polynomial of general graphs; and problems for which the refutations remove a lower bound but no
 reduction with few variables is known, such as dense Max-Cut, CNF-SAT with $\poly(n)$ clauses,

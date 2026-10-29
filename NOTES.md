@@ -471,3 +471,15 @@ N9, N9′ feedback vertex set on sparse graphs (2026-10-29): `lean/EthCor/Forest
   than N9/N9′; ours is the machine-checked one.
 - Ganian et al.'s open question (FVS reduces to 3-CNF-SAT preserving subexponentiality?) is not
   answered: N9′ reduces to sized counting, randomized.
+
+N10 odd cycle transversal, deterministic, any density (2026-10-29): `lean/EthCor/OctTM.lean`.
+- Formula `octF n E = sideF n ++ edgeOC n E` on 3n vars: x_v kept, s_v color (0 if not kept), s̄_v = ¬s_v;
+  per edge ¬x_u ∨ ¬x_v ∨ s_u ∨ s_v and ¬x_u ∨ ¬x_v ∨ ¬s_u ∨ ¬s_v (width 4). Only positivity is needed, no
+  counting identity: `oct_pos` (0 < cntS (3n) (n + s) ↔ ∃ x, |x| = s ∧ (G.induce {x}).IsBipartite), by
+  splitting w = Fin.append y g and building the coloring from `Coloring.mk`; `oct_iff` via
+  `exists_subset_card_eq` and `Colorable.of_hom (induceHomOfLE _).toHom`. Machine = `cvcM` shape with
+  `postO N = [decide (0 < N)]`; `oct_tm` rewrites with `decide_eq_decide`.
+- Novelty: known. IPZ01 Thm 5: size-constrained SNP allows "possibly size-constrained" second-order
+  quantifiers, and OCT = ∃X (|X| ≤ k) ∃C ∀u,v: E(u,v) → X(u) ∨ X(v) ∨ C(u) ≠ C(v). Not in Anthropic Cor. 7
+  (IS, clique, VC, DS, k-col). Tulsyan (974ea29) has only connected OCT, as a sketch. Label: known, formalized.
+- Minimum FVS needed no new work: N9′ already decides "at most k".

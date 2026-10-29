@@ -3,7 +3,7 @@
 For random small inputs, the input word goes to both: to `lean/Dump.lean`, which runs the Lean
 definitions (`EthCor.formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`,
 `SPermTM.leafS`, `HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`,
-`ConnITM.preR`, `ForestTM.preF`, `ForestITM.preQ`, `NbTM.preN`, the leaves of `Vc.stepV` with
+`ConnITM.preR`, `ForestTM.preF`, `ForestITM.preQ`, `OctTM.preO`, `NbTM.preN`, the leaves of `Vc.stepV` with
 `leafV`, of `stepD` with `leafD` (from `CnfTree.rootX`, `CdsTM.rootC`, `CdsITM.rootR`, `PosTM.rootP`
 and `PosTM.rootQ`) and of `GrowTree.stepW` with `GrowTM.leafF`), and to the Python functions of the
 same names. The outputs must be equal clause for clause.
@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 
 from ethcor import cnf_anywidth as ca
-from ethcor import cds, colorings, connected, forest, hamcycle, nonblocker, permanent, potts, spectrum, vertex_cover
+from ethcor import cds, colorings, connected, forest, hamcycle, nonblocker, oct, permanent, potts, spectrum, vertex_cover
 from ethcor.graphs import code, matrix, random_graph, random_relation, unary
 from ethcor.isolation import random_seed
 
@@ -75,6 +75,8 @@ def cases(rng: random.Random):
         out.append(("nb", 0, x, nonblocker.preN(x)))
         x = code(G) + unary(rng.randint(0, n))
         out.append(("for", 0, x, forest.preF(x)))
+        x = code(G) + unary(rng.randint(0, n))
+        out.append(("oct", 0, x, oct.preO(x)))
         d = rng.randint(1, 3)
         x = code(G) + unary(rng.randint(0, n))
         out.append(("vc", d, x, [vertex_cover.leafV(d, y) for y in vertex_cover.leaves(d, vertex_cover.rootV(x))]))
@@ -133,5 +135,5 @@ def test_python_matches_lean():
     for (name, arg, x, expected), line in zip(cs, lines):
         assert json.loads(line) == norm(expected), f"{name} arg={arg} on {bits(x)}"
         seen.add(name)
-    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "for", "fi", "cds", "cdr", "pos", "posr", "nb", "vc",
+    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "for", "fi", "oct", "cds", "cdr", "pos", "posr", "nb", "vc",
                     "perm", "sperm", "spec", "cnf", "grow"}

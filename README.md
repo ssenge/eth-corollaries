@@ -77,6 +77,7 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N6′ | `EthCor.SPermTM.sperm_fpt` (also `SPerm.cnt_sperm`, `SPerm.permanent_signed`) | **The permanent of a {−1, 0, 1} matrix in 2^{εm}·poly(n).** For every ε > 0, one machine is given a bit b, n in unary and two n × n 0/1 matrices A (the nonzero entries) and S (the entries −1). It outputs the number of permutations σ with A(σ i, i) for all i and an even (b = 0) or odd (b = 1) number of i with S(σ i, i), within C·(n+2)^C·2^{εm} steps, m the number of nonzero entries. The permanent of the matrix over ℤ (Mathlib's `Matrix.permanent`) is the first count minus the second (`permanent_signed`), so two runs give it. Under #ETH, no exp(o(m)) algorithm exists for this problem [10, Thm 1.3]. | direct corollary; formalized |
 | A3 | `EthCor.VcTM.vc_fpt` (also `Vc.good_step`, `Vc.leaves_le`, `VcTM.tm_fpt`) | **Vertex Cover in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of **any density**) and k ≤ n in unary. It outputs whether G has a vertex cover with at most k vertices, within C·(n+2)^C·2^{εk} steps. No kernel is used. | known: Vertex Cover is complete for size-constrained SNP [4, Thm 5], and a 2k-vertex kernel gives 2^{o(k)}·poly(n); see also [11]; formalized |
 | A3′ | `EthCor.NbTM.nb_fpt` (also `Nb.ore`, `Nb.nb_iff`, `Nb.nb_answer`) | **Nonblocker in 2^{εk}·poly(n).** For every ε > 0, one machine is given a graph G on n vertices (of any density) and k ≤ n in unary. It outputs whether G has a dominating set with at most n − k vertices (equivalently, k vertices whose complement dominates), within C·(n+2)^C·2^{εk} steps. | known: Nonblocker is in Linear Monadic NP [17], with Ore's bound [13] or the kernel [14]; formalized |
+| N10 | `EthCor.OctTM.oct_tm` (also `oct_pos`, `oct_iff`) | **Odd cycle transversal, deterministic.** For every δ > 0, one machine is given a graph G on n vertices (of **any density**) and n − k in unary (k ≤ n). It outputs whether G has an odd cycle transversal with at most k vertices (a set X with G − X bipartite, Mathlib's `IsBipartite`), within C·2^{δn} steps. Run for k = 0, 1, … it finds the minimum. | known: odd cycle transversal is in size-constrained SNP [4, Thm 5]; formalized |
 
 **Supporting theorem (for A5b): isolation for arbitrary sets.** `EthCor.Iso.isolation`: for every
 δ > 0 there are k and t such that for all M ≥ M₀(δ) and **every** nonempty S ⊆ {0,1}^M, at least a
@@ -270,6 +271,12 @@ the counting lemma `amplify`).
   removing vertices, so a feedback vertex set with at most k vertices exists iff an induced forest
   with exactly n − k vertices does (`fvs_iff`). N9′ adds the checks of a seed as in N2′. Steps C–E
   are now proved for any formula on N₀ variables (`Forest.iso_count`), not only for `connF`.
+- **N10, odd cycle transversal.** Use the variables of N2 with s_v as a color: s̄_v = ¬s_v, s_v = 0
+  outside the kept set Y, and for every edge uv two clauses of width 4 that say u ∉ Y, v ∉ Y or
+  s_u ≠ s_v. A solution with n + s true variables is a set Y of size s with a proper 2-coloring of
+  G[Y] (`oct_pos`). Induced bipartite subgraphs are closed under removing vertices (`oct_iff`, with
+  Mathlib's `Colorable.of_hom`), so one sized count with s = n − k decides, and nothing is random.
+  The formula has 3n variables, so the graph may be dense.
 - **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
   distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
   Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
@@ -344,6 +351,9 @@ published anything yet.
   "numerically verified, unrefereed" and as a claim "if the core holds"; it is not in Lean. If it
   were proved it would be deterministic and exact, so stronger than N9 and N9′. N9 and N9′ are also
   for sparse graphs only, but they are machine-checked.
+
+  **Odd cycle transversal (checked at commit 974ea29, 29 October, 18:28 UTC).** His notes sketch
+  only connected odd cycle transversal; plain odd cycle transversal (N10) does not appear.
 - **The two papers themselves** list corollaries. OpenAI [1, Cor. 1.3] counts independent sets and,
   for each fixed q, proper q-colorings in 2^{o(v)}, and perfect matchings in 2^{o(v+e)}; this
   covers N6. Anthropic [2, Cor. 7] counts independent sets, cliques, vertex covers and dominating
@@ -355,6 +365,8 @@ published anything yet.
     Jonsson, Lagerkvist, Schmidt and Uppman [16, Thm 8].
   - A3: Impagliazzo, Paturi and Zane [4, Thm 5], with a kernel.
   - A3′: Ganian, de Haan, Kanj and Szeider [17], with Ore's bound or the kernel.
+  - N10: odd cycle transversal is in size-constrained SNP (∃X with |X| ≤ k, ∃ a coloring C, ∀ edges
+    uv: u ∈ X, v ∈ X or C(u) ≠ C(v)), so its decision version follows from [4, Thm 5].
 - **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2, N2′, N7, N7′,
   N7″, N8, N8′, N8″, and N9, N9′ as proved results (Tulsyan sketches an exact count, see above). Tulsyan lists dominating set on dense graphs as not covered and sketches connected
   dominating set and k-leaf spanning trees only for sparse graphs [15]. Under ETH, connected dominating set has no 2^{o(n)} algorithm
@@ -661,6 +673,20 @@ Lean: `Forest.card_sides_eq`, `sides_edges`, `ebF`, `fvsF`, `stepF`, `stepG`, `f
 `fvs_parity`, `fvs_randomized`, `num_fvs`; `tests/test_forest.py` checks `sides_edges` (and that j
 is the cyclomatic number), both machines against brute force, and `fvs_iff`.
 
+### N10: odd cycle transversal
+
+```
+OCT(G on n vertices, s = n − k):
+  F := sideF(n)              # x_v kept, s_v color, s̄_v = ¬s_v, s_v = 0 if v is not kept
+  for every edge (u, v):  ¬x_u ∨ ¬x_v ∨ s_u ∨ s_v,   ¬x_u ∨ ¬x_v ∨ ¬s_u ∨ ¬s_v
+  c := SIZED_4(3n, n + s, F) # Σ over Y with |Y| = s of the proper 2-colorings of G[Y]
+  return c > 0               # G has an odd cycle transversal with at most k vertices
+```
+
+Lean: `OctTM.edgeOC`, `octF`, `oct_pos`, `oct_iff`, `preO`, `postO`, `octM`, `pos_tm`, `oct_tm`.
+Python: `oct.octF`, `oct_decide`, `min_oct`; `tests/test_oct.py` checks the count of `oct_pos`
+(pairs of Y and 2-colorings) and the machine against brute force for every k.
+
 ## Running the algorithms
 
 [`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
@@ -674,7 +700,7 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 69 tests: every algorithm against brute force on small inputs,
+python3 -m pytest -q                  # 71 tests: every algorithm against brute force on small inputs,
                                       # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
@@ -682,15 +708,15 @@ python3 -c "from ethcor.permanent import permanent_signed as p; \
 
 The tests compare each algorithm with a direct enumeration of the quantity in the Lean statement
 (colorings, homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles,
-connected vertex sets, connected dominating sets, spanning trees, induced forests). They also check the shape bounds
+connected vertex sets, connected dominating sets, spanning trees, induced forests, bipartite induced subgraphs). They also check the shape bounds
 the Lean proofs use (width, number of variables and clauses), and the one-sided error of A5b, N2′,
 N7′, N7″, N8′ and N9′ over random seeds.
 
-`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 131
+`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 130
 random input words to [`lean/Dump.lean`](lean/Dump.lean), which evaluates the Lean definitions
 (`formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`, `SPermTM.leafS`,
 `HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`,
-`ForestTM.preF`, `ForestITM.preQ`, `NbTM.preN`, and the leaves of the trees of A1, A1′, A3, N7, N7′,
+`ForestTM.preF`, `ForestITM.preQ`, `OctTM.preO`, `NbTM.preN`, and the leaves of the trees of A1, A1′, A3, N7, N7′,
 N8 and N8′), and compares the formulas clause for clause. It
 needs the built Lean development (`cd lean && lake build`, about 1 minute per run of the test) and is
 skipped if `lake` is not on the PATH or `ETHCOR_SKIP_LEAN` is set.
@@ -736,6 +762,8 @@ lake env lean CheckAxioms.lean
   parity, N2).
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
+- **N10** is done: odd cycle transversal, deterministic, any density. Open: the number of odd cycle
+  transversals of each size (the count weights each one by the 2-colorings of the rest).
 - **N9, N9′** are done for sparse graphs (see the table). Open: feedback vertex set on denser
   graphs (the edge bits make the formula grow with m), and a deterministic version.
 - **N2, N2′, N7, N7′, N7″, N8, N8′ and N8″** are done (see the table). N7 and N8 combine the Cut & Count
@@ -799,6 +827,7 @@ lean/
     MinConnTM                             minimum Steiner tree, connected vertex cover, Group Steiner tree (N8″)
     ForestFormula                         side maps × 2^{edges} = 2^{|V|+j}; induced forests by Cut & Count
     ForestTM, ForestIsoTM                 feedback vertex set on sparse graphs: parity (N9), randomized (N9′)
+    OctTM                                 odd cycle transversal, deterministic (N10)
 python/              reference implementations of all algorithms (see "Running the algorithms")
   pyproject.toml     pytest configuration
   ethcor/
@@ -810,6 +839,7 @@ python/              reference implementations of all algorithms (see "Running t
     nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
     isolation.py     seeds, isolation  connected.py      N2, N2′
     cds.py           N7, N7′, N7″, N8, N8′   forest.py   N9, N9′
+    oct.py           N10
   tests/             one test file per module, against brute force; test_lean_agreement.py
                      against the Lean front ends (via lean/Dump.lean)
 ```

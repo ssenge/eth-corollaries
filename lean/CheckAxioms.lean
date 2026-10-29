@@ -83,3 +83,6 @@ import EthCor
 #print axioms EthCor.ForestTM.fvs_iff
 #print axioms EthCor.ForestTM.fvs_parity_tm
 #print axioms EthCor.ForestITM.fvs_randomized
+#print axioms EthCor.OctTM.oct_pos
+#print axioms EthCor.OctTM.oct_iff
+#print axioms EthCor.OctTM.oct_tm

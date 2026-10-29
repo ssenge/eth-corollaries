@@ -50,6 +50,7 @@ def run (name : String) (arg : ℕ) (x : List Bool) : String :=
   | "posr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.PosTM.rootQ x)).map leafD)
   | "for" => jtrip (EthCor.ForestTM.preF x)
   | "fi" => jtrip (EthCor.ForestITM.preQ x)
+  | "oct" => jtrip (EthCor.OctTM.preO x)
   | _ => "\"unknown\""
 
 end Dump

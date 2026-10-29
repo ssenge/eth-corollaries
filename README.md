@@ -95,7 +95,7 @@ Hamiltonian cycles is `numHamCycles G`, the number of connected spanning subgrap
 degree 2. This agrees with Mathlib. For n ≠ 1, `0 < numHamCycles G` if and only if
 `G.IsHamiltonian` (`EthCor.Ham.numHamCycles_pos_iff`). And `numHamCycles G` is the number of edge
 sets of walks in G with Mathlib's `IsHamiltonianCycle` (`EthCor.Ham.numHamCycles_eq`), so each
-Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are results we did not find in the literature search of 28 October 2026 (see [Related and concurrent work](#related-and-concurrent-work)). That means we did not find them, not that they are certainly new.
+Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are results we did not find in the literature searches of 28 and 29 October 2026 (see [Related and concurrent work](#related-and-concurrent-work)). That means we did not find them, not that they are certainly new.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
 edges. In N2′, N7′, N8′ and N9′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
@@ -223,7 +223,7 @@ the counting lemma `amplify`).
   (`cntS_step`). Here the domination clauses are open and the clauses of the side bits and the edges
   are closed and carried along (`CdsTree.rootN`). The invariant of [2] bounds the variables of the
   open clauses by the number of variables; ours bounds them by n while the formula has 3n variables
-  (`InvC`). So a path still has at most n light and n/w heavy steps, the tree has at most
+  (`InvP`). So a path still has at most n light and n/w heavy steps, the tree has at most
   Σ_{j ≤ 2n/w} C(2n, j) ≤ 2^{εn} leaves for a suitable w, and every leaf has width at most w + 4
   (`shortensN`). `SIZED_{w+4}` counts each leaf with n + ℓ true variables, and bit 1 of the sum is
   the parity of N2 (`cds_parity_tm`). N7′ puts the closed clauses of N2′ (z, the chains of ω and
@@ -300,9 +300,9 @@ the counting lemma `amplify`).
 
 ## Related and concurrent work
 
-This is a literature search of 28 October 2026. It covered papers, preprints, blogs and GitHub. It
-could not reach X/Twitter or some journal full texts, and the review of the two claims has not
-published anything yet.
+This is a literature search of 28 October 2026, repeated for each new result on 29 October. It
+covered papers, preprints, blogs and GitHub. It could not reach X/Twitter or some journal full
+texts, and the review of the two claims has not published anything yet.
 
 - **Tulsyan [15]**, posted 27–28 October 2026, independently of this repository, also builds on
   Anthropic's Lean development. His `theorem1` counts the Hamiltonian cycles of graphs with
@@ -614,7 +614,7 @@ CDS_RANDOMIZED(G, ℓ, ω):
   3n + 1 + 2·(3n+3)·k variables with target n + ℓ + (3n+3)·k
 ```
 
-w comes from `CdsTree.shortensN_exists` for ε = δ/4. Lean: `CdsTree.rootN`, `InvC`, `shortensN`;
+w comes from `CdsTree.shortensN_exists` for ε = δ/4. Lean: `CdsTree.rootN`, `InvP`, `shortensN`;
 `CdsTM.numCDS`, `rootC`, `cdsM`, `cds_parity_tm`; `CdsITM.codeCD`, `formD`, `rootR`, `cdrM`,
 `cds_randomized`, `cds_amplified`. Python: `cds.rootC`, `rootR`, `cds_parity`, `cds_randomized`,
 `num_cds`.
@@ -880,7 +880,7 @@ and check proofs, to write the Lean formalisation, and to draft the text.
 15. V. Tulsyan. Counting Hamiltonian cycles in sparse graphs in subexponential time, assuming the
     new #SAT algorithms. October 2026. https://github.com/xennygrimmato/eth-hamiltonicity (Lean:
     `EthFollowup.ExactHC.theorem1`, `theorem2`, `theoremTSP`; checked at commits ae323a3,
-    ba4c161, 16fe4eb, c01f010 and 60d1679).
+    ba4c161, 16fe4eb, c01f010, 60d1679 and 974ea29).
 16. P. Jonsson, V. Lagerkvist, J. Schmidt, and H. Uppman. Relating the time complexity of
     optimization problems in light of the exponential-time hypothesis. MFCS 2014, LNCS 8635,
     408–419. arXiv:1406.3247.

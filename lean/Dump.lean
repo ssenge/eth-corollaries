@@ -48,6 +48,8 @@ def run (name : String) (arg : ℕ) (x : List Bool) : String :=
   | "cdr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.CdsITM.rootR x)).map leafD)
   | "pos" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.PosTM.rootP x)).map leafD)
   | "posr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.PosTM.rootQ x)).map leafD)
+  | "for" => jtrip (EthCor.ForestTM.preF x)
+  | "fi" => jtrip (EthCor.ForestITM.preQ x)
   | _ => "\"unknown\""
 
 end Dump

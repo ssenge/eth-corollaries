@@ -440,3 +440,34 @@ N8″ minimum Steiner tree / connected vertex cover / Group Steiner tree (2026-1
 - `min_conn_randomized r D` from `conn_randomized`, `min_pos_randomized D` from `pos_randomized`; G.Connected
   is a hypothesis (disconnected G: run per component). Python: `test_pos.test_min_iff` (brute force).
   65 tests; CheckAxioms 78 theorems, standard axioms.
+
+N9, N9′ feedback vertex set on sparse graphs (2026-10-29): `lean/EthCor/ForestFormula.lean`,
+`ForestTM.lean`, `ForestIsoTM.lean`.
+- Key identity `Forest.sides_edges` (any finite W with a linear order): S(H)·2^{e(H)} = 2^{|W|+j} with
+  j = 0 ↔ H.IsAcyclic, S(H) = #{s : W → Bool constant on edges}, e(H) = #{(a,b) : a < b, adj}. Induction on
+  e: delete an edge uv; if u, v are not reachable in H − uv, S(H − uv) = 2·S(H) (`card_sides_eq`, flip the
+  side of everything reachable from v) and acyclicity is kept (`isAcyclic_add_edge_iff_of_not_reachable`);
+  else S is unchanged (`sides_reach`) and j grows by 1 (`isAcyclic_sup_fromEdgeSet_iff`). No components or
+  cyclomatic numbers needed.
+- Formula `fvsF n E ψ = connF n E ψ ++ ebF n E ++ compF 3n m` on 3n + 2m vars: b_i = 3n + i with
+  b_i → x_u, b_i → x_v (`ebF`), b̄_i = 3n + m + i. Count with target n + s + m: Σ_{|x| = s, x ⊨ ψ, P x}
+  sig(x)·2^{e(x)} (`fvs_count`: `stepF` drops the complements, `stepG` splits off the edge bits as a sum
+  over b, then `cnt_stepA`/`cnt_stepB` with property `EdgeIn E b ∧ P`, swap sums, `card_edgeIn` = 2^{e(x)}
+  via `Fintype.piFinset`). `card_inE` links the edge-list count to edges of G[x] (`edges_nodup`).
+  `fvs_parity`: count / 2^s mod 2 = #induced forests of size s mod 2.
+- Machine: bit s, not bit 1, so the post step needs s: `Stepped.bind (mapIn preF SIZED) (ofFun postF)`
+  with `postF (x, N) = [N / 2^{lC x} % 2 = 1]` (PolyT via `PolyT.pow_unary` with `lC` unary). Size bound
+  through `bind_runs`/`ofFun_runs`; count < 2^{N+1} so size(count) ≤ N + 2. SIZED_4 on ≤ (2D+3)·n vars.
+- Isolation: `isoAdd N₀ F ω` and `isoC`/`isoD`/`isoE`/`iso_count` now for ANY formula F on N₀ variables
+  (ConnIso's steps were tied to connF). `fi_parity`, `fi_decide`. Input `codeFI G s ω = code G ++ unary s
+  ++ seedL ω`; reuses ConnITM's `sdR`, `aR` (nothing after the seed: `List.take_length`). Variables
+  ≤ (2D + 12k + 4)·n for n ≥ 1.
+- `numFVS_eq` (complement bijection), `fvs_iff` (induced forests are closed under subsets:
+  `IsAcyclic.embedding (induceHomOfLE)`), `fvs_parity_tm`, `fvs_randomized` with input s = n − k.
+- Python `forest.py`, `tests/test_forest.py` (4 tests, incl. j = cyclomatic number); Dump `for`, `fi`.
+- Tulsyan re-check (60d1679, 15:30 UTC): research notes list exact induced-forest counts (exact min FVS
+  and #min FVS) for |E| = O(n) via a "2−deg mass" determinant identity, "numerically verified,
+  unrefereed", "claim if the core holds"; not in Lean. If proved, deterministic and exact, so stronger
+  than N9/N9′; ours is the machine-checked one.
+- Ganian et al.'s open question (FVS reduces to 3-CNF-SAT preserving subexponentiality?) is not
+  answered: N9′ reduces to sized counting, randomized.

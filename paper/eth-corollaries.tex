@@ -35,7 +35,7 @@
 In October 2026 two groups claimed algorithms for \#$k$-SAT in time $2^{o(n)}$, which would refute
 the Exponential Time Hypothesis, and both formalized their algorithms in Lean. A refuted lower bound
 yields no algorithm by itself: every consequence needs a reduction to \#SAT whose number of
-variables is linear in the relevant parameter. We give such reductions for twenty-one problems and
+variables is linear in the relevant parameter. We give such reductions for twenty-three problems and
 prove each resulting algorithm as a Lean~4 theorem about a single Turing machine, on top of
 Anthropic's formalization and with the standard axioms only. The new results are: the parity of
 the number of connected vertex sets of size $\ell$ that satisfy a given CNF, on graphs of any
@@ -46,7 +46,9 @@ unbounded width, by running the clause-shortening tree of Anthropic's dominating
 inside the Cut \& Count formula, and from it Max Leaf Spanning Tree and minimum connected dominating
 set; the same for any positive CNF of unbounded width with linearly many clauses, which covers Group
 Steiner tree, connected hitting set and connected total domination, and the minimum versions of
-Steiner tree, connected vertex cover and Group Steiner tree; \#CNF-SAT of unbounded clause
+Steiner tree, connected vertex cover and Group Steiner tree; the parity and a one-sided-error
+decision for feedback vertex set on graphs with $O(n)$ edges, through a Cut \& Count formula for
+induced forests; \#CNF-SAT of unbounded clause
 width with up to $n\cdot 2^{(\lg n)^{1/4}/(\lg\lg n)^2}$ clauses; counting $k$-colorings for all
 $k$ with $\lg k\le(\lg n)^{1/6-\theta}$; and the Max-SAT spectrum. We also formalize direct
 corollaries (homomorphisms into a target in the input, the density of states of the Potts model and
@@ -100,15 +102,16 @@ algorithms for Steiner tree and connected vertex cover (N2$'$), on graphs with a
 The same for connected dominating sets (N7, N7$'$), and from it Max Leaf Spanning Tree and minimum
 connected dominating set (N7$''$). More generally, the same for the connected solutions of any positive
 CNF of unbounded width with linearly many clauses (N8, N8$'$): Group Steiner tree, connected hitting
-set and connected total domination, and the minimum versions (N8$''$).
-These are, to our knowledge, the first consequences of the claimed refutations for connectivity
+set and connected total domination, and the minimum versions (N8$''$). On graphs with $O(n)$ edges,
+the parity of the number of feedback vertex sets of each size and a one-sided-error decision (N9,
+N9$'$), by Cut \& Count for induced forests. These are, to our knowledge, the first consequences of the claimed refutations for connectivity
 problems on dense graphs; the concurrent work on Hamiltonian cycles~\cite{Tul26} needs average degree
 $2^{o(\sqrt{\lg n})}$.
 \item \emph{Counting beyond the bounded-width case} (Section~\ref{sec:counting}): \#CNF-SAT of
 unbounded width with superlinearly many clauses (A1$'$), $k$-colorings for $k$ growing with $n$ (A2)
 and the Max-SAT spectrum (A4), with direct corollaries for homomorphisms, the Potts model and the
 Tutte polynomial, and permanents.
-\item \emph{Seventeen algorithms} (Table~\ref{tab:results}), each one a polynomial-time reduction to
+\item \emph{Twenty-one algorithms} (Table~\ref{tab:results}; N7$''$ and N8$''$ reuse machines), each one a polynomial-time reduction to
 one of three counters from Anthropic's development, followed by a simple post-step. They are written
 out as pseudocode in Sections~\ref{sec:conn}--\ref{sec:fpt}.
 \item \emph{Machine-checked statements.} Each algorithm is a Lean~4 theorem stating that one Turing
@@ -139,7 +142,7 @@ parameter or the width before counting at the leaves.
 of 28~October 2026 (papers, preprints, blogs and repositories). A1, A3, A3$'$ and N6 are known
 consequences that we formalize. N3, N5 and N6$'$ are direct corollaries: the reduction is the
 obvious one. A5a, A5a$'$ and A5b are superseded by concurrent work~\cite{Tul26}. The remaining
-results, N2, N2$'$, N7, N7$'$, N7$''$, N8, N8$'$, N8$''$, A1$'$, the range of $k$ in A2 and the spectrum in A4, are ours: we did not find
+results, N2, N2$'$, N7, N7$'$, N7$''$, N8, N8$'$, N8$''$, N9, N9$'$, A1$'$, the range of $k$ in A2 and the spectrum in A4, are ours: we did not find
 them, which does not mean that they are certainly new.
 
 \begin{table}[t]
@@ -159,6 +162,8 @@ N7$''$ & Max Leaf Spanning Tree, minimum connected dominating set, one-sided err
 N8 & $\oplus$connected vertex sets of size $\ell$ meeting $\le Dn$ given sets, any density; $C2^{\delta n}$ & ours\\
 N8$'$ & Group Steiner tree, connected hitting set, connected total domination, one-sided error, any density; $C2^{\varepsilon n}$ & ours\\
 N8$''$ & minimum Steiner tree, connected vertex cover, Group Steiner tree, one-sided error, any density; $C2^{\varepsilon n}$ & ours\\
+N9 & $\oplus$feedback vertex sets of size $k$, $m\le Dn$; $C2^{\delta n}$ & ours\\
+N9$'$ & feedback vertex set, one-sided error, $m\le Dn$; $C2^{\varepsilon n}$ & ours\\
 A1 & \#CNF-SAT, any width, $m\le Dn$; $C2^{\delta n}$ & known~\cite{CIP06,anthropic}\\
 A1$'$ & \#CNF-SAT, any width, $m\le n\,2^{(\lg n)^{1/4}/(\lg\lg n)^2}$, one machine; $2^{\delta n}$ & ours\\
 A2 & \#$k$-colorings, all $k$ with $\lg k\le(\lg n)^{1/6-\theta}$, one machine; $2^{\varepsilon n}$ & ours (range of $k$)\\
@@ -192,7 +197,10 @@ and Lean-verified exact directed Hamiltonian cycle and ATSP. He also sketches de
 decision for Steiner tree, feedback vertex set, connected vertex cover, connected dominating set
 and $k$-leaf spanning trees on graphs with $m\le Dn$ and bounded degree, explicitly as a conjecture that is checked only
 numerically. He lists dominating set on dense graphs, and the exact counts of connected vertex
-covers and connected dominating sets, as not covered. The two refutation papers list
+covers and connected dominating sets, as not covered. His research notes also list the exact number
+of induced forests of each size for $m=O(n)$, and so the exact minimum feedback vertex set and the
+number of minimum ones, via a determinant identity checked numerically; it is not formalized. If it
+holds, it is deterministic and exact and so stronger than N9 and N9$'$. The two refutation papers list
 corollaries of their own: OpenAI~\cite[Cor.~1.3]{openai} counts independent sets, $q$-colorings for
 fixed $q$ and perfect matchings (this covers N6), and Anthropic~\cite[Cor.~7]{anthropic} counts
 independent sets, cliques, vertex covers and dominating sets of each size, and $k$-colorings for
@@ -205,7 +213,8 @@ and Max-Cut with linearly many constraints with ETH is due to Jonsson, Lagerkvis
 Uppman~\cite[Thm.~8]{JLSU14}; Ganian, de Haan, Kanj and Szeider~\cite{GdHKS16} show the same for
 Nonblocker and Dominating Set. For connectivity problems the direction we need was open:
 Impagliazzo, Paturi and Zane list Hamiltonian circuit only as SNP-hard~\cite{IPZ01}, and Ganian et
-al.\ ask whether Feedback Vertex Set reduces to 3-CNF-SAT in this way~\cite{GdHKS16}. Under ETH,
+al.\ ask whether Feedback Vertex Set reduces to 3-CNF-SAT in this way~\cite{GdHKS16}; N9$'$ does
+not answer this, since it reduces sparse instances to sized counting, with randomness. Under ETH,
 connected dominating set has no $2^{o(n)}$ algorithm even on intersection graphs of convex objects
 in the plane~\cite{dBKB26}. For connected $G$ with $n\ge3$ vertices, $n$ minus the connected
 domination number is the maximum number of leaves of a spanning tree~\cite{CWY00}. Dell, Husfeldt, Marx, Taslaman and
@@ -521,6 +530,64 @@ solution with at most $\ell\le n$ vertices grows to one with exactly $\ell$ (\le
 and~\ref{thm:pos}, run with $\ell$, decide with one-sided error whether a solution with at most
 $\ell$ vertices exists (N8$''$, \lean{min_conn_randomized}, \lean{min_pos_randomized}): minimum
 Steiner tree (in vertices), minimum connected vertex cover and minimum Group Steiner tree.
+
+
+\subsection{\texorpdfstring{Feedback vertex set on sparse graphs (N9, N9$'$)}{Feedback vertex set on sparse graphs (N9, N9')}}
+
+A feedback vertex set is a set $X$ such that $G-X$ is a forest. Its complement is an induced
+forest, so we count induced forests. Cut \& Count for forests needs one more ingredient: edge bits.
+
+\begin{lemma}[\lean{sides_edges}]\label{lem:forest}
+Let $H$ be a graph on a finite set $W$ with $e$ edges, and let $S$ be the number of maps
+$W\to\{0,1\}$ that are constant on the edges of $H$. Then $S\cdot2^e=2^{|W|+j}$ for some $j\ge0$, and
+$j=0$ iff $H$ is acyclic.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Induction on $e$; delete an edge $uv$. If $u$ and $v$ are not joined in $H-uv$, flipping the side of
+everything reachable from $v$ shows that half the maps of $H-uv$ are maps of $H$
+(\lean{card_sides_eq}), and $H$ is acyclic iff $H-uv$ is. Otherwise every map of $H-uv$ is a map of
+$H$, the edge closes a cycle, and $j$ grows by one. Mathlib's lemmas on adding an edge to an acyclic
+graph give both cases.
+\end{proof}
+
+\begin{algorithm}[t]
+\caption{Parity of feedback vertex sets (N9). Lean: \lean{Forest.fvsF}, \lean{ForestTM.forM}.}\label{alg:fvs}
+\begin{algorithmic}[1]
+\Require graph $G$ on $n$ vertices with edges $e_0,\dots,e_{m-1}$, $m\le Dn$; $s=n-k$
+\State $\psi\gets$ the formula of Algorithm~\ref{alg:conn} for $\varphi=\emptyset$, on $3n$ variables
+\For{each edge $e_i=uv$} add $b_i\to x_u$, $b_i\to x_v$, $\bar b_i=\neg b_i$, where $b_i=x_{3n+i}$, $\bar b_i=x_{3n+m+i}$\EndFor
+\State $c\gets\SIZED_4(3n+2m,\ n+s+m,\ \psi)$ \Comment{$c=\sum_{|X|=s}S(G[X])\cdot2^{e(G[X])}$}
+\State \Return $\lfloor c/2^s\rfloor\bmod2$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}[\lean{fvs_parity_tm}, \lean{fvs_randomized}]\label{thm:fvs}
+For every $D$ and $\delta>0$ there are $C$ and one machine that, given a graph $G$ on $n$ vertices
+with at most $Dn$ edges and $n-k$ in unary, outputs within $C2^{\delta n}$ steps the parity of the
+number of feedback vertex sets of $G$ with $k$ vertices. For every $D$, $\delta>0$ and
+$\varepsilon>0$ there are $k_0,t,n_0,C$ and one machine that, for $n\ge n_0$, $k\le n$ and every seed
+$\omega$ as in Theorem~\ref{thm:connrand}, halts on $(G,n-k,\omega)$ within $C2^{\varepsilon n}$
+steps with a bit $\mathrm{out}(\omega)$, which is $0$ for every seed if $G$ has no feedback vertex
+set with at most $k$ vertices and $1$ for at least a $2^{-\delta n}$ fraction of the seeds if it has
+one.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+For a vertex set $X$ the edge bits can be set freely on the edges inside $X$ and must be $0$
+elsewhere, and each pair $(b_i,\bar b_i)$ has one true bit. So the solutions with $n+s+m$ true
+variables number $\sum_{|X|=s}S(G[X])\cdot2^{e(G[X])}$ (\lean{fvs_count}), which by
+Lemma~\ref{lem:forest} is $\sum_{|X|=s}2^{s+j_X}$, and $\lfloor c/2^s\rfloor$ is odd iff the
+number of induced forests of size $s$ is odd (\lean{fvs_parity}). The machine reads $s$ again after
+the count to keep bit $s$. The complements of the feedback vertex sets of size $k$ are the induced
+forests of size $n-k$ (\lean{numFVS_eq}). Induced forests are closed under removing vertices, so a
+feedback vertex set with at most $k$ vertices exists iff an induced forest with exactly $n-k$
+vertices does (\lean{fvs_iff}). The one-sided error is that of Theorem~\ref{thm:connrand}, with the
+steps C--E proved for any formula (\lean{iso_count}, \lean{fi_decide}). The formula has
+$3n+2m\le(2D+3)n$ variables, plus $1+2(3n+3)k_0$ for the checks.
+\end{proof}
+
+The edge bits make the number of variables grow with $m$, so unlike N2 this needs a sparse graph.
 
 %======================================================================
 \section{Counting}\label{sec:counting}
@@ -842,9 +909,9 @@ exponential part.
 %======================================================================
 \section{Formalization and reference implementation}\label{sec:formal}
 
-\paragraph{The Lean development.} The development consists of 45 Lean files with about 14{,}050
+\paragraph{The Lean development.} The development consists of 48 Lean files with about 15{,}300
 lines on top of Anthropic's development (pinned to a fixed revision) and Mathlib. A check file prints
-the axioms of 78 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
+the axioms of 84 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
 \lean{Quot.sound} only, and there is no \lean{sorry}. Every main theorem quantifies over the
 machine existentially and states its finite alphabets, its output (\lean{Wrap.Outputs}) and its
 time bound explicitly. The polynomial-time front ends are verified with Anthropic's \lean{PolyT}
@@ -860,8 +927,8 @@ $n\ne1$), and it equals the number of edge sets of walks with Mathlib's \lean{Is
 (\lean{numHamCycles_pos_iff}, \lean{numHamCycles_eq}); the proof uses Mathlib's result that a
 connected graph with all degrees 2 is a single cycle. The homomorphism count equals the number of
 Mathlib homomorphisms $G\to_g H$ for simple $H$ (\lean{numHom_simple}), both permanents are
-stated with Mathlib's \lean{Matrix.permanent}, and the spanning trees of N7$''$ are subgraphs with
-Mathlib's \lean{IsTree}. The remaining definitions (the spectrum, the Potts
+stated with Mathlib's \lean{Matrix.permanent}, the spanning trees of N7$''$ are subgraphs with
+Mathlib's \lean{IsTree}, and the forests of N9 are induced subgraphs with Mathlib's \lean{IsAcyclic}. The remaining definitions (the spectrum, the Potts
 counts, the Tutte polynomial, the seeds and the input codes) must be read by hand, as must
 Anthropic's model of computation and statement files.
 
@@ -872,16 +939,16 @@ are Lean theorems; the proof sketches summarize the Lean proofs. Not formalized 
 cite from the literature (lower bounds, earlier algorithms, Tutte's identity between $T(G;0,1-q)$ and
 nowhere-zero flows) and the novelty labels of Table~\ref{tab:results}.
 
-\paragraph{The reference implementation.} A Python package of about 2{,}150 lines mirrors every
+\paragraph{The reference implementation.} A Python package of about 2{,}300 lines mirrors every
 front end and post-step clause by clause, with the same variable indices and from the same input
 words as the Lean machines. Anthropic's counters are replaced by an exact DPLL counter with
 component caching that returns the weight enumerator of the solutions, so the implementation runs
 in exponential time; its purpose is to make the reductions concrete and testable. The tests
 compare every algorithm with a direct enumeration of the quantity in the Lean statement (colorings,
 homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles, connected
-vertex sets, connected dominating sets, spanning trees), check the shape bounds that the Lean proofs
-use, and measure the one-sided error of A5b, N2$'$, N7$'$ and N7$''$ over random seeds. A further test checks that the Python front ends are the Lean ones:
-a small Lean program evaluates the Lean definitions of all 20 front ends on 113 random input words,
+vertex sets, connected dominating sets, spanning trees, induced forests), check the shape bounds that the Lean proofs
+use, and measure the one-sided error of A5b, N2$'$, N7$'$, N7$''$, N8$'$ and N9$'$ over random seeds. A further test checks that the Python front ends are the Lean ones:
+a small Lean program evaluates the Lean definitions of all 22 front ends on 131 random input words,
 and the formulas agree clause for clause.
 
 \paragraph{Availability.} The Lean development, the Python package and the instructions to check
@@ -911,7 +978,8 @@ dominating set and Max Leaf Spanning Tree on dense graphs; the exact
 number of connected vertex sets of size $\ell$ on dense graphs, of which N2 gives the parity;
 Hamiltonian cycle on graphs of average degree $2^{\Omega(\sqrt{\lg n})}$, beyond Tulsyan's
 bound~\cite{Tul26}; positive CNFs of unbounded width with superlinearly many clauses, such as Group
-Steiner tree with $\omega(n)$ groups; the Tutte
+Steiner tree with $\omega(n)$ groups; feedback vertex set on graphs with $\omega(n)$ edges, and
+deterministically; the Tutte
 polynomial off the integer hyperbolas; permanents with larger integer entries; the matching
 polynomial of general graphs; and problems for which the refutations remove a lower bound but no
 reduction with few variables is known, such as dense Max-Cut, CNF-SAT with $\poly(n)$ clauses,

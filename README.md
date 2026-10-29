@@ -69,6 +69,8 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N8 | `EthCor.PosTM.pos_parity_tm` (also `CdsTree.shortensP`) | **Parity of connected solutions of a positive CNF of any width.** For every D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n in unary, and a CNF φ on the vertices with only positive literals, at most n literals per clause and **at most D·n clauses of any width**. It outputs whether the number of vertex sets X with \|X\| = ℓ that meet every clause of φ and induce a connected subgraph is odd, within C·2^{δn} steps. N2 allows negative literals but needs clauses of bounded width; N7 is the special case where φ is the closed neighbourhoods. | ours |
 | N8′ | `EthCor.PosTM.pos_randomized` | **Group Steiner tree, connected hitting set and connected total domination, randomized, one-sided error.** The same as N2′, for φ as in N8 (input `codeCI`): the bit is 0 for every seed if no X as in N8 exists, and 1 for at least a 2^{−δn} fraction of the seeds if one does, within C·2^{εn} steps, for graphs of **any density**. Special cases: with φ = the groups, the sets X are the vertex sets of the group Steiner trees with ℓ vertices (at most D·n groups of any size); with φ = a system of at most D·n sets of vertices, the connected hitting sets of size ℓ; with φ = the open neighbourhoods, the connected total dominating sets of size ℓ. | ours |
 | N8″ | `EthCor.MinTM.min_conn_randomized`, `min_pos_randomized` (also `conn_grow`, `min_iff`) | **Minimum Steiner tree, minimum connected vertex cover and minimum Group Steiner tree, randomized, one-sided error.** For a connected graph G of **any density** and a positive φ, the machines of N2′ (clauses of at most r literals, at most (n+2)^D clauses) and N8′ (any width, at most D·n clauses), run with ℓ, decide in the same sense whether some X with **at most** ℓ vertices meets every clause of φ and induces a connected subgraph. With φ = the terminals, the edges or the groups, this is minimum Steiner tree (size counted in vertices), minimum connected vertex cover and minimum Group Steiner tree. | ours |
+| N9 | `EthCor.ForestTM.fvs_parity_tm` (also `Forest.sides_edges`, `Forest.fvs_parity`, `ForestTM.numFVS_eq`) | **Parity of feedback vertex sets on sparse graphs.** For every D and δ > 0, one machine is given a graph G on n vertices with **at most D·n edges** and n − k in unary (k ≤ n). It outputs whether G has an odd number of feedback vertex sets with k vertices (sets X with G − X a forest, Mathlib's `IsAcyclic`), within C·2^{δn} steps. | ours |
+| N9′ | `EthCor.ForestITM.fvs_randomized` (also `for_randomized`, `Forest.fi_decide`, `ForestTM.fvs_iff`) | **Feedback vertex set on sparse graphs, randomized, one-sided error.** For every D, δ > 0 and ε > 0 there are k₀, t, n₀ and one machine with the following property. Run on G, n − k and the code of a seed ω (`codeFI`), for any graph on n ≥ n₀ vertices with **at most D·n edges** and k ≤ n, it halts within C·2^{εn} steps with one bit. If G has no feedback vertex set with **at most** k vertices, the bit is 0 for every seed. If it has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | independent; superseded by the deterministic exact count of [15] |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases (`EthCor.Special`): for q = 2 the Max-Cut spectrum (`maxcut_spectrum`) and the density of states of the ±1 Ising model (`ising_spectrum`); N₀ is the number of Mathlib colorings `G.Coloring (Fin q)` (`pottsSpec_zero`), which is (−q)^{k(E)}·(−1)^n·T(G; 1−q, 0) (`chromatic_tutte`); and T(G; 0, 1−q) (`flow_tutte`), which by Tutte's classical theorem is ± the flow polynomial at q. | direct corollary; formalized |
 | N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | known: perfect matchings in 2^{o(v+e)} [1, Cor. 1.3]; formalized |
@@ -95,11 +97,11 @@ sets of walks in G with Mathlib's `IsHamiltonianCycle` (`EthCor.Ham.numHamCycles
 Hamiltonian cycle counts once, whatever its start and direction. The "ours" entries are results we did not find in the literature search of 28 October 2026 (see [Related and concurrent work](#related-and-concurrent-work)). That means we did not find them, not that they are certainly new.
 
 In A5b, the seeds are the elements of the finite type `Seed m k t (3m + 3)`, m being the number of
-edges. In N2′ and N7′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
+edges. In N2′, N7′, N8′ and N9′ they are the elements of `Seed n k t (3n + 3)`, checks on the vertex bits. The fraction
 is taken over all seeds, so it is the probability for a uniformly random seed. A seed has
 O(M·k·log M) bits, for M = m or n. Its code `seedCode ω` is W = M + k + (3M + 3) + 1 in unary,
 followed by the numbers of ω, each written as a block 1^v 0^{W−v} of W bits. In N2′ and N7′ the
-input carries the seed's length in unary in front of it (`seedL`). Running the machine on R independent
+input carries the seed's length in unary in front of it (`seedL`); so does the input of N9′. Running the machine on R independent
 seeds and answering yes if some run outputs 1 never errs on no-instances. On yes-instances it errs on
 at most a fraction e^{−R·2^{−δn}} of the R-tuples of seeds, which is at most e^{−2^{δn}} for
 R ≥ 2^{2δn} (`EthCor.Amplify.ham_amplified`, `conn_amplified`, `EthCor.CdsITM.cds_amplified`, from
@@ -253,6 +255,21 @@ the counting lemma `amplify`).
   to a vertex outside crosses the boundary (Mathlib's `exists_boundary_dart`). So a solution with
   fewer than ℓ ≤ n vertices grows to one with exactly ℓ (`conn_grow`, `min_iff`), and the runs of N2′
   and N8′ with ℓ decide the minimum. G must be connected; otherwise run each component.
+- **N9, N9′, feedback vertex set.** Count induced forests instead of connected sets. Add to the
+  formula of N2 an edge bit b_e for every edge e = uv, with b_e → x_u ∧ x_v, and its complement.
+  The formula has 3n + 2m variables. A vertex set X then has sig(X)·2^{e(X)} solutions, sig(X) the
+  side maps of G[X] and e(X) its number of edges. The new identity is `Forest.sides_edges`: a graph
+  H on W with S side maps (maps to {0,1} constant on edges) and e edges has S·2^e = 2^{|W|+j} with
+  j = 0 exactly if H is acyclic. It is proved by induction on the edges. An edge between two
+  components halves S (`card_sides_eq`, the flip of A5a on the component of one end), and an edge
+  inside a component leaves S unchanged and closes a cycle (Mathlib's
+  `isAcyclic_add_edge_iff_of_not_reachable`, `isAcyclic_sup_fromEdgeSet_iff`). So with target
+  n + s + m, the count divided by 2^s is odd exactly when the number of induced forests of size s
+  is odd (`fvs_parity`). The machine reads s again from the input to keep bit s of the count
+  (`Stepped.bind`). For m ≤ D·n the formula has O(n) variables. Induced forests are closed under
+  removing vertices, so a feedback vertex set with at most k vertices exists iff an induced forest
+  with exactly n − k vertices does (`fvs_iff`). N9′ adds the checks of a seed as in N2′. Steps C–E
+  are now proved for any formula on N₀ variables (`Forest.iso_count`), not only for `connF`.
 - **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
   distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
   Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
@@ -320,6 +337,13 @@ published anything yet.
   and are machine-checked. His sketch, if it were proved, would give deterministic decisions for
   Steiner tree, connected vertex cover, connected dominating set and k-leaf spanning trees on sparse
   graphs only.
+
+  **Feedback vertex set (checked at commit 60d1679, 29 October, 15:30 UTC).** His research notes
+  list the exact number of induced forests of each size, and so the exact minimum feedback vertex
+  set and the number of minimum ones, for |E| = O(n), via a determinant identity. They mark it
+  "numerically verified, unrefereed" and as a claim "if the core holds"; it is not in Lean. If it
+  were proved it would be deterministic and exact, so stronger than N9 and N9′. N9 and N9′ are also
+  for sparse graphs only, but they are machine-checked.
 - **The two papers themselves** list corollaries. OpenAI [1, Cor. 1.3] counts independent sets and,
   for each fixed q, proper q-colorings in 2^{o(v)}, and perfect matchings in 2^{o(v+e)}; this
   covers N6. Anthropic [2, Cor. 7] counts independent sets, cliques, vertex covers and dominating
@@ -332,12 +356,14 @@ published anything yet.
   - A3: Impagliazzo, Paturi and Zane [4, Thm 5], with a kernel.
   - A3′: Ganian, de Haan, Kanj and Szeider [17], with Ore's bound or the kernel.
 - **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2, N2′, N7, N7′,
-  N7″, N8, N8′ and N8″. Tulsyan lists dominating set on dense graphs as not covered and sketches connected
+  N7″, N8, N8′, N8″, and N9, N9′ as proved results (Tulsyan sketches an exact count, see above). Tulsyan lists dominating set on dense graphs as not covered and sketches connected
   dominating set and k-leaf spanning trees only for sparse graphs [15]. Under ETH, connected dominating set has no 2^{o(n)} algorithm
   even on some geometric intersection graphs [20].
   Connectivity problems were open in this direction. Impagliazzo, Paturi and Zane list Hamiltonian
   Circuit only as SNP-hard [4], and Ganian et al. state as an open problem whether Feedback Vertex
-  Set reduces to 3-CNF-SAT in this way [17].
+  Set reduces to 3-CNF-SAT in this way [17]. N9′ does not answer that question. It reduces sparse
+  Feedback Vertex Set to counting with a prescribed number of true variables, not to satisfiability,
+  and it is randomized.
 
 ## Algorithms
 
@@ -611,6 +637,30 @@ w comes from `CdsTree.shortensP_exists D` for ε = δ/4; the tree has depth (D+1
 a connected graph (`MinTM.min_conn_randomized`, `min_pos_randomized`); `test_min_iff` checks
 `min_iff` by brute force.
 
+### N9, N9′: feedback vertex set on sparse graphs
+
+```
+FVS_PARITY(G on n vertices with m ≤ D·n edges, s = n − k):
+  F := CONN(G, φ = [])                               # x_v, s_v, s̄_v as in N2, 3n variables
+  for every edge e = (u, v), the i-th:  b_i → x_u,  b_i → x_v,  b̄_i = ¬b_i   # b_i = 3n + i
+  c := SIZED_4(3n + 2m, n + s + m, F)                # Σ over X with |X| = s of sig(X)·2^{e(X)}
+  return ⌊c/2^s⌋ mod 2                 # parity of #induced forests of size s = #FVS of size k
+
+FVS_RANDOMIZED(G, s = n − k, ω):
+  N₀ := 3n + 2m
+  F := the formula above, z = N₀ false, the chains of ω on the vertex bits at N₀ + 1 + …,
+       their complements                             # N₀ + 1 + 2·(3n+3)·k₀ variables
+  c := SIZED_4(N₀ + 1 + 2·(3n+3)·k₀, n + s + m + (3n+3)·k₀, F)
+  return ⌊c/2^s⌋ mod 2      # 0 for every ω if no FVS with ≤ k vertices
+```
+
+Lean: `Forest.card_sides_eq`, `sides_edges`, `ebF`, `fvsF`, `stepF`, `stepG`, `fvs_count`,
+`weight_eq`, `fvs_parity_P`, `fvs_parity`, `isoAdd`, `iso_count`, `fi_parity`, `fi_decide`;
+`ForestTM.preF`, `postF`, `forM`, `for_parity_tm`, `numFVS_eq`, `fvs_iff`, `fvs_parity_tm`;
+`ForestITM.codeFI`, `preQ`, `fiM`, `for_randomized`, `fvs_randomized`. Python: `forest.fvsF`,
+`fvs_parity`, `fvs_randomized`, `num_fvs`; `tests/test_forest.py` checks `sides_edges` (and that j
+is the cyclomatic number), both machines against brute force, and `fvs_iff`.
+
 ## Running the algorithms
 
 [`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
@@ -624,7 +674,7 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 65 tests: every algorithm against brute force on small inputs,
+python3 -m pytest -q                  # 69 tests: every algorithm against brute force on small inputs,
                                       # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
@@ -632,15 +682,16 @@ python3 -c "from ethcor.permanent import permanent_signed as p; \
 
 The tests compare each algorithm with a direct enumeration of the quantity in the Lean statement
 (colorings, homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles,
-connected vertex sets, connected dominating sets, spanning trees). They also check the shape bounds
+connected vertex sets, connected dominating sets, spanning trees, induced forests). They also check the shape bounds
 the Lean proofs use (width, number of variables and clauses), and the one-sided error of A5b, N2′,
-N7′ and N7″ over random seeds.
+N7′, N7″, N8′ and N9′ over random seeds.
 
-`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 113
+`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 131
 random input words to [`lean/Dump.lean`](lean/Dump.lean), which evaluates the Lean definitions
 (`formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`, `SPermTM.leafS`,
-`HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`, `NbTM.preN`,
-and the leaves of the trees of A1, A1′, A3, N7, N7′, N8 and N8′), and compares the formulas clause for clause. It
+`HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`,
+`ForestTM.preF`, `ForestITM.preQ`, `NbTM.preN`, and the leaves of the trees of A1, A1′, A3, N7, N7′,
+N8 and N8′), and compares the formulas clause for clause. It
 needs the built Lean development (`cd lean && lake build`, about 1 minute per run of the test) and is
 skipped if `lake` is not on the PATH or `ETHCOR_SKIP_LEAN` is set.
 
@@ -685,6 +736,8 @@ lake env lean CheckAxioms.lean
   parity, N2).
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
+- **N9, N9′** are done for sparse graphs (see the table). Open: feedback vertex set on denser
+  graphs (the edge bits make the formula grow with m), and a deterministic version.
 - **N2, N2′, N7, N7′, N7″, N8, N8′ and N8″** are done (see the table). N7 and N8 combine the Cut & Count
   formula with Anthropic's shortening tree, so they handle positive clauses of unbounded width. Open:
   more than linearly many such clauses (for example Group Steiner tree with n·ω(1) groups), long
@@ -744,6 +797,8 @@ lean/
     MaxLeafTM                             Max Leaf Spanning Tree, minimum connected dominating set (N7″)
     PosConnTM                             positive CNF of any width: parity (N8), randomized (N8′)
     MinConnTM                             minimum Steiner tree, connected vertex cover, Group Steiner tree (N8″)
+    ForestFormula                         side maps × 2^{edges} = 2^{|V|+j}; induced forests by Cut & Count
+    ForestTM, ForestIsoTM                 feedback vertex set on sparse graphs: parity (N9), randomized (N9′)
 python/              reference implementations of all algorithms (see "Running the algorithms")
   pyproject.toml     pytest configuration
   ethcor/
@@ -754,7 +809,7 @@ python/              reference implementations of all algorithms (see "Running t
     permanent.py     N6, N6′           vertex_cover.py   A3
     nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
     isolation.py     seeds, isolation  connected.py      N2, N2′
-    cds.py           N7, N7′, N7″, N8, N8′
+    cds.py           N7, N7′, N7″, N8, N8′   forest.py   N9, N9′
   tests/             one test file per module, against brute force; test_lean_agreement.py
                      against the Lean front ends (via lean/Dump.lean)
 ```
@@ -794,8 +849,8 @@ and check proofs, to write the Lean formalisation, and to draft the text.
     algorithmics for minimum dominating set. SOFSEM 2006, LNCS 3831, 237–245.
 15. V. Tulsyan. Counting Hamiltonian cycles in sparse graphs in subexponential time, assuming the
     new #SAT algorithms. October 2026. https://github.com/xennygrimmato/eth-hamiltonicity (Lean:
-    `EthFollowup.ExactHC.theorem1`, `theorem2`, `theoremTSP`; checked at commits ae323a3 and
-    ba4c161).
+    `EthFollowup.ExactHC.theorem1`, `theorem2`, `theoremTSP`; checked at commits ae323a3,
+    ba4c161, 16fe4eb, c01f010 and 60d1679).
 16. P. Jonsson, V. Lagerkvist, J. Schmidt, and H. Uppman. Relating the time complexity of
     optimization problems in light of the exponential-time hypothesis. MFCS 2014, LNCS 8635,
     408–419. arXiv:1406.3247.

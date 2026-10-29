@@ -43,3 +43,6 @@ import EthCor.LeafTree
 import EthCor.MaxLeafTM
 import EthCor.PosConnTM
 import EthCor.MinConnTM
+import EthCor.ForestFormula
+import EthCor.ForestTM
+import EthCor.ForestIsoTM

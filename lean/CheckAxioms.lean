@@ -77,3 +77,9 @@ import EthCor
 #print axioms EthCor.MinTM.conn_grow
 #print axioms EthCor.MinTM.min_conn_randomized
 #print axioms EthCor.MinTM.min_pos_randomized
+#print axioms EthCor.Forest.sides_edges
+#print axioms EthCor.Forest.fvs_parity
+#print axioms EthCor.Forest.fi_decide
+#print axioms EthCor.ForestTM.fvs_iff
+#print axioms EthCor.ForestTM.fvs_parity_tm
+#print axioms EthCor.ForestITM.fvs_randomized

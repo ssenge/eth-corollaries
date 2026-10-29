@@ -19,8 +19,9 @@ from itertools import combinations
 from typing import Sequence
 
 from .cnf import Fml
-from .cnf_anywidth import DNode, leafD, sized, stepD, walk_sum
-from .connected import _connected_in, aR, compF, connF, edgeCC, lC, postC, sdR, seedL, sideF
+from .cnf_anywidth import DNode, dedup, leafD, sized, stepD, walk_sum
+from .connected import (_connected_in, aR, codeCI, compF, connF, edgeCC, enc_free, fC, fR, lC, postC, sdR,
+                        seedL, sideF)
 from .graphs import Matrix, adjB, code, unary
 from .hamcycle import EH, dFixes, dRows, dk, dm1, isoF, nH, rest
 from .isolation import Seed
@@ -125,3 +126,46 @@ def maxleaf_randomized(adj: Matrix, L: int, seed: Seed, w: int = 2) -> bool:
     1 ≤ L < n, G has a spanning tree with at least L leaves iff it has a connected dominating set of
     size n − L (`Leaf.leaf_iff`)."""
     return cds_randomized(adj, len(adj) - L, seed, w)
+
+
+# ---------------------------------------------------------------------------------------------
+# A positive CNF of any width with at most D·n clauses in place of the clauses of domination
+
+
+def opens(psi: Fml) -> list[list[int]]:
+    """The variables of each clause, without repeats (Lean: `PosTM.opens`)."""
+    return [dedup([v for v, _ in C]) for C in psi]
+
+
+def rootP(x: Sequence[bool]) -> DNode:
+    """The root of `pos_parity_tm`: as `rootC`, with the clauses of φ open (Lean: `PosTM.rootP`)."""
+    head, (_, F) = rootC(x)
+    return (head, (opens(fC(x)), F))
+
+
+def rootQ(x: Sequence[bool]) -> DNode:
+    """The root of `pos_randomized`: as `rootR`, with the clauses of φ open (Lean: `PosTM.rootQ`)."""
+    head, (_, F) = rootR(x)
+    return (head, (opens(fR(x)), F))
+
+
+def _check_pos(n: int, psi: Fml) -> None:
+    if any(not b for C in psi for _, b in C) or any(len(C) > n for C in psi):
+        raise ValueError("φ must be positive, with clauses of at most n literals")
+
+
+def pos_parity(adj: Matrix, l: int, psi: Fml, w: int = 2) -> bool:
+    """Whether the number of X with |X| = ℓ, X meeting every clause of the positive CNF ψ and G[X]
+    connected is odd (Lean: `EthCor.PosTM.pos_parity_tm`)."""
+    _check_pos(len(adj), psi)
+    x = code(adj) + unary(l) + enc_free(len(adj), psi)
+    return postC(walk_sum(lambda y: stepD(w, y), rootP, lambda y: sized(leafD(y)), x))[0]
+
+
+def pos_randomized(adj: Matrix, l: int, seed: Seed, psi: Fml, w: int = 2) -> bool:
+    """The bit out(ω) on `codeCI G ℓ ω φ` (Lean: `EthCor.PosTM.pos_randomized`)."""
+    _check_pos(len(adj), psi)
+    if seed.M != len(adj):
+        raise ValueError("the seed must act on the n vertex bits")
+    x = codeCI(adj, l, seed, psi)
+    return postC(walk_sum(lambda y: stepD(w, y), rootQ, lambda y: sized(leafD(y)), x))[0]

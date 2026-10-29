@@ -103,6 +103,11 @@ def cases(rng: random.Random):
             out.append(("cds", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootC(x))]))
             x = cds.codeCD(G, l, w_v)
             out.append(("cdr", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootR(x))]))
+            pos = [[(rng.randrange(n), True) for _ in range(rng.randint(1, n))] for _ in range(rng.randint(0, 2 * n))]
+            x = code(G) + unary(l) + connected.enc_free(n, pos)
+            out.append(("pos", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootP(x))]))
+            x = connected.codeCI(G, l, w_v, pos)
+            out.append(("posr", w, x, [ca.leafD(y) for y in ca.leaves(lambda y: ca.stepD(w, y), 1000, cds.rootQ(x))]))
             m = len(hamcycle.EH(code(G)))
             if m >= 1:
                 w_e = random_seed(m, kk, t, 3 * m + 3, rng)
@@ -123,5 +128,5 @@ def test_python_matches_lean():
     for (name, arg, x, expected), line in zip(cs, lines):
         assert json.loads(line) == norm(expected), f"{name} arg={arg} on {bits(x)}"
         seen.add(name)
-    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "cds", "cdr", "nb", "vc",
+    assert seen == {"col", "hom", "potts", "hcF", "hcS", "hcI", "cvc", "conn", "ci", "cds", "cdr", "pos", "posr", "nb", "vc",
                     "perm", "sperm", "spec", "cnf", "grow"}

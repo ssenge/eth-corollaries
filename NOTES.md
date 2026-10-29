@@ -412,3 +412,23 @@ Re-check of concurrent work (2026-10-29, after N7): Tulsyan's repo at ba4c161 (2
 - Other repos pinning anthropics/formal-math (gh code search): cert-machine (certifies the ETH bridge),
   glitnir-notebooks (ETH walkthrough), apsp-bound, ImprovedExponents, others unrelated. No corollaries.
   Web search: nothing new.
+
+N8, N8′ positive CNF of any width on graphs of any density (2026-10-29): `lean/EthCor/PosConnTM.lean`,
+generalized tree in `CdsTree.lean`.
+- `CdsTree.InvP N s W M R P`: open clauses ≤ M (= D·n), their variables ≤ R (= n), separately (as
+  `CnfTree.Inv2`). `invP_root` for any open O (Nodup, vars < R, |O| ≤ M). `shortensN` now goes through
+  InvP with M = R = n. `shortensP D w`: depth (D+1)·n, ≤ 2^{εn} leaves via `sum_choose_le_two_rpow`
+  with k = 2, L = D + 2, leaves of width ≤ W with ≤ |F| + (2D+1)·n clauses, count identity, stack bound.
+- `PosTM.opens ψ` = variables of each clause, dedup; `cntS_opens` (positive clause ≡ clause of its vars).
+  `rootP x = ((rootC x).1, (opens (fC x), (rootC x).2.2))`, `rootQ` likewise from `rootR`/`fR`, so PolyT
+  comes from `rootC_polyT`/`rootR_polyT` projections. Input `code G ++ unary ℓ ++ SatFree.enc φ`
+  (parity) and `codeCI G ℓ ω φ` (randomized); clause length ≤ n needed for the input-length bound.
+- `pos_parity_tm D`, `pos_randomized D`: copies of cds_parity_tm / cds_randomized with depth (D+1)·n
+  and node bound S·X² (S = 2D+9, resp. 24k+16+2D+1). Special cases: Group Steiner tree (≤ D·n groups),
+  connected hitting set, connected total domination (open neighbourhoods; isolated vertex = empty
+  clause, count 0). Red-blue domination skipped: X ⊆ red needs negative unit clauses (closed clauses
+  would do; not done).
+- Python `cds.opens`, `rootP`, `rootQ`, `pos_parity`, `pos_randomized`; `tests/test_pos.py` (2 tests);
+  Dump `pos`, `posr`: 113 words, 20 front ends agree. 64 tests. CheckAxioms: 75 theorems, standard axioms.
+- Tulsyan re-check (c01f010, 11:06 UTC): theorem3 (exact #HC for avg degree 2^{o(√lg n)}) and exact
+  directed HC/ATSP now in Lean; nothing on hitting sets/groups/total domination.

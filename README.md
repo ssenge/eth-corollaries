@@ -66,6 +66,8 @@ in ⌊log₂ 2n⌋+1 bits)*, 0, then a final 0; unary t = 1ᵗ0.
 | N7 | `EthCor.CdsTM.cds_parity_tm` (also `CdsTree.shortensN`) | **Parity of connected dominating sets.** For every δ > 0, one machine is given a graph G on n vertices of **any density** and 1 ≤ ℓ ≤ n in unary. It outputs whether G has an odd number of connected dominating sets with ℓ vertices (every vertex is in X or has a neighbour in X, and G[X] is connected), within C·2^{δn} steps. Unlike in N2, the clauses of domination have unbounded width; Anthropic's shortening tree for dominating sets cuts them inside the Cut & Count formula. | ours |
 | N7′ | `EthCor.CdsITM.cds_randomized` (also `cds_amplified`) | **Connected dominating set, randomized, one-sided error.** For every δ > 0 and ε > 0 there are k, t, n₀ and one machine with the following property. Run on G, ℓ and the code of a seed ω (`codeCD`), for any graph on n ≥ n₀ vertices of **any density**, it halts within C·2^{εn} steps with one bit. If G has no connected dominating set of size ℓ, the bit is 0 for every seed. If it has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. | ours |
 | N7″ | `EthCor.MaxLeafTM.maxleaf_randomized` (also `mincds_randomized`; `Leaf.leaf_iff`, `Leaf.cds_le_iff`) | **Max Leaf Spanning Tree and minimum connected dominating set, randomized, one-sided error.** The machine of N7′, run on `codeCD G (n − L) ω` for n ≥ n₀ and 1 ≤ L < n, outputs 0 for every seed if G has no spanning tree with at least L leaves, and 1 for at least a 2^{−δn} fraction of the seeds if it has one. Spanning trees are subgraphs T ≤ G with Mathlib's `IsTree`. Run on `codeCD G ℓ ω` for 1 ≤ ℓ ≤ n, it decides in the same sense whether G has a connected dominating set with **at most** ℓ vertices. Both for graphs of **any density**, within C·2^{εn} steps. | ours |
+| N8 | `EthCor.PosTM.pos_parity_tm` (also `CdsTree.shortensP`) | **Parity of connected solutions of a positive CNF of any width.** For every D and δ > 0, one machine is given a graph G on n vertices of **any density**, 1 ≤ ℓ ≤ n in unary, and a CNF φ on the vertices with only positive literals, at most n literals per clause and **at most D·n clauses of any width**. It outputs whether the number of vertex sets X with \|X\| = ℓ that meet every clause of φ and induce a connected subgraph is odd, within C·2^{δn} steps. N2 allows negative literals but needs clauses of bounded width; N7 is the special case where φ is the closed neighbourhoods. | ours |
+| N8′ | `EthCor.PosTM.pos_randomized` | **Group Steiner tree, connected hitting set and connected total domination, randomized, one-sided error.** The same as N2′, for φ as in N8 (input `codeCI`): the bit is 0 for every seed if no X as in N8 exists, and 1 for at least a 2^{−δn} fraction of the seeds if one does, within C·2^{εn} steps, for graphs of **any density**. Special cases: with φ = the groups, the sets X are the vertex sets of the group Steiner trees with ℓ vertices (at most D·n groups of any size); with φ = a system of at most D·n sets of vertices, the connected hitting sets of size ℓ; with φ = the open neighbourhoods, the connected total dominating sets of size ℓ. | ours |
 | A5b | `EthCor.HamITM.ham_randomized` (also `hcI_tm`, `ham_randomized_mathlib`) | **Hamiltonian cycle, randomized, one-sided error.** One machine, run on `code G` followed by the code of a seed ω, halts within 2^{εn} steps with one bit. This holds for every D, δ > 0 and ε > 0, for k, t and n₀ depending on them, for every graph on n ≥ n₀ vertices with **at most D·n edges**, and for every seed ω. If G has no Hamiltonian cycle, the bit is 0 for every seed. If G has one, the bit is 1 for at least a 2^{−δn} fraction of the seeds. `ham_randomized_mathlib` states the same with Mathlib's `G.IsHamiltonian`. | independent; superseded by the deterministic exact count of [15] |
 | N3 | `EthCor.PottsTM.potts_spectrum` (also `tutte_tm`; identities `Potts.potts_fk`, `Potts.tutte_hyperbola`) | **Potts model and Tutte polynomial on sparse graphs.** For every number of colors q ≥ 1, density D and δ > 0, one machine is given a graph G on n vertices with ≤ D·n edges and j ≤ \|E(G)\| in unary. It outputs the number N_j of colorings σ : V → [q] with exactly j monochromatic edges (the density of states of the q-state Potts model), within C·2^{δn} steps. The N_j give the Potts partition function Σ_j N_j·y^j, its random-cluster form Σ_{A ⊆ E} q^{k(A)}·v^{\|A\|} with y = 1 + v [9], and the Tutte polynomial on the hyperbola (x−1)(y−1) = q: (x−1)^{k(E)}·(y−1)^n·T(G; x, y) = Σ_j N_j·y^j for x, y ≠ 1 (`tutte_tm`). Special cases (`EthCor.Special`): for q = 2 the Max-Cut spectrum (`maxcut_spectrum`) and the density of states of the ±1 Ising model (`ising_spectrum`); N₀ is the number of Mathlib colorings `G.Coloring (Fin q)` (`pottsSpec_zero`), which is (−q)^{k(E)}·(−1)^n·T(G; 1−q, 0) (`chromatic_tutte`); and T(G; 0, 1−q) (`flow_tutte`), which by Tutte's classical theorem is ± the flow polynomial at q. | direct corollary; formalized |
 | N6 | `EthCor.PermTM.perm_fpt` (also `Perm.cntS_permF`, `Perm.permanent_eq`) | **The 0/1 permanent in 2^{εm}·poly(n).** For every ε > 0, one machine is given n in unary and the n² entries of a 0/1 matrix A. It outputs Mathlib's `Matrix.permanent` of A (for a bipartite graph, its number of perfect matchings) within C·(n+2)^C·2^{εm} steps, m the number of ones of A. Under #ETH, no exp(o(m/log m)) algorithm exists for this problem [10]. | known: perfect matchings in 2^{o(v+e)} [1, Cor. 1.3]; formalized |
@@ -237,6 +239,14 @@ the counting lemma `amplify`).
   So the run of N7′ with ℓ = n − L decides Max Leaf, and the run with ℓ decides whether the
   connected domination number is at most ℓ. A disconnected graph has neither a spanning tree nor a
   connected dominating set, and N7′ already answers 0 on it.
+- **N8, N8′, positive CNFs of any width.** The tree of N7 uses only that the open clauses are
+  positive, have no repeated variables and live on the n vertex bits. `CdsTree.shortensP` allows D·n
+  of them: its invariant `InvP` bounds the number of open clauses by D·n and the variables in them by
+  n, separately, as `CnfTree.Inv2` does for A1. So a path has at most D·n light and n/w heavy steps,
+  and the tree of depth (D+1)·n has at most Σ_{j ≤ 2n/w} C((D+2)·n, j) ≤ 2^{εn} leaves for a suitable w.
+  The front end reads φ and keeps the variables of each clause without repeats (`PosTM.opens`); a
+  positive clause has the same models as the clause of its variables (`cntS_opens`). The rest is N7
+  and N7′ with φ in place of the clauses of domination.
 - **Isolation for arbitrary sets [7].** One check on k coordinates fails to separate two points at
   distance w with probability (1 + (1 − w/M)^k)/2 (`two_mul_card_rv`, by flipping one coefficient).
   Step I: call x ∈ S semi-isolated if no point of S at distance ≥ r passes the same first m checks.
@@ -282,9 +292,9 @@ published anything yet.
   07:13 UTC). Since our first check (commit ae323a3) he has added:
   - **Sparse TSP**, verified in Lean (`EthFollowup.ExactHC.theoremTSP`, `theoremTSP_decode`): the
     tours of every weight on graphs with |E| ≤ D·n and integer weights ≤ W, in 2^{δn}·poly(W).
-  - **#HC for average degree d̄**, a written proof that is not machine-checked: exact #HC in
-    2^{O(n·log d̄/√lg n)}, subexponential for d̄ = 2^{o(√lg n)}. This goes beyond the range of
-    A5a′. It is conditional on lemmas of Anthropic's paper.
+  - **#HC for average degree d̄**: exact #HC in 2^{O(n·log d̄/√lg n)}, subexponential for
+    d̄ = 2^{o(√lg n)}. This goes beyond the range of A5a′. At ba4c161 it was a written proof; at
+    c01f010 (29 October, 11:06 UTC) it is verified in Lean (`theorem3`, `theorem3_maxdeg`).
   - **A sketch of Steiner tree, feedback vertex set, connected vertex cover, connected dominating
     set and k-leaf spanning trees**, deterministic, for graphs with |E| ≤ D·n and bounded degree. It
     is conditional on Anthropic's paper lemmas and checked numerically on graphs with up to seven
@@ -296,10 +306,11 @@ published anything yet.
 
   At commit 16fe4eb (29 October, 08:05 UTC) he has also added Lean proofs of decision, search and
   Hamiltonian paths at the level of Turing machines, a mathematical layer for directed
-  Hamiltonian cycle and ATSP, and lemmas behind his barrier notes. None of them is about domination
-  or leaves.
+  Hamiltonian cycle and ATSP, and lemmas behind his barrier notes. At c01f010 (11:06 UTC) exact
+  directed Hamiltonian cycle and ATSP are verified in Lean too. None of this is about domination,
+  leaves, hitting sets or groups.
 
-  None of this touches the labels below. N2, N2′, N7, N7′ and N7″ hold on graphs of **any density**
+  None of this touches the labels below. N2, N2′, N7, N7′, N7″, N8 and N8′ hold on graphs of **any density**
   and are machine-checked. His sketch, if it were proved, would give deterministic decisions for
   Steiner tree, connected vertex cover, connected dominating set and k-leaf spanning trees on sparse
   graphs only.
@@ -314,8 +325,8 @@ published anything yet.
     Jonsson, Lagerkvist, Schmidt and Uppman [16, Thm 8].
   - A3: Impagliazzo, Paturi and Zane [4, Thm 5], with a kernel.
   - A3′: Ganian, de Haan, Kanj and Szeider [17], with Ore's bound or the kernel.
-- **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2, N2′, N7, N7′
-  and N7″. Tulsyan lists dominating set on dense graphs as not covered and sketches connected
+- **Not found anywhere:** A1′, A2 for growing k, N5, the spectrum in A4, N3, N6′, N2, N2′, N7, N7′,
+  N7″, N8 and N8′. Tulsyan lists dominating set on dense graphs as not covered and sketches connected
   dominating set and k-leaf spanning trees only for sparse graphs [15]. Under ETH, connected dominating set has no 2^{o(n)} algorithm
   even on some geometric intersection graphs [20].
   Connectivity problems were open in this direction. Impagliazzo, Paturi and Zane list Hamiltonian
@@ -578,6 +589,20 @@ Lean: `Leaf.IsCDS`, `leaves`, `cds_of_tree`, `tree_of_cds`, `cds_grow`, `cds_le_
 `cds.maxleaf_randomized`, `mincds_randomized`; `tests/test_maxleaf.py` checks `leaf_iff` and
 `cds_le_iff` against all spanning trees of small graphs.
 
+### N8, N8′: positive CNF of any width
+
+```
+POS_PARITY(G, ℓ, φ):            # φ positive, ≤ D·n clauses of any width
+  CDS_PARITY, with open := for every clause of φ: its variables without repeats
+POS_RANDOMIZED(G, ℓ, ω, φ):
+  CDS_RANDOMIZED, with the same open clauses
+```
+
+w comes from `CdsTree.shortensP_exists D` for ε = δ/4; the tree has depth (D+1)·n. Lean:
+`CdsTree.InvP`, `shortensP`; `PosTM.opens`, `cntS_opens`, `rootP`, `posM`, `pos_parity_tm`, `rootQ`,
+`posrM`, `pos_randomized`. Python: `cds.opens`, `rootP`, `rootQ`, `pos_parity`, `pos_randomized`;
+`tests/test_pos.py` with random positive CNFs and open neighbourhoods.
+
 ## Running the algorithms
 
 [`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
@@ -591,7 +616,7 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 62 tests: every algorithm against brute force on small inputs,
+python3 -m pytest -q                  # 64 tests: every algorithm against brute force on small inputs,
                                       # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
@@ -603,11 +628,11 @@ connected vertex sets, connected dominating sets, spanning trees). They also che
 the Lean proofs use (width, number of variables and clauses), and the one-sided error of A5b, N2′,
 N7′ and N7″ over random seeds.
 
-`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 106
+`tests/test_lean_agreement.py` checks that the Python front ends are the Lean ones. It sends 113
 random input words to [`lean/Dump.lean`](lean/Dump.lean), which evaluates the Lean definitions
 (`formOf`, `Hom.formHom`, `Spectrum.preS`, `PottsTM.preP`, `PermTM.leafP`, `SPermTM.leafS`,
 `HamTM.formH`, `HamSTM.formS`, `HamITM.formI`, `ConnTM.preC`, `preV`, `ConnITM.preR`, `NbTM.preN`,
-and the leaves of the trees of A1, A1′, A3, N7 and N7′), and compares the formulas clause for clause. It
+and the leaves of the trees of A1, A1′, A3, N7, N7′, N8 and N8′), and compares the formulas clause for clause. It
 needs the built Lean development (`cd lean && lake build`, about 1 minute per run of the test) and is
 skipped if `lake` is not on the PATH or `ETHCOR_SKIP_LEAN` is set.
 
@@ -644,18 +669,18 @@ lake env lean CheckAxioms.lean
 
 ## Status and next steps
 
-- **A5a, A5a′, A5b** are done (see the table), and superseded by Tulsyan's exact count [15]. Tulsyan
-  also gives a written proof, not machine-checked, for average degree 2^{o(√lg n)} [15]. Open:
-  Hamiltonian cycle on denser graphs, and a machine-checked proof beyond ω(n·√lg n) edges.
+- **A5a, A5a′, A5b** are done (see the table), and superseded by Tulsyan's exact count [15], which
+  is now machine-checked up to average degree 2^{o(√lg n)} [15]. Open: Hamiltonian cycle on denser
+  graphs.
 - **N2′** is randomized. Open: deterministic Steiner tree and connected vertex cover on dense
   graphs, and the exact number of connected vertex sets of size ℓ on dense graphs (we have its
   parity, N2).
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
-- **N2, N2′, N7, N7′ and N7″** are done (see the table). N7 combines the Cut & Count formula with
-  Anthropic's shortening tree, so it handles clauses of unbounded width. The same tree should handle
-  other connected problems with at most n positive clauses on the vertex bits, for example connected
-  total domination (open neighbourhoods). Open: connected dominating set deterministically.
+- **N2, N2′, N7, N7′, N7″, N8 and N8′** are done (see the table). N7 and N8 combine the Cut & Count
+  formula with Anthropic's shortening tree, so they handle positive clauses of unbounded width. Open:
+  more than linearly many such clauses (for example Group Steiner tree with n·ω(1) groups), long
+  clauses with negative literals, and deterministic versions.
 - **N5** is done (see the table). The range of h is that of A2; it ends where b³ ≈ √lg n/lglg n.
   The number of clauses grows with h², not the number of variables, so dense targets cost nothing extra.
 - **N6 and N6′** are done (see the table): 0/1 and {−1, 0, 1} entries. Open: the matching
@@ -705,10 +730,11 @@ lean/
     Amplify                               error e^{−R·2^{−δn}} for R independent seeds (A5b, N2′)
     ConnFormula, ConnTM                   parity of connected solutions (N2)
     ConnIso, ConnIsoTM                    Steiner tree / connected vertex cover, randomized (N2′)
-    CdsTree                               the shortening tree under any closed clauses (N7)
+    CdsTree                               the shortening tree under any closed clauses (N7, N8)
     CdsTM, CdsIsoTM                       connected dominating set: parity (N7), randomized (N7′)
     LeafTree                              spanning trees with many leaves vs connected dominating sets
     MaxLeafTM                             Max Leaf Spanning Tree, minimum connected dominating set (N7″)
+    PosConnTM                             positive CNF of any width: parity (N8), randomized (N8′)
 python/              reference implementations of all algorithms (see "Running the algorithms")
   pyproject.toml     pytest configuration
   ethcor/
@@ -719,7 +745,7 @@ python/              reference implementations of all algorithms (see "Running t
     permanent.py     N6, N6′           vertex_cover.py   A3
     nonblocker.py    A3′               hamcycle.py       A5a, A5a′, A5b
     isolation.py     seeds, isolation  connected.py      N2, N2′
-    cds.py           N7, N7′, N7″
+    cds.py           N7, N7′, N7″, N8, N8′
   tests/             one test file per module, against brute force; test_lean_agreement.py
                      against the Lean front ends (via lean/Dump.lean)
 ```

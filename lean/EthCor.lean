@@ -41,3 +41,4 @@ import EthCor.CdsTM
 import EthCor.CdsIsoTM
 import EthCor.LeafTree
 import EthCor.MaxLeafTM
+import EthCor.PosConnTM

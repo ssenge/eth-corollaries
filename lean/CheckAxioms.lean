@@ -71,3 +71,6 @@ import EthCor
 #print axioms EthCor.Leaf.leaf_iff
 #print axioms EthCor.MaxLeafTM.mincds_randomized
 #print axioms EthCor.MaxLeafTM.maxleaf_randomized
+#print axioms EthCor.CdsTree.shortensP
+#print axioms EthCor.PosTM.pos_parity_tm
+#print axioms EthCor.PosTM.pos_randomized

@@ -46,6 +46,8 @@ def run (name : String) (arg : ℕ) (x : List Bool) : String :=
       (Sparsify.leaves EthCor.GrowTree.stepW 1000 (EthCor.CnfTree.rootX (FreeCode.readFree x)))
   | "cds" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.CdsTM.rootC x)).map leafD)
   | "cdr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.CdsITM.rootR x)).map leafD)
+  | "pos" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.PosTM.rootP x)).map leafD)
+  | "posr" => jlist jtrip ((Sparsify.leaves (stepD arg) 1000 (EthCor.PosTM.rootQ x)).map leafD)
   | _ => "\"unknown\""
 
 end Dump

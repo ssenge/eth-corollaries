@@ -376,3 +376,19 @@ Kisfaludi-Bak, arXiv:2601.08425).
   from rootC, rootR): now 106 words, 18 front ends, all agree. CheckAxioms: 69 theorems, standard axioms.
 - Corollary (classical, not formalized): for connected G with n ≥ 3, γ_c(G) = n − maxleaf(G)
   (Caro, West, Yuster 2000), and supersets of a CDS are CDS, so N7′ also decides Max Leaf Spanning Tree.
+
+Re-check of concurrent work (2026-10-29, after N7): Tulsyan's repo at ba4c161 (22 commits after ae323a3).
+- New, Lean: sparse TSP `EthFollowup.ExactHC.theoremTSP`, `theoremTSP_decode` (|E| ≤ Dn, weights ≤ W,
+  2^{δn}·poly(W)). No overlap with us.
+- Written, not machine-checked: exact #HC in 2^{O(n log d̄/√log n)} (`research/hc-degree-theorem.md`,
+  paper Thm 1.3), conditional on Anthropic's paper lemmas (H_A). Goes beyond our A5a′ range (already
+  superseded); our open problem "HC on ω(n√lg n) edges" now reads "machine-checked".
+- Paper Prop. "Sketch" + Remark: deterministic Steiner tree, FVS, connected VC / connected DS (decision
+  and minimum only), k-leaf out-branchings, on |E| ≤ Dn with bounded degree or hubs; numerically checked
+  on ≤ 7 vertices; README R3 "conjectured, not claimed". Exact counts of CVC/CDS listed as open there.
+  Our N2, N2′, N7, N7′ (any density, machine-checked) unaffected; labels unchanged.
+- Informal notes: dense-permanent barriers, k-dependence of #k-SAT (Theorem S), crossover estimates
+  (Anthropic's Lean algorithm beats 2^n from n ≈ 2^{552 000}).
+- Other repos pinning anthropics/formal-math (gh code search): cert-machine (certifies the ETH bridge),
+  glitnir-notebooks (ETH walkthrough), apsp-bound, ImprovedExponents, others unrelated. No corollaries.
+  Web search: nothing new.

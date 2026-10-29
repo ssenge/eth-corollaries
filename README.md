@@ -256,12 +256,32 @@ published anything yet.
   identity, not the CNF counter. An exact count gives parity and a deterministic decision, so it
   subsumes A5a, A5a′ and A5b. Our A5a and A5b were pushed earlier (27 October, 12:20 and
   19:33 UTC), but his result is stronger. He also formalizes the isolation lemma for arbitrary sets,
-  and sketches, without proof, Steiner tree and feedback vertex set on sparse graphs. We rebuilt
+  and sketches Steiner tree and feedback vertex set on sparse graphs. We rebuilt
   `theorem1` and `theorem2` from his repository (commit ae323a3) on our copy of Anthropic's
   development (same revision, 16a5ce4). Both compile and depend only on `propext`,
   `Classical.choice` and `Quot.sound`. His `hamCycles G` is the set of edge sets of G in which every
   vertex meets exactly two edges and which form a connected graph, the same quantity as our
   `numHamCycles G`. We have not reviewed his proofs beyond that.
+
+  **Update, 29 October 2026.** We checked his repository again, at commit ba4c161 (29 October,
+  07:13 UTC). Since our first check (commit ae323a3) he has added:
+  - **Sparse TSP**, verified in Lean (`EthFollowup.ExactHC.theoremTSP`, `theoremTSP_decode`): the
+    tours of every weight on graphs with |E| ≤ D·n and integer weights ≤ W, in 2^{δn}·poly(W).
+  - **#HC for average degree d̄**, a written proof that is not machine-checked: exact #HC in
+    2^{O(n·log d̄/√lg n)}, subexponential for d̄ = 2^{o(√lg n)}. This goes beyond the range of
+    A5a′. It is conditional on lemmas of Anthropic's paper.
+  - **A sketch of Steiner tree, feedback vertex set, connected vertex cover, connected dominating
+    set and k-leaf spanning trees**, deterministic, for graphs with |E| ≤ D·n and bounded degree. It
+    is conditional on Anthropic's paper lemmas and checked numerically on graphs with up to seven
+    vertices only. He labels it "conjectured, not claimed" and gives only decision and minimum for
+    connected vertex cover and connected dominating set. Their exact counts he lists as open.
+  - **Informal notes on barriers** for the dense permanent, the k-dependence of #k-SAT, and
+    crossover estimates. He puts Anthropic's Lean algorithm's first gain over 2^n at about
+    n ≈ 2^{552 000}.
+
+  None of this touches the labels below. N2, N2′, N7 and N7′ hold on graphs of **any density** and
+  are machine-checked. His sketch, if it were proved, would give deterministic decisions for Steiner
+  tree, connected vertex cover and connected dominating set on sparse graphs only.
 - **The two papers themselves** list corollaries. OpenAI [1, Cor. 1.3] counts independent sets and,
   for each fixed q, proper q-colorings in 2^{o(v)}, and perfect matchings in 2^{o(v+e)}; this
   covers N6. Anthropic [2, Cor. 7] counts independent sets, cliques, vertex covers and dominating
@@ -589,8 +609,9 @@ lake env lean CheckAxioms.lean
 
 ## Status and next steps
 
-- **A5a, A5a′, A5b** are done (see the table), and superseded by Tulsyan's exact count [15]. Open
-  for both: Hamiltonian cycle on graphs with ω(n·√lg n) edges.
+- **A5a, A5a′, A5b** are done (see the table), and superseded by Tulsyan's exact count [15]. Tulsyan
+  also gives a written proof, not machine-checked, for average degree 2^{o(√lg n)} [15]. Open:
+  Hamiltonian cycle on denser graphs, and a machine-checked proof beyond ω(n·√lg n) edges.
 - **N2′** is randomized. Open: deterministic Steiner tree and connected vertex cover on dense
   graphs, and the exact number of connected vertex sets of size ℓ on dense graphs (we have its
   parity, N2).
@@ -701,7 +722,8 @@ and check proofs, to write the Lean formalisation, and to draft the text.
     algorithmics for minimum dominating set. SOFSEM 2006, LNCS 3831, 237–245.
 15. V. Tulsyan. Counting Hamiltonian cycles in sparse graphs in subexponential time, assuming the
     new #SAT algorithms. October 2026. https://github.com/xennygrimmato/eth-hamiltonicity (Lean:
-    `EthFollowup.ExactHC.theorem1`, `theorem2`).
+    `EthFollowup.ExactHC.theorem1`, `theorem2`, `theoremTSP`; checked at commits ae323a3 and
+    ba4c161).
 16. P. Jonsson, V. Lagerkvist, J. Schmidt, and H. Uppman. Relating the time complexity of
     optimization problems in light of the exponential-time hypothesis. MFCS 2014, LNCS 8635,
     408–419. arXiv:1406.3247.

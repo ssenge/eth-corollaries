@@ -175,9 +175,14 @@ together with a matrix-tree identity, rather than the CNF counter. An exact coun
 and a deterministic decision, so his result supersedes A5a, A5a$'$ and A5b. Our versions were
 posted some hours earlier, on 27 October; we state them briefly in Section~\ref{sec:ham}. We rebuilt both theorems from his
 repository on the same revision of Anthropic's development; they compile and use only the standard
-axioms, and his count is the same quantity as our $\mathrm{hc}(G)$ of Section~\ref{sec:ham}. He
-sketches Steiner tree, feedback vertex set and connected dominating set on sparse graphs, without
-proof, and lists dominating set on dense graphs as not covered. The two refutation papers list
+axioms, and his count is the same quantity as our $\mathrm{hc}(G)$ of Section~\ref{sec:ham}. Since
+then (29 October) he has added a Lean-verified exact algorithm for TSP with polynomial weights on
+graphs with $m\le Dn$, and a written proof, not machine-checked, of exact counting in
+$2^{O(n\log\bar d/\sqrt{\lg n})}$ for average degree $\bar d$. He also sketches deterministic
+decision for Steiner tree, feedback vertex set, connected vertex cover and connected dominating set
+on graphs with $m\le Dn$ and bounded degree, explicitly as a conjecture that is checked only
+numerically. He lists dominating set on dense graphs, and the exact counts of connected vertex
+covers and connected dominating sets, as not covered. The two refutation papers list
 corollaries of their own: OpenAI~\cite[Cor.~1.3]{openai} counts independent sets, $q$-colorings for
 fixed $q$ and perfect matchings (this covers N6), and Anthropic~\cite[Cor.~7]{anthropic} counts
 independent sets, cliques, vertex covers and dominating sets of each size, and $k$-colorings for
@@ -838,7 +843,8 @@ n)^{1/6}$; \#CNF-SAT of unbounded width with more clauses than in A1$'$; a deter
 N2$'$ and N7$'$, that is, deterministic Steiner tree, connected vertex cover and connected
 dominating set on dense graphs; the exact
 number of connected vertex sets of size $\ell$ on dense graphs, of which N2 gives the parity;
-Hamiltonian cycle on graphs with $\omega(n\sqrt{\lg n})$ edges; the Tutte
+a machine-checked algorithm for Hamiltonian cycle on graphs with $\omega(n\sqrt{\lg n})$ edges,
+where Tulsyan's written proof~\cite{Tul26} reaches average degree $2^{o(\sqrt{\lg n})}$; the Tutte
 polynomial off the integer hyperbolas; permanents with larger integer entries; the matching
 polynomial of general graphs; and problems for which the refutations remove a lower bound but no
 reduction with few variables is known, such as dense Max-Cut, CNF-SAT with $\poly(n)$ clauses,
@@ -901,8 +907,8 @@ the text. All theorems were checked by Lean.
 \bibitem{Tutte54} W.~T.~Tutte. A contribution to the theory of chromatic polynomials.
   \emph{Canad.\ J.\ Math.}, 6:80--91, 1954.
 \bibitem{Tul26} V.~Tulsyan. Counting Hamiltonian cycles in sparse graphs in subexponential time,
-  assuming the new \#SAT algorithms. Preprint and Lean development, October 2026.
-  \url{https://github.com/xennygrimmato/eth-hamiltonicity}.
+  assuming the new \#SAT algorithms. Preprint and Lean development, October 2026; versions of
+  28 and 29 October (commits ae323a3, ba4c161). \url{https://github.com/xennygrimmato/eth-hamiltonicity}.
 \bibitem{VV86} L.~G.~Valiant and V.~V.~Vazirani. NP is as easy as detecting unique solutions.
   \emph{Theoret.\ Comput.\ Sci.}, 47:85--93, 1986.
 \end{thebibliography}

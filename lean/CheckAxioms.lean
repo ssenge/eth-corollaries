@@ -68,3 +68,6 @@ import EthCor
 #print axioms EthCor.CdsTM.cds_parity_tm
 #print axioms EthCor.CdsITM.cds_randomized
 #print axioms EthCor.CdsITM.cds_amplified
+#print axioms EthCor.Leaf.leaf_iff
+#print axioms EthCor.MaxLeafTM.mincds_randomized
+#print axioms EthCor.MaxLeafTM.maxleaf_randomized

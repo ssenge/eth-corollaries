@@ -112,3 +112,16 @@ def num_cds(adj: Matrix, l: int) -> int:
         if all(v in S or any(adj[v][u] for u in S) for v in range(n)) and _connected_in(adj, list(X)):
             count += 1
     return count
+
+
+def mincds_randomized(adj: Matrix, l: int, seed: Seed, w: int = 2) -> bool:
+    """`EthCor.MaxLeafTM.mincds_randomized`: the same run on `codeCD G ℓ ω` as `cds_randomized`; a
+    connected dominating set of size at most ℓ ≤ n grows to one of size ℓ (`Leaf.cds_le_iff`)."""
+    return cds_randomized(adj, l, seed, w)
+
+
+def maxleaf_randomized(adj: Matrix, L: int, seed: Seed, w: int = 2) -> bool:
+    """`EthCor.MaxLeafTM.maxleaf_randomized`: the run on `codeCD G (n − L) ω`; for n ≥ 3 and
+    1 ≤ L < n, G has a spanning tree with at least L leaves iff it has a connected dominating set of
+    size n − L (`Leaf.leaf_iff`)."""
+    return cds_randomized(adj, len(adj) - L, seed, w)

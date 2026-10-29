@@ -374,8 +374,28 @@ Kisfaludi-Bak, arXiv:2601.08425).
   `cds_amplified` via `Amplify.amplify`, `amplify_sq`.
 - Python `ethcor/cds.py`, `tests/test_cds.py` (7 tests); Dump.lean `cds`, `cdr` (leaves of stepD
   from rootC, rootR): now 106 words, 18 front ends, all agree. CheckAxioms: 69 theorems, standard axioms.
-- Corollary (classical, not formalized): for connected G with n ≥ 3, γ_c(G) = n − maxleaf(G)
-  (Caro, West, Yuster 2000), and supersets of a CDS are CDS, so N7′ also decides Max Leaf Spanning Tree.
+- Corollary (classical): for connected G with n ≥ 3, γ_c(G) = n − maxleaf(G) (Caro, West, Yuster
+  2000), and supersets of a CDS are CDS, so N7′ also decides Max Leaf Spanning Tree. Formalized as
+  N7″ on 2026-10-29, see below.
+
+N7″ Max Leaf Spanning Tree and minimum CDS (2026-10-29): `lean/EthCor/LeafTree.lean`, `MaxLeafTM.lean`.
+- `Leaf.IsCDS G X` (Finset, `G.induce X` connected), `Leaf.leaves T` = degree-1 vertices.
+- `cds_of_tree`: n ≥ 3, T ≤ G tree ⇒ the non-leaves are a CDS (`two_le_degree`: inner vertices of a
+  path have degree ≥ 2; `induce_connected_of_patches` with the tree paths).
+- `tree_of_cds`: n ≥ 2, X a CDS ⇒ ∃ tree T ≤ G with Xᶜ ⊆ leaves T. H = G[X] edges plus one edge
+  v–f(v) for every v ∉ X (`fromRel`); H is connected; take `Connected.exists_isTree_le`; every v ∉ X
+  has H-degree 1.
+- `cds_grow`, `cds_le_iff`: a CDS with |X| < ℓ ≤ n gets a vertex outside with a neighbour in X
+  (`induce_union_connected`, `induce_pair_connected_of_adj`).
+- `leaf_iff`: n ≥ 3, 1 ≤ L < n: (∃ tree T ≤ G with ≥ L leaves) ↔ ∃ CDS of size n − L.
+- `MaxLeafTM.numCDS_pos_iff` (numCDS over Bool vectors ↔ Finset CDS), `mincds_randomized`,
+  `maxleaf_randomized` (n₀ := max n₀ 3, ℓ = n − L): direct from `cds_randomized`.
+- No connectivity test needed: a disconnected G has neither a spanning tree nor a CDS.
+- Python `cds.maxleaf_randomized`, `mincds_randomized`; `tests/test_maxleaf.py` (3 tests: leaf_iff
+  and cds_le_iff against all spanning trees on ≤ 7 vertices, one-sided error). 62 tests in all.
+  CheckAxioms: 72 theorems, standard axioms. Re-check of Tulsyan first (16fe4eb, 08:05 UTC: HC
+  decision/search/paths in Lean, directed HC layer, barrier lemmas); his R3 lists k-leaf spanning
+  trees as "conjectured, not claimed", sparse only.
 
 Re-check of concurrent work (2026-10-29, after N7): Tulsyan's repo at ba4c161 (22 commits after ae323a3).
 - New, Lean: sparse TSP `EthFollowup.ExactHC.theoremTSP`, `theoremTSP_decode` (|E| ≤ Dn, weights ≤ W,

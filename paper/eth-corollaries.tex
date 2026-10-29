@@ -35,7 +35,7 @@
 In October 2026 two groups claimed algorithms for \#$k$-SAT in time $2^{o(n)}$, which would refute
 the Exponential Time Hypothesis, and both formalized their algorithms in Lean. A refuted lower bound
 yields no algorithm by itself: every consequence needs a reduction to \#SAT whose number of
-variables is linear in the relevant parameter. We give such reductions for seventeen problems and
+variables is linear in the relevant parameter. We give such reductions for eighteen problems and
 prove each resulting algorithm as a Lean~4 theorem about a single Turing machine, on top of
 Anthropic's formalization and with the standard axioms only. The new results are: the parity of
 the number of connected vertex sets of size $\ell$ that satisfy a given CNF, on graphs of any
@@ -43,7 +43,8 @@ density; from it, with an isolation lemma for arbitrary sets, one-sided-error al
 Steiner tree and connected vertex cover on graphs of any density; the parity and a one-sided-error
 decision for connected dominating set on graphs of any density, whose clauses of domination have
 unbounded width, by running the clause-shortening tree of Anthropic's dominating-set algorithm
-inside the Cut \& Count formula; \#CNF-SAT of unbounded clause
+inside the Cut \& Count formula, and from it Max Leaf Spanning Tree and minimum connected dominating
+set; \#CNF-SAT of unbounded clause
 width with up to $n\cdot 2^{(\lg n)^{1/4}/(\lg\lg n)^2}$ clauses; counting $k$-colorings for all
 $k$ with $\lg k\le(\lg n)^{1/6-\theta}$; and the Max-SAT spectrum. We also formalize direct
 corollaries (homomorphisms into a target in the input, the density of states of the Potts model and
@@ -94,8 +95,8 @@ number of variables linear in the parameter even though the natural encoding doe
 \item \emph{Connectivity on graphs of any density} (Section~\ref{sec:conn}). The parity of the
 number of connected vertex sets of size $\ell$ that satisfy a CNF (N2), and from it one-sided-error
 algorithms for Steiner tree and connected vertex cover (N2$'$), on graphs with any number of edges.
-The same for connected dominating sets (N7, N7$'$); the decision version also decides Max Leaf
-Spanning Tree.
+The same for connected dominating sets (N7, N7$'$), and from it Max Leaf Spanning Tree and minimum
+connected dominating set (N7$''$).
 These are, to our knowledge, the first consequences of the claimed refutations for connectivity
 problems on dense graphs; the concurrent work on Hamiltonian cycles~\cite{Tul26} needs $o(n\sqrt{\lg
 n})$ edges.
@@ -134,7 +135,7 @@ parameter or the width before counting at the leaves.
 of 28~October 2026 (papers, preprints, blogs and repositories). A1, A3, A3$'$ and N6 are known
 consequences that we formalize. N3, N5 and N6$'$ are direct corollaries: the reduction is the
 obvious one. A5a, A5a$'$ and A5b are superseded by concurrent work~\cite{Tul26}. The remaining
-results, N2, N2$'$, N7, N7$'$, A1$'$, the range of $k$ in A2 and the spectrum in A4, are ours: we did not find
+results, N2, N2$'$, N7, N7$'$, N7$''$, A1$'$, the range of $k$ in A2 and the spectrum in A4, are ours: we did not find
 them, which does not mean that they are certainly new.
 
 \begin{table}[t]
@@ -150,6 +151,7 @@ N2 & $\oplus$connected vertex sets of size $\ell$ satisfying a CNF, any density;
 N2$'$ & Steiner tree, connected vertex cover, one-sided error, any density; $C2^{\varepsilon n}$ & ours\\
 N7 & $\oplus$connected dominating sets of size $\ell$, any density; $C2^{\delta n}$ & ours\\
 N7$'$ & connected dominating set, one-sided error, any density; $C2^{\varepsilon n}$ & ours\\
+N7$''$ & Max Leaf Spanning Tree, minimum connected dominating set, one-sided error, any density; $C2^{\varepsilon n}$ & ours\\
 A1 & \#CNF-SAT, any width, $m\le Dn$; $C2^{\delta n}$ & known~\cite{CIP06,anthropic}\\
 A1$'$ & \#CNF-SAT, any width, $m\le n\,2^{(\lg n)^{1/4}/(\lg\lg n)^2}$, one machine; $2^{\delta n}$ & ours\\
 A2 & \#$k$-colorings, all $k$ with $\lg k\le(\lg n)^{1/6-\theta}$, one machine; $2^{\varepsilon n}$ & ours (range of $k$)\\
@@ -178,9 +180,10 @@ repository on the same revision of Anthropic's development; they compile and use
 axioms, and his count is the same quantity as our $\mathrm{hc}(G)$ of Section~\ref{sec:ham}. Since
 then (29 October) he has added a Lean-verified exact algorithm for TSP with polynomial weights on
 graphs with $m\le Dn$, and a written proof, not machine-checked, of exact counting in
-$2^{O(n\log\bar d/\sqrt{\lg n})}$ for average degree $\bar d$. He also sketches deterministic
-decision for Steiner tree, feedback vertex set, connected vertex cover and connected dominating set
-on graphs with $m\le Dn$ and bounded degree, explicitly as a conjecture that is checked only
+$2^{O(n\log\bar d/\sqrt{\lg n})}$ for average degree $\bar d$, and Lean proofs of decision and search
+for Hamiltonian cycles and of Hamiltonian paths. He also sketches deterministic
+decision for Steiner tree, feedback vertex set, connected vertex cover, connected dominating set
+and $k$-leaf spanning trees on graphs with $m\le Dn$ and bounded degree, explicitly as a conjecture that is checked only
 numerically. He lists dominating set on dense graphs, and the exact counts of connected vertex
 covers and connected dominating sets, as not covered. The two refutation papers list
 corollaries of their own: OpenAI~\cite[Cor.~1.3]{openai} counts independent sets, $q$-colorings for
@@ -387,7 +390,7 @@ a no-instance. On a yes-instance it errs on at most a fraction $e^{-R2^{-\delta 
 $R$-tuples of seeds, which is at most $e^{-2^{\delta n}}$ for $R\ge2^{2\delta n}$
 (\lean{conn_amplified}).
 
-\subsection{\texorpdfstring{Connected dominating set (N7, N7$'$)}{Connected dominating set (N7, N7')}}
+\subsection{\texorpdfstring{Connected dominating set and Max Leaf (N7, N7$'$, N7$''$)}{Connected dominating set and Max Leaf (N7, N7', N7'')}}
 
 A connected dominating set is a set $X$ with $G[X]$ connected such that every vertex is in $X$ or
 has a neighbour in $X$. Domination is the CNF $\varphi_{\mathrm{dom}}=\{\bigvee_{u\in N[v]}x_u : v\in
@@ -449,11 +452,32 @@ count of Algorithm~\ref{alg:connrand} for $\varphi=\varphi_{\mathrm{dom}}$, and 
 the one-sided error. Amplification is as for N2$'$ (\lean{cds_amplified}).
 \end{proof}
 
-A superset of a connected dominating set is again one, so a connected dominating set of size
-$\ell$ exists iff one of size at most $\ell$ does. For connected $G$ with $n\ge3$, this holds iff
-$G$ has a spanning tree with at least $n-\ell$ leaves~\cite{CWY00}. Theorem~\ref{thm:cdsrand}
-therefore also decides Max Leaf Spanning Tree with one-sided error in $C2^{\varepsilon n}$; these two
-facts are not formalized. The proof of Theorem~\ref{thm:cds} uses only that the open clauses are at
+\begin{theorem}[\lean{maxleaf_randomized}, \lean{mincds_randomized}]\label{thm:maxleaf}
+For every $\delta>0$ and $\varepsilon>0$ there are $k,t,n_0,C$ and one machine that, for every
+graph $G$ on $n\ge n_0$ vertices of any density, every $1\le L<n$ and every seed $\omega$, halts on
+$(G,n-L,\omega)$ within $C2^{\varepsilon n}$ steps with a bit $\mathrm{out}(\omega)$. If $G$ has no
+spanning tree with at least $L$ leaves, $\mathrm{out}(\omega)=0$ for every seed; if it has one,
+$\mathrm{out}(\omega)=1$ for at least a $2^{-\delta n}$ fraction of the seeds. On $(G,\ell,\omega)$
+with $1\le\ell\le n$ the same machine decides, in the same sense, whether $G$ has a connected
+dominating set with at most $\ell$ vertices.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+It is the machine of Theorem~\ref{thm:cdsrand}. Two facts about graphs, proved with Mathlib's walks
+and trees, translate the conditions. First, if $X$ is a connected dominating set with
+$|X|<\ell\le n$, some vertex outside $X$ has a neighbour in $X$, and adding it keeps $X$ connected
+and dominating; so a connected dominating set with at most $\ell$ vertices exists iff one with
+exactly $\ell$ does (\lean{cds_le_iff}). Second, for $n\ge3$ and $1\le L<n$, $G$ has a spanning
+tree with at least $L$ leaves iff it has a connected dominating set with $n-L$
+vertices~\cite{CWY00} (\lean{leaf_iff}). In a spanning tree on $n\ge3$ vertices the non-leaves
+induce a connected subgraph, because the inner vertices of a path have degree at least 2, and they
+dominate, because the neighbour of a leaf is not a leaf. Conversely, a spanning tree of $G[X]$
+together with one edge from each vertex outside $X$ to a neighbour in $X$ is a spanning tree of
+$G$ in which every vertex outside $X$ is a leaf. A disconnected graph has neither, so no test of
+connectivity is needed.
+\end{proof}
+
+The proof of Theorem~\ref{thm:cds} uses only that the open clauses are at
 most $n$ positive clauses without repeated variables on the vertex bits; open neighbourhoods, for
 connected total domination, are another example.
 
@@ -777,9 +801,9 @@ exponential part.
 %======================================================================
 \section{Formalization and reference implementation}\label{sec:formal}
 
-\paragraph{The Lean development.} The development consists of 41 Lean files with about 13{,}000
+\paragraph{The Lean development.} The development consists of 43 Lean files with about 13{,}300
 lines on top of Anthropic's development (pinned to a fixed revision) and Mathlib. A check file prints
-the axioms of 69 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
+the axioms of 72 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
 \lean{Quot.sound} only, and there is no \lean{sorry}. Every main theorem quantifies over the
 machine existentially and states its finite alphabets, its output (\lean{Wrap.Outputs}) and its
 time bound explicitly. The polynomial-time front ends are verified with Anthropic's \lean{PolyT}
@@ -794,8 +818,9 @@ $\mathrm{hc}(G)$ is positive iff $G$ satisfies Mathlib's \lean{SimpleGraph.IsHam
 $n\ne1$), and it equals the number of edge sets of walks with Mathlib's \lean{IsHamiltonianCycle}
 (\lean{numHamCycles_pos_iff}, \lean{numHamCycles_eq}); the proof uses Mathlib's result that a
 connected graph with all degrees 2 is a single cycle. The homomorphism count equals the number of
-Mathlib homomorphisms $G\to_g H$ for simple $H$ (\lean{numHom_simple}), and both permanents are
-stated with Mathlib's \lean{Matrix.permanent}. The remaining definitions (the spectrum, the Potts
+Mathlib homomorphisms $G\to_g H$ for simple $H$ (\lean{numHom_simple}), both permanents are
+stated with Mathlib's \lean{Matrix.permanent}, and the spanning trees of N7$''$ are subgraphs with
+Mathlib's \lean{IsTree}. The remaining definitions (the spectrum, the Potts
 counts, the Tutte polynomial, the seeds and the input codes) must be read by hand, as must
 Anthropic's model of computation and statement files.
 
@@ -813,8 +838,8 @@ component caching that returns the weight enumerator of the solutions, so the im
 in exponential time; its purpose is to make the reductions concrete and testable. The tests
 compare every algorithm with a direct enumeration of the quantity in the Lean statement (colorings,
 homomorphisms, assignments, covers, dominating sets, permutations, Hamiltonian cycles, connected
-vertex sets, connected dominating sets), check the shape bounds that the Lean proofs use, and
-measure the one-sided error of A5b, N2$'$ and N7$'$ over random seeds. A further test checks that the Python front ends are the Lean ones:
+vertex sets, connected dominating sets, spanning trees), check the shape bounds that the Lean proofs
+use, and measure the one-sided error of A5b, N2$'$, N7$'$ and N7$''$ over random seeds. A further test checks that the Python front ends are the Lean ones:
 a small Lean program evaluates the Lean definitions of all 18 front ends on 106 random input words,
 and the formulas agree clause for clause.
 
@@ -840,8 +865,8 @@ variables.
 
 \paragraph{Open problems.} Colorings and homomorphisms into targets with $\lg h\ge(\lg
 n)^{1/6}$; \#CNF-SAT of unbounded width with more clauses than in A1$'$; a deterministic version of
-N2$'$ and N7$'$, that is, deterministic Steiner tree, connected vertex cover and connected
-dominating set on dense graphs; the exact
+N2$'$, N7$'$ and N7$''$, that is, deterministic Steiner tree, connected vertex cover, connected
+dominating set and Max Leaf Spanning Tree on dense graphs; the exact
 number of connected vertex sets of size $\ell$ on dense graphs, of which N2 gives the parity;
 a machine-checked algorithm for Hamiltonian cycle on graphs with $\omega(n\sqrt{\lg n})$ edges,
 where Tulsyan's written proof~\cite{Tul26} reaches average degree $2^{o(\sqrt{\lg n})}$; the Tutte

@@ -86,3 +86,7 @@ import EthCor
 #print axioms EthCor.OctTM.oct_pos
 #print axioms EthCor.OctTM.oct_iff
 #print axioms EthCor.OctTM.oct_tm
+#print axioms EthCor.Barrier.psum_mem
+#print axioms EthCor.Barrier.pow_mem
+#print axioms EthCor.Barrier.barrier
+#print axioms EthCor.Barrier.barrier_rooted

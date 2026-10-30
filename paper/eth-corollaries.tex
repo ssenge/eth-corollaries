@@ -10,6 +10,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
 
@@ -58,8 +59,12 @@ clauses, the 0/1 permanent, Vertex Cover and Nonblocker in $2^{\varepsilon k}\po
 of any density). Our results
 on Hamiltonian cycles, the parity for $o(n\sqrt{\lg n}/\lg\lg n)$ edges and one-sided error for
 $O(n)$ edges, were obtained independently of Tulsyan's concurrent exact count, which supersedes
-them. All bounds hold for every $\varepsilon>0$. We also give reference implementations of all
-reductions, tested against brute force and against the Lean definitions.
+them. All bounds hold for every $\varepsilon>0$. We also prove a barrier: over the rationals, Cut
+\& Count with $q$ colors whose weights are shared by all vertices cannot separate the connected
+vertex sets of size $\ell>q$ from the disconnected ones, which explains why our connectivity results
+are parities or have one-sided error. We
+give reference implementations of all reductions, tested against brute force and against the Lean
+definitions.
 
 \end{abstract}
 
@@ -120,6 +125,10 @@ machine (Mathlib's multi-stack model TM2, finite alphabets) halts on a given inp
 output within a given number of steps. The proofs build on Anthropic's development, which proves its
 $2^{o(n)}$ algorithm as a theorem; the results are therefore Lean theorems, not conditional
 statements. They use only the axioms \lean{propext}, \lean{Classical.choice} and \lean{Quot.sound}.
+\item \emph{A barrier for Cut \& Count} (Section~\ref{sec:barrier}), formalized: with $q$ color
+weights shared by all vertices, no rational linear combination of the counts separates the
+connected sets of size $\ell>q$ from the disconnected ones, and $q=\ell$ colors would cost
+$\lg\ell$ bits per vertex.
 \item \emph{The isolation lemma of~\cite{CIKP08} for arbitrary sets}, formalized: sparse parity
 checks on $k$ coordinates isolate a point of any nonempty $S\subseteq\{0,1\}^M$ with probability
 $2^{-\delta M}$. The proof of~\cite{CIKP08} is oblivious to the formula~\cite[\S9.3]{Calabro09};
@@ -236,7 +245,7 @@ Mathlib~\cite{mathlib}.
 development. Section~\ref{sec:conn} treats connected solutions on graphs of any density,
 Section~\ref{sec:counting} counting problems and odd cycle transversal, Section~\ref{sec:ham} Hamiltonian cycles and
 Section~\ref{sec:fpt} parameterized problems, each with algorithms, theorems and proof sketches.
-Section~\ref{sec:formal} describes the formalization and the reference implementation, and
+Section~\ref{sec:barrier} proves the barrier for Cut \& Count, Section~\ref{sec:formal} describes the formalization and the reference implementation, and
 Section~\ref{sec:concl} discusses limitations.
 
 %======================================================================
@@ -943,11 +952,70 @@ This is the linear kernel of~\cite{DFFPR06} in its simplest form, with the claim
 exponential part.
 
 %======================================================================
+\section{A barrier for Cut \& Count}\label{sec:barrier}
+
+Our connectivity results give parities (N2, N7, N8, N9) or one-sided error (N2$'$, N7$'$, N7$''$,
+N8$'$, N8$''$, N9$'$), never a deterministic decision. This section shows that the colorings behind
+Cut \& Count cannot do better over the rationals unless they use about $\ell$ colors.
+
+Fix $q$ colors with weights $x_1,\dots,x_q$ in a commutative $\mathbb Q$-algebra, the same for every
+vertex. A coloring $s:X\to\{1,\dots,q\}$ that is constant on the edges of $G[X]$ assigns one color
+to each component, so
+\[
+\sum_s\prod_{v\in X}x_{s(v)}=\prod_{C}p_{|C|}(x),\qquad p_k=x_1^k+\dots+x_q^k,
+\]
+where $C$ ranges over the components of $G[X]$. If the color of a root $r\in X$ is fixed to $a$, the
+sum is $x_a^{|C_r|}\prod_{C\ne C_r}p_{|C|}(x)$, where $C_r$ is the component of~$r$. The side bits of
+N2 are the case $q=2$ with a root, and with the sized counter the weights become polynomials in a
+size variable. A set of size $\ell$ thus contributes a product indexed by its component sizes, and a
+connected one contributes $p_\ell$, or $x_a^\ell$ with a root.
+
+\begin{proposition}[\lean{barrier}, \lean{barrier_rooted}]\label{prop:barrier}
+Let $q<\ell$. Then $p_\ell$ is a rational linear combination of products $p_{\mu_1}\cdots p_{\mu_r}$
+with $\mu_1+\dots+\mu_r=\ell$, all $\mu_i\ge1$ and $r\ge2$, and $x_a^\ell$ is a rational linear
+combination of products $x_a^c\,p_{\mu_1}\cdots p_{\mu_r}$ with $c\ge1$, $r\ge1$ and
+$c+\mu_1+\dots+\mu_r=\ell$. Hence a $\mathbb Q$-linear map that vanishes on the contribution of
+every disconnected set of size $\ell$ also vanishes on the contribution of a connected one, with or
+without a root.
+\end{proposition}
+
+\begin{proof}
+Each $x_a$ is a root of $\prod_b(T-x_b)=\sum_{j=0}^q(-1)^je_jT^{q-j}$, so
+$x_a^\ell=-\sum_{j=1}^q(-1)^je_jx_a^{\ell-j}$ for $\ell>q$ (\lean{pow_eq}), and summing over $a$
+gives Newton's identity $p_\ell=-\sum_{j=1}^q(-1)^je_jp_{\ell-j}$ (\lean{psum_eq}). By Newton's
+identities $ke_k=\sum_{i=1}^k(-1)^{i-1}e_{k-i}p_i$ (Mathlib's \lean{mul_esymm_eq_sum}), so by
+induction $e_j$ is a rational combination of products of power sums of total degree $j$, with at
+least one factor if $j\ge1$ (\lean{esymm_mem}). Since $j\le q<\ell$, the remaining factor
+$x_a^{\ell-j}$ or $p_{\ell-j}$ has positive degree (\lean{pow_mem}, \lean{psum_mem}).
+\end{proof}
+
+On a graph with $\ell$ vertices the count over $X=V$ is $p_{\mu_1}\cdots p_{\mu_r}$ for the disjoint
+union of cliques $K_{\mu_1}+\dots+K_{\mu_r}$ and $p_\ell$ for $K_\ell$. So a fixed rational
+combination of such counts, with any weights and any size refinement, that is $0$ on every graph
+without a connected set of size $\ell$ is also $0$ on $K_\ell$: it neither decides nor counts the
+connected sets of size $\ell$. Reduction modulo $2$ is not $\mathbb Q$-linear, and this is how Cut \&
+Count obtains parities with $q=2$. The bound is tight in $q$: with $x=(1,\zeta,\dots,\zeta^{\ell-1})$
+for a primitive $\ell$-th root of unity $\zeta$, $p_k=0$ for $\ell\nmid k$ and $p_\ell=\ell$, so the
+count is $\ell$ times the number of connected sets. But $\ell$ colors cost $\lceil\lg\ell\rceil$ bits
+per vertex, and the counters give $2^{o(n)}$ only for $n\cdot o(\sqrt{\lg n}/\lg\lg n)$ variables,
+that is, for $\ell=2^{o(\sqrt{\lg n}/\lg\lg n)}$, where the $n^\ell=2^{o(n)}$ sets of size $\ell$ can
+be listed directly.
+
+The proposition covers weights that are the same for all vertices, apart from the root, and
+combinations that are fixed in advance. It says nothing about vertex-dependent weights, about
+restrictions of $X$ that change from term to term, as in isolation, where each seed restricts $X$
+differently (this is how N2$'$ decides with one-sided error), or about other encodings, such as
+Tulsyan's matrix-tree identity on sparse graphs~\cite{Tul26}. It also shows why N9 needs a bit per
+edge: a count of this form depends only on the component sizes of $G[X]$, so it cannot tell an
+induced path from an induced cycle. N9 therefore adds a bit per edge, which limits it to $O(n)$
+edges.
+
+%======================================================================
 \section{Formalization and reference implementation}\label{sec:formal}
 
-\paragraph{The Lean development.} The development consists of 49 Lean files with about 15{,}600
+\paragraph{The Lean development.} The development consists of 50 Lean files with about 15{,}800
 lines on top of Anthropic's development (pinned to a fixed revision) and Mathlib. A check file prints
-the axioms of 87 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
+the axioms of 91 theorems, the main theorems and the lemmas cited in the proof sketches; each depends on \lean{propext}, \lean{Classical.choice} and
 \lean{Quot.sound} only, and there is no \lean{sorry}. Every main theorem quantifies over the
 machine existentially and states its finite alphabets, its output (\lean{Wrap.Outputs}) and its
 time bound explicitly. The polynomial-time front ends are verified with Anthropic's \lean{PolyT}
@@ -974,7 +1042,8 @@ counters of Section~\ref{sec:prelim}, the special cases (independent sets, the M
 Ising model, the chromatic polynomial and $T(G;0,1-q)$) and the amplification of the one-sided error
 are Lean theorems; the proof sketches summarize the Lean proofs. Not formalized are the results we
 cite from the literature (lower bounds, earlier algorithms, Tutte's identity between $T(G;0,1-q)$ and
-nowhere-zero flows) and the novelty labels of Table~\ref{tab:results}.
+nowhere-zero flows), the identity between colorings and power sums in Section~\ref{sec:barrier},
+which is tested in Python, and the novelty labels of Table~\ref{tab:results}.
 
 \paragraph{The reference implementation.} A Python package of about 2{,}400 lines mirrors every
 front end and post-step clause by clause, with the same variable indices and from the same input
@@ -1011,7 +1080,8 @@ variables.
 \paragraph{Open problems.} Colorings and homomorphisms into targets with $\lg h\ge(\lg
 n)^{1/6}$; \#CNF-SAT of unbounded width with more clauses than in A1$'$; a deterministic version of
 N2$'$, N7$'$ and N7$''$, that is, deterministic Steiner tree, connected vertex cover, connected
-dominating set and Max Leaf Spanning Tree on dense graphs; the exact
+dominating set and Max Leaf Spanning Tree on dense graphs, which by
+Proposition~\ref{prop:barrier} needs more than Cut \& Count with few colors; the exact
 number of connected vertex sets of size $\ell$ on dense graphs, of which N2 gives the parity;
 Hamiltonian cycle on graphs of average degree $2^{\Omega(\sqrt{\lg n})}$, beyond Tulsyan's
 bound~\cite{Tul26}; positive CNFs of unbounded width with superlinearly many clauses, such as Group

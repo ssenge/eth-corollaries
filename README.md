@@ -10,6 +10,9 @@ definitions it consists of. [`python/`](python) has a reference implementation o
 against brute force (see [Running the algorithms](#running-the-algorithms)). A write-up of all
 results, with statements and proof sketches, is in
 [`paper/eth-corollaries.pdf`](paper/eth-corollaries.pdf) (source `paper/eth-corollaries.tex`).
+We also prove [a barrier](#a-barrier-for-cut--count): Cut & Count with few colors cannot separate
+connected vertex sets from disconnected ones over the rationals, which is why the connectivity
+results are parities or have one-sided error.
 
 Some of the results have since turned out to be known or superseded. In particular, Tulsyan [15]
 counts Hamiltonian cycles exactly and deterministically, which subsumes A5a, A5a′ and A5b; see
@@ -687,6 +690,36 @@ Lean: `OctTM.edgeOC`, `octF`, `oct_pos`, `oct_iff`, `preO`, `postO`, `octM`, `po
 Python: `oct.octF`, `oct_decide`, `min_oct`; `tests/test_oct.py` checks the count of `oct_pos`
 (pairs of Y and 2-colorings) and the machine against brute force for every k.
 
+## A barrier for Cut & Count
+
+Why are the connectivity results parities (N2, N7, N8, N9) or one-sided (N2′, N7′, N7″, N8′, N8″,
+N9′), and never deterministic? Take q colors with weights x_1, …, x_q that are the same for every
+vertex. A coloring of X that is constant on the edges of G[X] is one color per component, so X
+contributes ∏_C p_{|C|}(x), with the power sums p_k = x_1^k + … + x_q^k. With the root's color fixed
+to a, it contributes x_a^{|C_r|} ∏_{C ≠ C_r} p_{|C|}(x). N2's side bits are q = 2 with a root. A
+connected set of size ℓ contributes p_ℓ, resp. x_a^ℓ.
+
+For ℓ > q, p_ℓ is a rational combination of products p_{μ_1}⋯p_{μ_r} with r ≥ 2 parts summing to ℓ,
+and x_a^ℓ is a rational combination of products x_a^c p_{μ_1}⋯p_{μ_r} with c ≥ 1 and r ≥ 1
+(`Barrier.psum_mem`, `pow_mem`; Newton's identities and Vieta's formulas, from Mathlib). So a rational
+linear map that is 0 on every disconnected component pattern is 0 on the connected one
+(`barrier`, `barrier_rooted`). On ℓ vertices, the disjoint unions of cliques realize every pattern
+and K_ℓ the connected one, so no fixed rational combination of such counts decides or counts the
+connected sets of size ℓ. Reduction mod 2 is not rational, which is how Cut & Count gets parities.
+
+The bound is tight: q = ℓ colors with ℓ-th roots of unity as weights give ℓ times the number of
+connected sets. But that costs lg ℓ bits per vertex, and the counters give 2^{o(n)} only for
+ℓ = 2^{o(√lg n/lglg n)}, where listing the n^ℓ sets is already subexponential. The barrier says
+nothing about vertex-dependent weights, about restrictions that change from term to term (isolation
+does this, which is how N2′ decides with one-sided error), or about other encodings, such as
+Tulsyan's matrix-tree identity on sparse graphs [15]. It also shows why N9 needs a bit per edge: a
+count of this form depends only on the component sizes of G[X], so it cannot tell an induced path
+from an induced cycle.
+
+Lean: `Barrier.esymm_mem`, `pow_eq`, `psum_eq`, `psum_mem`, `pow_mem`, `barrier`, `barrier_rooted`.
+Python: `tests/test_barrier.py` checks the step from colorings to power sums, with and without a
+root, which is not formalized.
+
 ## Running the algorithms
 
 [`python/`](python) is a reference implementation in plain Python (3.10 or later, no dependencies
@@ -700,7 +733,7 @@ no gain over 2^n below n ≈ 10^{10}.
 
 ```sh
 cd python
-python3 -m pytest -q                  # 71 tests: every algorithm against brute force on small inputs,
+python3 -m pytest -q                  # 72 tests: every algorithm against brute force on small inputs,
                                       # and every front end against the Lean definitions
 python3 -c "from ethcor.permanent import permanent_signed as p; \
   print(p([[True, True], [True, True]], [[False, True], [True, False]]))"   # [[1,-1],[-1,1]]: 2
@@ -759,13 +792,14 @@ lake env lean CheckAxioms.lean
   graphs.
 - **N2′** is randomized. Open: deterministic Steiner tree and connected vertex cover on dense
   graphs, and the exact number of connected vertex sets of size ℓ on dense graphs (we have its
-  parity, N2).
+  parity, N2). By the barrier above, neither follows from Cut & Count with fewer than ℓ colors.
 - **A3** is done for Vertex Cover and Nonblocker (A3, A3′ in the table). Nonblocker needs no
   branching: Ore's bound leaves at most 2k relevant vertices.
 - **N10** is done: odd cycle transversal, deterministic, any density. Open: the number of odd cycle
   transversals of each size (the count weights each one by the 2-colorings of the rest).
 - **N9, N9′** are done for sparse graphs (see the table). Open: feedback vertex set on denser
-  graphs (the edge bits make the formula grow with m), and a deterministic version.
+  graphs (the edge bits make the formula grow with m, and by the barrier above vertex colorings
+  alone cannot see cycles), and a deterministic version.
 - **N2, N2′, N7, N7′, N7″, N8, N8′ and N8″** are done (see the table). N7 and N8 combine the Cut & Count
   formula with Anthropic's shortening tree, so they handle positive clauses of unbounded width. Open:
   more than linearly many such clauses (for example Group Steiner tree with n·ω(1) groups), long
@@ -828,6 +862,7 @@ lean/
     ForestFormula                         side maps × 2^{edges} = 2^{|V|+j}; induced forests by Cut & Count
     ForestTM, ForestIsoTM                 feedback vertex set on sparse graphs: parity (N9), randomized (N9′)
     OctTM                                 odd cycle transversal, deterministic (N10)
+    Barrier                               Cut & Count with q < ℓ colors cannot separate connected sets
 python/              reference implementations of all algorithms (see "Running the algorithms")
   pyproject.toml     pytest configuration
   ethcor/
@@ -840,8 +875,8 @@ python/              reference implementations of all algorithms (see "Running t
     isolation.py     seeds, isolation  connected.py      N2, N2′
     cds.py           N7, N7′, N7″, N8, N8′   forest.py   N9, N9′
     oct.py           N10
-  tests/             one test file per module, against brute force; test_lean_agreement.py
-                     against the Lean front ends (via lean/Dump.lean)
+  tests/             one test file per module, against brute force; test_barrier.py for the
+                     barrier; test_lean_agreement.py against the Lean front ends (via lean/Dump.lean)
 ```
 
 ## Use of AI

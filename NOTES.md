@@ -483,3 +483,27 @@ N10 odd cycle transversal, deterministic, any density (2026-10-29): `lean/EthCor
   quantifiers, and OCT = ∃X (|X| ≤ k) ∃C ∀u,v: E(u,v) → X(u) ∨ X(v) ∨ C(u) ≠ C(v). Not in Anthropic Cor. 7
   (IS, clique, VC, DS, k-col). Tulsyan (974ea29) has only connected OCT, as a sketch. Label: known, formalized.
 - Minimum FVS needed no new work: N9′ already decides "at most k".
+
+Research items after N10 (2026-10-30): deterministic N2′/N7′/N9′, FVS on dense graphs, exact connected
+counts. Outcome: a barrier, no algorithm. `lean/EthCor/Barrier.lean` (imports Mathlib only).
+- Cut & Count with q colors, weights x shared by all vertices: X contributes ∏_C p_{|C|}(x) (rooted:
+  x_a^{|C_r|} ∏_{C≠C_r} p_{|C|}). Sympy check (q ≤ 4, ℓ ≤ 7): the connected term p_ℓ resp. x_a^ℓ lies in
+  the ℚ-span of the disconnected patterns exactly when ℓ > q, rooted and unrooted alike.
+- Lean: `esymm_mem` (Newton, Mathlib `mul_esymm_eq_sum`, strong induction), `pow_eq` (Vieta,
+  `Multiset.prod_X_sub_X_eq_sum_esymm` evaluated at X a), `psum_eq`, `psum_mem`, `pow_mem`, `barrier`,
+  `barrier_rooted` (any ℚ-linear map to any ℚ-module). Spans of `Prods q k m` / `RProds q a k` as
+  multisets of degrees. The colorings → power sums step is only tested (`tests/test_barrier.py`).
+- Tight: q = ℓ with ℓ-th roots of unity gives ℓ·#connected, but lg ℓ bits per vertex; within the
+  counters' n·o(√lg n/lglg n) budget only ℓ = 2^{o(√lg n/lglg n)}, where n^ℓ = 2^{o(n)} brute force works.
+- Not covered: vertex-dependent weights, restrictions that vary between terms (isolation), other
+  encodings (Tulsyan's matrix-tree on sparse graphs). Integer form: clearing denominators gives two
+  pattern multisets, one with D > 0 connected sets and one with none, with equal polynomials; for
+  q = 2, D must be even, consistent with Cut & Count giving the parity.
+- FVS dense: a vertex-coloring count depends only on component sizes, so it cannot tell an induced
+  path from an induced cycle; N9 needs its edge bits. No vertex-only route found; Ganian et al.'s
+  question stays open.
+- Tulsyan re-check (a4f924c, 30 Oct 02:58 UTC): new since 974ea29 are exact quantum circuit amplitudes
+  in Lean (`amplitude_TM*`), a Tutte-plane note (engine reaches the integer hyperbolas and y = 1 on
+  sparse graphs; n log n cut-rank barrier elsewhere, informal) and a citation audit. Steiner tree, FVS,
+  forests / T(x,1) still "conjectured, not claimed". His barrier notes (Θ(n log n) shared bits for
+  dense permanents) point the same way as ours.
